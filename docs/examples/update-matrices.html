@@ -198,7 +198,7 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
 <section id="julia">
 <h2>Julia<a class="headerlink" href="#julia" title="Link to this heading"></a></h2>
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">OSQP</span>
-<span class="k">using</span><span class="w"> </span><span class="n">Compat</span><span class="o">.</span><span class="n">SparseArrays</span><span class="p">,</span><span class="w"> </span><span class="n">Compat</span><span class="o">.</span><span class="n">LinearAlgebra</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SparseArrays</span><span class="p">,</span><span class="w"> </span><span class="n">LinearAlgebra</span>
 
 <span class="c"># Define problem data</span>
 <span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sparse</span><span class="p">([</span><span class="mf">4.</span><span class="w"> </span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="mf">1.</span><span class="w"> </span><span class="mf">2.</span><span class="p">])</span>
@@ -313,7 +313,7 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
 <span class="w">                                                   </span><span class="n">A_x_new</span><span class="p">,</span><span class="w"> </span><span class="n">OSQP_NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Solve updated problem */</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">exitflag</span><span class="p">)</span><span class="w"> </span><span class="n">exitflag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">osqp_solve</span><span class="p">(</span><span class="n">work</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">exitflag</span><span class="p">)</span><span class="w"> </span><span class="n">exitflag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">osqp_solve</span><span class="p">(</span><span class="n">solver</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Cleanup */</span>
 <span class="w">    </span><span class="n">osqp_cleanup</span><span class="p">(</span><span class="n">solver</span><span class="p">);</span>

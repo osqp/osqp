@@ -99,7 +99,7 @@ Julia
 .. code:: julia
 
     using OSQP
-    using Compat.SparseArrays
+    using SparseArrays
 
     # Define problem data
     P = sparse([4. 1.; 1. 2.])
@@ -212,7 +212,7 @@ C
         if (!exitflag) exitflag = osqp_update_data_vec(solver, q_new, l_new, u_new);
 
         /* Solve updated problem */
-        if (!exitflag) exitflag = osqp_solve(work);
+        if (!exitflag) exitflag = osqp_solve(solver);
 
         /* Cleanup */
         osqp_cleanup(solver);

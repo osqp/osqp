@@ -31,7 +31,7 @@ Python
     from scipy import sparse
 
     # Generate problem data
-    sp.random.seed(1)
+    np.random.seed(1)
     m = 30
     n = 20
     Ad = sparse.random(m, n, density=0.7, format='csc')
@@ -92,13 +92,13 @@ CVXPY
 
 .. code:: python
 
-    from cvxpy import *
+    from cvxpy import Variable, Problem, Minimize, sum_squares, OSQP
     import numpy as np
     import scipy as sp
     from scipy import sparse
 
     # Generate problem data
-    sp.random.seed(1)
+    np.random.seed(1)
     m = 30
     n = 20
     A = sparse.random(m, n, density=0.7, format='csc')
