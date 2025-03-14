@@ -230,3 +230,48 @@ C
 
         return (int)exitflag;
     };
+
+
+
+Rust
+----
+
+.. code:: rust
+
+    use osqp::{CscMatrix, Problem, Settings};
+
+    fn main() {
+        // Define problem data
+        let P = &[[4.0, 1.0],
+            [1.0, 2.0]];
+        let q = &[1.0, 1.0];
+        let A = &[[1.0, 1.0],
+            [1.0, 0.0],
+            [0.0, 1.0]];
+        let l = &[1.0, 0.0, 0.0];
+        let u = &[1.0, 0.7, 0.7];
+
+        // Extract the upper triangular elements of `P`
+        let P = CscMatrix::from(P).into_upper_tri();
+
+        let settings = Settings::default();
+
+        // Create an OSQP problem
+        let mut prob = Problem::new(P, q, A, l, u, &settings).expect("failed to setup problem");
+
+        // Solve problem
+        let result = prob.solve();
+
+        // Update P/A without changing their sparsity structure
+        // NB: Update only upper triangular part of P
+        prob.update_P_A(
+            &CscMatrix::from(&[[5.0, 1.5], [1.5, 1.0]]).into_upper_tri(),
+            &[[1.2, 1.1], [1.5, 0.0], [0.0, 0.8]],
+        );
+
+        // Solve updated problem
+        let result = prob.solve();
+
+        // Print the solution
+        println!("{:?}", result.x().expect("failed to solve problem"));
+    }

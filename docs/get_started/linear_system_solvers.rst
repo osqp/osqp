@@ -35,7 +35,7 @@ However, it becomes not really efficient for large scale problems since it is no
 
 
 oneMKL Pardiso
------------
+--------------
 `oneMKL Pardiso <https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2023-0/onemkl-pardiso-parallel-direct-sparse-solver-iface.html>`_ is an efficient multi-threaded linear system solver that works well for large scale problems part of the Intel Math Kernel Library.
 Intel offers `free licenses <https://www.intel.com/content/www/us/en/developer/articles/tool/onemkl-license-faq.html>`_ for oneMKL for most non-commercial applications.
 

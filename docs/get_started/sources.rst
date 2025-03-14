@@ -96,24 +96,26 @@ Run the following commands from the terminal
        cmake --build .
 
 
-Thanks to CMake, it is possible to create projects for a wide variety of IDEs; see `here <https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html>`_ for more details. For example, to create a project for Visual Studio 14 2015, it is just necessary to run
+Thanks to CMake, it is possible to create projects for a wide variety of IDEs; see `here <https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html>`_ for more details. For example, to create a project for Visual Studio 17 2022, it is just necessary to run
 
 .. code:: bash
 
-   cmake -G "Visual Studio 14 2015" ..
+   cmake -G "Visual Studio 17 2022" ..
 
+To generate unittests for OSQP, specify the `-DOSQP_BUILD_UNITTESTS=ON` flag. This requires that you have `numpy` and `scipy` python modules, so it is best to do this in a python virtual environment where you have these packages installed.
 
-The compilation will generate the demo :code:`osqp_demo` and the unittests :code:`osqp_tester` executables. In the case of :code:`Unix` or :code:`MinGW` :code:`Makefiles` option they are located in the :code:`build/out/` directory.  Run them to check that the compilation was correct.
+.. code:: bash
 
+   cmake -G "Unix Makefiles" -DOSQP_BUILD_UNITTESTS=ON ..
 
-Once the sources are built, the generated static :code:`build/out/libosqp.a` and shared :code:`build/out/libosqp.ext` libraries can be used to interface any C/C++ software to OSQP (see :ref:`install_osqp_libs` installation).
+The compilation will generate the demo :code:`osqp_demo` (and the unittests :code:`osqp_tester` if you generated them) executable. In the case of :code:`Unix Makefiles` or :code:`MinGW Makefiles` option they are located in the :code:`build/out/` directory.  Run them to check that the compilation was correct.
+
+Once the sources are built, the generated static :code:`build/out/libosqpstatic.a` and shared :code:`build/out/libosqp.ext` (where :code:`ext` is :code:`.so/.dylib/.dll` depending on your platform) libraries can be used to interface any C/C++ software to OSQP (see :ref:`install_osqp_libs` installation).
 
 .. _install_the_binaries:
 
 Install the binaries
 --------------------
-
-
 
 To install the generated libraries and headers to a system-wide location compatible with `GNU standards <http://www.gnu.org/prep/standards/html_node/Directory-Variables.html>`_ it is just necessary to run
 

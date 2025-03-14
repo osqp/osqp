@@ -9,7 +9,7 @@ Binaries
 Precompiled platform-dependent shared and static libraries are available on `GitHub <https://github.com/osqp/osqp/releases>`__.
 We here assume that the user uncompressed each archive to :code:`OSQP_FOLDER`.
 
-Each archive contains static :code:`OSQP_FOLDER/lib/libosqp.a` and shared :code:`OSQP_FOLDER/lib/libosqp.ext` libraries to be used to interface OSQP to any C/C++ software.
+Each archive contains static :code:`OSQP_FOLDER/lib/libosqpstatic.a` and shared :code:`OSQP_FOLDER/lib/libosqp.ext` libraries to be used to interface OSQP to any C/C++ software.
 The extension :code:`.ext` is platform dependent and is :code:`.so` for Linux, :code:`.dylib` for Mac and :code:`.dll` for Windows.
 The required include files can be found in :code:`OSQP_FOLDER/include`.
 
@@ -40,4 +40,14 @@ If you compiled OSQP from sources and followed the CMake installation instructio
    # Link the OSQP static library
    target_link_libraries(yourTarget PRIVATE osqp::osqpstatic)
 
+You will need to help CMake out by specifying the path to the folder where you installed the OSQP library, for example:
 
+.. code:: bash
+
+   cmake --build . -Dosqp_ROOT=myfolder
+
+You may or may not need to link your target to the standard math library in your :code:`CMakeLists.txt` file:
+
+.. code::
+
+    target_link_libraries(yourTarget PRIVATE m)
