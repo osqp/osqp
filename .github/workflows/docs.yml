@@ -40,7 +40,7 @@ jobs:
 
       - name: Build docs
         run: |
-          cd docs && touch .nojekyll && make HTMLCOPYDIR=../site/docs html
+          cd docs && make HTMLCOPYDIR=../site/docs html && touch ../site/docs/.nonjekyll
 
       # Build documentation on the release-0.6.3 branch in a subfolder
       # ------------------------------------------------------------
@@ -59,6 +59,6 @@ jobs:
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.7.3
         with:
-          branch: gh-pages3
+          branch: gh-pages4
           folder: site
           clean: true
