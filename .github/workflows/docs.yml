@@ -40,7 +40,7 @@ jobs:
 
       - name: Build docs
         run: |
-          cd docs && make HTMLCOPYDIR=../site/docs html && touch ../site/docs/.nojekyll
+          cd docs && touch .nojekyll && make HTMLCOPYDIR=../site/docs html
 
       # Build documentation on the release-0.6.3 branch in a subfolder
       # ------------------------------------------------------------
