@@ -110,5 +110,6 @@ Numerical benchmarks against other solvers are available `here <https://github.c
    codegen/index
    examples/index
    advanced/index
+   get_started/migration_guide
    contributing/index
    citing/index
