@@ -2,7 +2,7 @@ name: Docs
 
 on:
   push:
-    branches: [ vb/marimo ]
+    branches: [ master, release-0.6.3, vb/marimo ]
     tags:
       - '*'
 
@@ -17,7 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: master
           lfs: false
 
       - name: Install OS dependencies
@@ -40,7 +39,7 @@ jobs:
 
       - name: Build docs
         run: |
-          cd docs && make HTMLCOPYDIR=../site/docs html && touch ../site/docs/.nonjekyll
+          cd docs && make HTMLCOPYDIR=../site/docs html && touch ../site/docs/.nojekyll
 
       # Build documentation on the release-0.6.3 branch in a subfolder
       # ------------------------------------------------------------
@@ -59,6 +58,6 @@ jobs:
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.7.3
         with:
-          branch: gh-pages4
+          branch: gh-pages
           folder: site
           clean: true
