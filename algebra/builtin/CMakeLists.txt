@@ -44,7 +44,7 @@ if( OSQP_CODEGEN )
        ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl_interface.c
        ${qdldl_SOURCE_DIR}/src/qdldl.c
        ${qdldl_SOURCE_DIR}/include/qdldl.h
-       ${qdldl_SOURCE_DIR}/include/qdldl_version.h )
+       ${qdldl_BINARY_DIR}/include/qdldl_version.h )
 
   foreach( f ${EMBEDDED_LINALG} )
     get_filename_component( fname ${f} NAME )
