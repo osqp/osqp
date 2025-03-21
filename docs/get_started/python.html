@@ -71,7 +71,15 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l2"><a class="reference internal" href="C.html">C</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Python</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pip">Pip</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sources">Sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#alternative-algebra-backends">Alternative Algebra Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-from-source">Building from source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-alternative-algebra-backends-advanced">Building alternative algebra backends (advanced)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#build-wheels-for-builtin-backend">Build wheels for <cite>builtin</cite> backend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#build-wheels-for-mkl-backend">Build wheels for <cite>mkl</cite> backend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#build-wheels-for-cuda-backend">Build wheels for <cite>cuda</cite> backend</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#install-developer-dependencies-and-run-tests">Install developer dependencies and run tests</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="julia.html">Julia</a></li>
@@ -86,6 +94,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration guide from v0.6.x</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
 </ul>
@@ -124,8 +133,19 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </pre></div>
 </div>
 </section>
-<section id="sources">
-<h2>Sources<a class="headerlink" href="#sources" title="Link to this heading"></a></h2>
+<section id="alternative-algebra-backends">
+<h2>Alternative Algebra Backends<a class="headerlink" href="#alternative-algebra-backends" title="Link to this heading"></a></h2>
+<p>In addition to the default <code class="code docutils literal notranslate"><span class="pre">builtin</span></code> backend, OSQP supports <code class="code docutils literal notranslate"><span class="pre">mkl</span></code> and <code class="code docutils literal notranslate"><span class="pre">cuda</span></code> algebra backends.
+For most users, fetching and installing the binary wheels from the
+<a class="reference external" href="https://github.com/osqp/osqp-python/releases">Releases</a> page (files with the <code class="code docutils literal notranslate"><span class="pre">.whl</span></code> suffix, installable using
+<code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&lt;path/to/whl/file&gt;</span></code>) should work.</p>
+<p>Use the following command to check what algebra backends you have available locally:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import algebras_available; print(algebras_available())&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="building-from-source">
+<h2>Building from source<a class="headerlink" href="#building-from-source" title="Link to this heading"></a></h2>
 <p>You need to install the following (see <a class="reference internal" href="sources.html#build-from-sources"><span class="std std-ref">Build from sources</span></a> for more details):</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://gcc.gnu.org/">GCC compiler</a></p></li>
@@ -138,11 +158,146 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li><p>Python 3: <a class="reference external" href="https://visualstudio.microsoft.com/downloads/">Build Tools for Visual Studio</a></p></li>
 </ul>
 </div>
-<p>Now you are ready to build OSQP python interface from sources. Run the following in your terminal</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>https://github.com/osqp/osqp-python
+<p>Cloning the repo and <code class="code docutils literal notranslate"><span class="pre">pip</span></code> installing it directly should work. Just make sure you have a recent version of <code class="code docutils literal notranslate"><span class="pre">pip</span></code> (<code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pip</span> <span class="pre">--upgrade</span></code>).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/osqp/osqp-python.git
 <span class="nb">cd</span><span class="w"> </span>osqp-python
 pip<span class="w"> </span>install<span class="w"> </span>.
 </pre></div>
+</div>
+</section>
+<section id="building-alternative-algebra-backends-advanced">
+<span id="python-build-algebras"></span><h2>Building alternative algebra backends (advanced)<a class="headerlink" href="#building-alternative-algebra-backends-advanced" title="Link to this heading"></a></h2>
+<p>The following instructions illustrate how you can use the <code class="code docutils literal notranslate"><span class="pre">osqp</span></code> <code class="code docutils literal notranslate"><span class="pre">git</span></code> source tree to build <code class="code docutils literal notranslate"><span class="pre">osqp</span></code> wheels that support different algebra backends. These are probably not needed for most users.</p>
+<p>The procedure has been tested out on Linux. The process should be identical on MacOS and Windows, though of course you will likely not be able to to build <code class="code docutils literal notranslate"><span class="pre">osqp-cuda</span></code> wheels on MacOS, due to missing <code class="code docutils literal notranslate"><span class="pre">cuda-toolkit</span></code> on Mac platforms.</p>
+<p>Create a dedicated environment to build <code class="code docutils literal notranslate"><span class="pre">osqp</span></code>. Checkout and <code class="code docutils literal notranslate"><span class="pre">cd</span></code> into the code.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/osqp/osqp-python.git
+<span class="nb">cd</span><span class="w"> </span>osqp-python
+</pre></div>
+</div>
+<section id="build-wheels-for-builtin-backend">
+<h3>Build wheels for <cite>builtin</cite> backend<a class="headerlink" href="#build-wheels-for-builtin-backend" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>wheel<span class="w"> </span>.<span class="w"> </span>--no-deps<span class="w"> </span>--wheel-dir<span class="w"> </span>dist
+</pre></div>
+</div>
+<p>The resulting wheel is available in the <code class="code docutils literal notranslate"><span class="pre">dist</span></code> folder, and can be installed using <code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">dist/osqp-1.*.whl</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>dist
+├──<span class="w"> </span>osqp-1.0.0b2.dev68+gcaa6446-cp39-cp39-linux_x86_64.whl
+</pre></div>
+</div>
+<p>The default wheel we built provides us with the <code class="code docutils literal notranslate"><span class="pre">osqp</span></code> module, and we can check that we have the <code class="code docutils literal notranslate"><span class="pre">built-in</span></code> algebra available:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import algebras_available; print(algebras_available())&quot;</span>
+<span class="o">[</span><span class="s1">&#39;builtin&#39;</span><span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="build-wheels-for-mkl-backend">
+<h3>Build wheels for <cite>mkl</cite> backend<a class="headerlink" href="#build-wheels-for-mkl-backend" title="Link to this heading"></a></h3>
+<p>The process assumes that the <code class="code docutils literal notranslate"><span class="pre">mkl</span></code> development library has been installed, and environment variables set so that the build process can discover these libraries (in particular, you will likely need to set <code class="code docutils literal notranslate"><span class="pre">MKL_ROOT</span></code>, which on our machine is set to <code class="code docutils literal notranslate"><span class="pre">opt/intel/oneapi/mkl/latest</span></code>). When working on a cluster, you may want to look for a <a class="reference external" href="https://hpc-wiki.info/hpc/Modules">module</a> that populates the necessary environment variables (on our clusters, we do a <code class="code docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">intel-mkl/2024.0</span></code>, for example).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you’re using a <cite>conda</cite> environment to build <cite>osqp</cite>, one way to get <cite>MKL</cite> is to try (<cite>osqp</cite> uses this in its CI):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">software</span><span class="o">.</span><span class="n">repos</span><span class="o">.</span><span class="n">intel</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">python</span><span class="o">/</span><span class="n">conda</span><span class="o">/</span> <span class="n">mkl</span><span class="o">-</span><span class="n">devel</span>
+</pre></div>
+</div>
+<p>On Windows:</p>
+<p>..code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">software</span><span class="o">.</span><span class="n">repos</span><span class="o">.</span><span class="n">intel</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">python</span><span class="o">/</span><span class="n">conda</span><span class="o">/</span> <span class="n">dpcpp_impl_win</span><span class="o">-</span><span class="mi">64</span>
+</pre></div>
+</div>
+</div>
+<p>However you decide to get <code class="code docutils literal notranslate"><span class="pre">MKL</span></code> for your platform, the next step is to build the wrappers for the <code class="code docutils literal notranslate"><span class="pre">mkl</span></code> backend:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>wheel<span class="w"> </span>backend/mkl<span class="w"> </span>--no-deps<span class="w"> </span>--wheel-dir<span class="w"> </span>dist
+</pre></div>
+</div>
+<p>The resulting wheel is available in the <code class="code docutils literal notranslate"><span class="pre">dist</span></code> folder, and can be installed using <code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">dist/osqp_mkl-1.*.whl</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>dist
+├──<span class="w"> </span>osqp-1.0.0b2.dev68+gcaa6446-cp39-cp39-linux_x86_64.whl
+└──<span class="w"> </span>osqp_mkl-1.0.0b2.dev68+gcaa6446-cp39-cp39-linux_x86_64.whl
+</pre></div>
+</div>
+<p>The mkl wheel we built provides us with the <code class="code docutils literal notranslate"><span class="pre">osqp_mkl</span></code> module. When we try to do this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import osqp_mkl&quot;</span>
+Traceback<span class="w"> </span><span class="o">(</span>most<span class="w"> </span>recent<span class="w"> </span>call<span class="w"> </span>last<span class="o">)</span>:
+<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;&lt;string&gt;&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>&lt;module&gt;
+ImportError:<span class="w"> </span>libmkl_rt.so.2:<span class="w"> </span>cannot<span class="w"> </span>open<span class="w"> </span>shared<span class="w"> </span>object<span class="w"> </span>file:<span class="w"> </span>No<span class="w"> </span>such<span class="w"> </span>file<span class="w"> </span>or<span class="w"> </span>directory
+</pre></div>
+</div>
+<p>This is because we need the <code class="code docutils literal notranslate"><span class="pre">mkl</span></code> libraries available to python at runtime to be able to use <code class="code docutils literal notranslate"><span class="pre">osqp-mkl</span></code>. There are many ways for users to do this, so we don’t enforce an <code class="code docutils literal notranslate"><span class="pre">mkl</span></code> dependency in <code class="code docutils literal notranslate"><span class="pre">pip</span></code> to install the <code class="code docutils literal notranslate"><span class="pre">osqp_mkl</span></code> wheels. An easy way to do this in conda would be <code class="code docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">anaconda::mkl</span></code>, for example.</p>
+<p><strong>Note that while its possible to do an `import osqp_mkl` in python, we’ll never import that module directly in our code</strong>, and just use <cite>import osqp</cite>. We can check that we have the <cite>mkl</cite> algebra in <cite>osqp</cite> available:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import algebras_available; print(algebras_available())&quot;</span>
+<span class="o">[</span><span class="s1">&#39;mkl&#39;</span>,<span class="w"> </span><span class="s1">&#39;builtin&#39;</span><span class="o">]</span>
+</pre></div>
+</div>
+<p>Note that <code class="code docutils literal notranslate"><span class="pre">mkl</span></code> appears <em>before</em> <code class="code docutils literal notranslate"><span class="pre">builtin</span></code>, and will be the preferred backend for all <code class="code docutils literal notranslate"><span class="pre">osqp</span></code> operations. We can verify this by running:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import default_algebra; print(default_algebra())&quot;</span>
+mkl
+</pre></div>
+</div>
+<p>This behavior can be overridden by setting the <code class="code docutils literal notranslate"><span class="pre">OSQP_ALGEBRA_BACKEND</span></code> environment variable (which can take the values <code class="code docutils literal notranslate"><span class="pre">builtin</span></code>, <code class="code docutils literal notranslate"><span class="pre">mkl</span></code>, or <code class="code docutils literal notranslate"><span class="pre">cuda</span></code>).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">OSQP_ALGEBRA_BACKEND</span><span class="o">=</span><span class="nb">builtin</span><span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import default_algebra; print(default_algebra())&quot;</span>
+<span class="nb">builtin</span>
+</pre></div>
+</div>
+</section>
+<section id="build-wheels-for-cuda-backend">
+<h3>Build wheels for <cite>cuda</cite> backend<a class="headerlink" href="#build-wheels-for-cuda-backend" title="Link to this heading"></a></h3>
+<p>This assumes you have the <code class="code docutils literal notranslate"><span class="pre">cuda-toolkit</span></code> installed, and available at <code class="code docutils literal notranslate"><span class="pre">/usr/local/cuda</span></code>. When working on a cluster, you may want to look for a <a class="reference external" href="https://hpc-wiki.info/hpc/Modules">module</a> that populates the necessary environment variables (on our clusters, we do a <code class="code docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">cudatoolkit/12.4</span></code>, for example).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>wheel<span class="w"> </span>backend/cuda<span class="w"> </span>--no-deps<span class="w"> </span>--wheel-dir<span class="w"> </span>dist
+</pre></div>
+</div>
+<p>The resulting wheel is available in the <cite>dist</cite> folder, and can be installed using <cite>pip install dist/osqp_cuda-1.*.whl</cite></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>dist
+├──<span class="w"> </span>osqp-1.0.0b2.dev68+gcaa6446-cp39-cp39-linux_x86_64.whl
+├──<span class="w"> </span>osqp_cuda-1.0.0b2.dev68+gcaa6446-cp39-cp39-linux_x86_64.whl
+└──<span class="w"> </span>osqp_mkl-1.0.0b2.dev68+gcaa6446-cp39-cp39-linux_x86_64.whl
+</pre></div>
+</div>
+<p>The cuda wheel we built provides us with the <code class="code docutils literal notranslate"><span class="pre">osqp_cuda</span></code> module, and we can check that we have the <code class="code docutils literal notranslate"><span class="pre">cuda</span></code> algebra available:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import algebras_available; print(algebras_available())&quot;</span>
+<span class="o">[</span><span class="s1">&#39;cuda&#39;</span>,<span class="w"> </span><span class="s1">&#39;mkl&#39;</span>,<span class="w"> </span><span class="s1">&#39;builtin&#39;</span><span class="o">]</span>
+</pre></div>
+</div>
+<p>Again, the default algebra can be overridden with the <code class="code docutils literal notranslate"><span class="pre">OSQP_ALGEBRA_BACKEND</span></code> environment variable.</p>
+</section>
+</section>
+<section id="install-developer-dependencies-and-run-tests">
+<h2>Install developer dependencies and run tests<a class="headerlink" href="#install-developer-dependencies-and-run-tests" title="Link to this heading"></a></h2>
+<p>Finally, to test that <code class="code docutils literal notranslate"><span class="pre">osqp</span></code> is installed/working correct with all available algebras, run the tests.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>.<span class="o">[</span>dev<span class="o">]</span>
+pytest
+</pre></div>
+</div>
+<p>The tests run across all available algebras. The <code class="code docutils literal notranslate"><span class="pre">OSQP_ALGEBRA_BACKEND</span></code> environment variable does not need to be set, and has no effect for the tests. If the <code class="code docutils literal notranslate"><span class="pre">mkl</span></code> backend is available, then the tests are run for both the <code class="code docutils literal notranslate"><span class="pre">&quot;direct&quot;</span></code> and <code class="code docutils literal notranslate"><span class="pre">&quot;indirect&quot;</span></code> <em>modes</em> of <code class="code docutils literal notranslate"><span class="pre">mkl</span></code>.</p>
+<p>To pick exactly what algebras are tested, read on.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Tests that use the <code class="code docutils literal notranslate"><span class="pre">mkl</span></code> backend and the <code class="code docutils literal notranslate"><span class="pre">indirect</span></code> mode are slow to run on head nodes of clusters, where cpu cores are a shared resource and thus cannot be monopolized. Tests involving the <code class="code docutils literal notranslate"><span class="pre">cuda</span></code> algebra may not be possible to run on head nodes of clusters anyway (because of lack of GPUs there). Also, <code class="code docutils literal notranslate"><span class="pre">codegen</span></code> tests in <code class="code docutils literal notranslate"><span class="pre">osqp</span></code> require an internet connection to work properly, which compute nodes may or may not have (because the generated code gets compiled using <code class="code docutils literal notranslate"><span class="pre">python+cmake</span></code>, which wants to fetch certain modules..)</p>
+<p>For these and other unforeseen scenarios, fine-tuning of test parametrization is supported using the <code class="code docutils literal notranslate"><span class="pre">OSQP_TEST_ALGEBRA_INCLUDE</span></code> and <code class="code docutils literal notranslate"><span class="pre">OSQP_TEST_ALGEBRA_SKIP</span></code> environment variables (both optional). These variables can take space-delimited values that include <code class="code docutils literal notranslate"><span class="pre">builtin</span></code>, <code class="code docutils literal notranslate"><span class="pre">mkl-direct</span></code>, <code class="code docutils literal notranslate"><span class="pre">mkl-indirect</span></code>, and <code class="code docutils literal notranslate"><span class="pre">cuda</span></code>. Of course, this can be combined with the <code class="code docutils literal notranslate"><span class="pre">-k</span></code> pattern selection that <code class="code docutils literal notranslate"><span class="pre">pytest</span></code> itself supports.</p>
+<p>For example:</p>
+<ul class="simple">
+<li><p>Run all tests for all available algebras:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Run all tests, but only for the <code class="code docutils literal notranslate"><span class="pre">builtin</span></code> and <code class="code docutils literal notranslate"><span class="pre">mkl-direct</span></code> algebras (if available):</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">OSQP_TEST_ALGEBRA_INCLUDE</span><span class="o">=</span><span class="s2">&quot;builtin mkl-direct&quot;</span><span class="w"> </span>pytest
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Run all tests, but skip the <code class="code docutils literal notranslate"><span class="pre">cuda</span></code> algebra:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">OSQP_TEST_ALGEBRA_SKIP</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="w"> </span>pytest
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Run all tests, but only for the <code class="code docutils literal notranslate"><span class="pre">builtin</span></code> algebra, and skip the <code class="code docutils literal notranslate"><span class="pre">codegen</span></code> tests:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">OSQP_TEST_ALGEBRA_INCLUDE</span><span class="o">=</span><span class="s2">&quot;builtin&quot;</span><span class="w"> </span>pytest<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;not codegen&quot;</span>
+</pre></div>
+</div>
 </div>
 </section>
 </section>
@@ -158,7 +313,7 @@ pip<span class="w"> </span>install<span class="w"> </span>.
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+    <p>&#169; Copyright 2025, OSQP Developer Team.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

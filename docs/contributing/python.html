@@ -72,15 +72,11 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/migration_guide.html">Migration guide from v0.6.x</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Contributing</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="solvers.html">Interfacing new linear system solvers</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Python Wrappers for OSQP</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#wrappers-for-builtin-algebra">Wrappers for <code class="docutils literal notranslate"><span class="pre">builtin</span></code> algebra</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#wrappers-for-mkl-algebra">Wrappers for <code class="docutils literal notranslate"><span class="pre">mkl</span></code> algebra</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#wrappers-for-cuda-algebra">Wrappers for <code class="docutils literal notranslate"><span class="pre">cuda</span></code> algebra</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#building-wrappers-against-an-experimental-branch-of-osqp">Building wrappers against an experimental branch of OSQP</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#building-wrappers-against-an-experimental-branch-of-osqp">Building wrappers against an experimental branch of OSQP</a></li>
 </ul>
 </li>
 </ul>
@@ -124,92 +120,10 @@ check what algebra backends we have successfully built.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import algebras_available; print(algebras_available())&quot;</span>
 </pre></div>
 </div>
-<section id="wrappers-for-builtin-algebra">
-<h2>Wrappers for <code class="docutils literal notranslate"><span class="pre">builtin</span></code> algebra<a class="headerlink" href="#wrappers-for-builtin-algebra" title="Link to this heading"></a></h2>
-<p>Building wrappers for the <code class="docutils literal notranslate"><span class="pre">builtin</span></code> algebra demonstrates some of the basic steps
-you would need to take for all algebra backends.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>osqp_build<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.9
-$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>osqp_build
-
-<span class="c1"># &quot;build&quot; is the python package that is capable of generating binary &quot;wheels&quot;</span>
-<span class="c1"># there are other ways of doing this but this way is the most standards compliant</span>
-$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>build
-
-$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:osqp/osqp-python.git
-$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>osqp-python/
-
-<span class="c1"># Build the python wheels for &quot;builtin&quot; algebra</span>
-$<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>build<span class="w"> </span>.
-
-<span class="c1"># Built artifacts are in the &quot;dist&quot; folder, we can &quot;pip install&quot; any of these files</span>
-<span class="c1"># installing the wheel entails no (further) compilation so its fastest</span>
-$<span class="w"> </span>tree<span class="w"> </span>dist
-dist
-├──<span class="w"> </span>osqp-1.0.0b1-cp39-cp39-linux_x86_64.whl<span class="w">    </span>&lt;-<span class="w"> </span>compiled<span class="w"> </span>wheel
-└──<span class="w"> </span>osqp-1.0.0b1.tar.gz<span class="w">                        </span>&lt;-<span class="w"> </span><span class="nb">source</span><span class="w"> </span>gz
-
-$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>dist/osqp-1.0.0b1-cp39-cp39-linux_x86_64.whl
-
-$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import algebras_available; print(algebras_available())&quot;</span>
-<span class="o">[</span><span class="s1">&#39;builtin&#39;</span><span class="o">]</span>
-</pre></div>
-</div>
-</section>
-<section id="wrappers-for-mkl-algebra">
-<h2>Wrappers for <code class="docutils literal notranslate"><span class="pre">mkl</span></code> algebra<a class="headerlink" href="#wrappers-for-mkl-algebra" title="Link to this heading"></a></h2>
-<p>For building Python wrappers for the <code class="docutils literal notranslate"><span class="pre">MKL</span></code> algebra backend, you need to have the <a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html#base-kit">Intel OneAPI</a>.
-library installed and accessible for your platform.</p>
-<p>Once installed, set the environment variable <code class="docutils literal notranslate"><span class="pre">MKL_ROOT</span></code> to the path of the installed toolkit. For example:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="nv">MKL_ROOT</span><span class="o">=</span>/opt/intel/oneapi/mkl/latest
-</pre></div>
-</div>
-<p>The process of building the <code class="docutils literal notranslate"><span class="pre">MKL</span></code> OSQP wrappers is the same as above, except that the environment variable
-<code class="docutils literal notranslate"><span class="pre">OSQP_ALGEBRA_BACKEND</span></code> set to <code class="docutils literal notranslate"><span class="pre">mkl</span></code> tells the build process that we wish to build MKL wrappers.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="nv">OSQP_ALGEBRA_BACKEND</span><span class="o">=</span>mkl
-
-$<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>build<span class="w"> </span>.
-
-$<span class="w"> </span>tree<span class="w"> </span>dist
-dist
-├──<span class="w"> </span>osqp-1.0.0b1-cp39-cp39-linux_x86_64.whl
-├──<span class="w"> </span>osqp-1.0.0b1.tar.gz
-├──<span class="w"> </span>osqp_mkl-1.0.0b1-cp39-cp39-linux_x86_64.whl
-└──<span class="w"> </span>osqp_mkl-1.0.0b1.tar.gz
-
-$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>dist/osqp_mkl-1.0.0b1-cp39-cp39-linux_x86_64.whl
-$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import algebras_available; print(algebras_available())&quot;</span>
-<span class="o">[</span><span class="s1">&#39;mkl&#39;</span>,<span class="w"> </span><span class="s1">&#39;builtin&#39;</span><span class="o">]</span>
-</pre></div>
-</div>
-</section>
-<section id="wrappers-for-cuda-algebra">
-<h2>Wrappers for <code class="docutils literal notranslate"><span class="pre">cuda</span></code> algebra<a class="headerlink" href="#wrappers-for-cuda-algebra" title="Link to this heading"></a></h2>
-<p>For building Python wrappers for the <code class="docutils literal notranslate"><span class="pre">CUDA</span></code> algebra backend, you need to have the <a class="reference external" href="https://developer.nvidia.com/cuda-toolkit-archive">CUDA Toolkit</a>.
-installed and accessible for your platform. The build process has been tested out for CUDA Toolkit versions 11.2 through 11.7.</p>
-<p>If you install the CUDA Toolkit using the default paths and options (which makes the toolkit available at <code class="docutils literal notranslate"><span class="pre">/usr/local/cuda</span></code> for *nix platforms),
-there is no need for any further configuration.</p>
-<p>The process of building the <code class="docutils literal notranslate"><span class="pre">CUDA</span></code> OSQP wrappers is the same as above, except that the environment variable
-<code class="docutils literal notranslate"><span class="pre">OSQP_ALGEBRA_BACKEND</span></code> set to <code class="docutils literal notranslate"><span class="pre">cuda</span></code> tells the build process that we wish to build CUDA wrappers.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="nv">OSQP_ALGEBRA_BACKEND</span><span class="o">=</span>cuda
-
-$<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>build<span class="w"> </span>.
-
-$<span class="w"> </span>tree<span class="w"> </span>dist
-dist
-├──<span class="w"> </span>osqp-1.0.0b1-cp39-cp39-linux_x86_64.whl
-├──<span class="w"> </span>osqp-1.0.0b1.tar.gz
-├──<span class="w"> </span>osqp_cuda-1.0.0b1-cp39-cp39-linux_x86_64.whl
-├──<span class="w"> </span>osqp_cuda-1.0.0b1.tar.gz
-├──<span class="w"> </span>osqp_mkl-1.0.0b1-cp39-cp39-linux_x86_64.whl
-└──<span class="w"> </span>osqp_mkl-1.0.0b1.tar.gz
-
-$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>dist/osqp_cuda-1.0.0b1-cp39-cp39-linux_x86_64.whl
-$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import algebras_available; print(algebras_available())&quot;</span>
-<span class="o">[</span><span class="s1">&#39;cuda&#39;</span>,<span class="w"> </span><span class="s1">&#39;mkl&#39;</span>,<span class="w"> </span><span class="s1">&#39;builtin&#39;</span><span class="o">]</span>
-</pre></div>
-</div>
+<p>See <a class="reference internal" href="../get_started/python.html#python-build-algebras"><span class="std std-ref">Building alternative algebra backends</span></a> on how to build and test
+different OSQP algebra backends.</p>
 <section id="building-wrappers-against-an-experimental-branch-of-osqp">
-<h3>Building wrappers against an experimental branch of OSQP<a class="headerlink" href="#building-wrappers-against-an-experimental-branch-of-osqp" title="Link to this heading"></a></h3>
+<h2>Building wrappers against an experimental branch of OSQP<a class="headerlink" href="#building-wrappers-against-an-experimental-branch-of-osqp" title="Link to this heading"></a></h2>
 <p>The file <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in the root folder of the <code class="docutils literal notranslate"><span class="pre">osqp-python</span></code> repository lists the <code class="docutils literal notranslate"><span class="pre">osqp</span></code> branch that
 is fetched and compiled as part of the build process. The relevant section of this file looks like (at the time
 of this writing):</p>
@@ -225,7 +139,6 @@ wrappers for experimental features not available in the main/master branch of <c
 wrappers against the algebra of your choice.</p>
 </section>
 </section>
-</section>
 
 
            </div>
@@ -238,7 +151,7 @@ wrappers against the algebra of your choice.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+    <p>&#169; Copyright 2025, OSQP Developer Team.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -79,6 +79,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/migration_guide.html">Migration guide from v0.6.x</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
 </ul>
@@ -273,6 +274,28 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </tbody>
 </table>
 <p>The boolean values <code class="code docutils literal notranslate"><span class="pre">True/False</span></code> are defined as <code class="code docutils literal notranslate"><span class="pre">1/0</span></code> in the C interface.</p>
+<p>The infinity values correspond to:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Language</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>C</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">OSQP_INFTY</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Python</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">numpy.inf</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Matlab</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">Inf</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Julia</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">Inf</span></code></p></td>
+</tr>
+</tbody>
+</table>
 </section>
 
 
@@ -286,7 +309,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+    <p>&#169; Copyright 2025, OSQP Developer Team.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

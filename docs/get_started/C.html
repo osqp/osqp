@@ -87,6 +87,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration guide from v0.6.x</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
 </ul>
@@ -122,7 +123,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <h2>Binaries<a class="headerlink" href="#binaries" title="Link to this heading"></a></h2>
 <p>Precompiled platform-dependent shared and static libraries are available on <a class="reference external" href="https://github.com/osqp/osqp/releases">GitHub</a>.
 We here assume that the user uncompressed each archive to <code class="code docutils literal notranslate"><span class="pre">OSQP_FOLDER</span></code>.</p>
-<p>Each archive contains static <code class="code docutils literal notranslate"><span class="pre">OSQP_FOLDER/lib/libosqp.a</span></code> and shared <code class="code docutils literal notranslate"><span class="pre">OSQP_FOLDER/lib/libosqp.ext</span></code> libraries to be used to interface OSQP to any C/C++ software.
+<p>Each archive contains static <code class="code docutils literal notranslate"><span class="pre">OSQP_FOLDER/lib/libosqpstatic.a</span></code> and shared <code class="code docutils literal notranslate"><span class="pre">OSQP_FOLDER/lib/libosqp.ext</span></code> libraries to be used to interface OSQP to any C/C++ software.
 The extension <code class="code docutils literal notranslate"><span class="pre">.ext</span></code> is platform dependent and is <code class="code docutils literal notranslate"><span class="pre">.so</span></code> for Linux, <code class="code docutils literal notranslate"><span class="pre">.dylib</span></code> for Mac and <code class="code docutils literal notranslate"><span class="pre">.dll</span></code> for Windows.
 The required include files can be found in <code class="code docutils literal notranslate"><span class="pre">OSQP_FOLDER/include</span></code>.</p>
 <p>Simply compile with the linker option with <code class="code docutils literal notranslate"><span class="pre">-LOSQP_FOLDER/lib</span></code> and <code class="code docutils literal notranslate"><span class="pre">-losqp</span></code>.</p>
@@ -147,6 +148,14 @@ The required include files can be found in <code class="code docutils literal no
 <span class="n">target_link_libraries</span><span class="p">(</span><span class="n">yourTarget</span> <span class="n">PRIVATE</span> <span class="n">osqp</span><span class="p">::</span><span class="n">osqpstatic</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>You will need to help CMake out by specifying the path to the folder where you installed the OSQP library, for example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>--build<span class="w"> </span>.<span class="w"> </span>-Dosqp_ROOT<span class="o">=</span>myfolder
+</pre></div>
+</div>
+<p>You may or may not need to link your target to the standard math library in your <code class="code docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">target_link_libraries</span><span class="p">(</span><span class="n">yourTarget</span> <span class="n">PRIVATE</span> <span class="n">m</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -161,7 +170,7 @@ The required include files can be found in <code class="code docutils literal no
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+    <p>&#169; Copyright 2025, OSQP Developer Team.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

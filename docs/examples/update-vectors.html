@@ -80,6 +80,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l4"><a class="reference internal" href="#julia">Julia</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#r">R</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#c">C</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rust">Rust</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="update-matrices.html">Update matrices</a></li>
@@ -89,6 +90,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/migration_guide.html">Migration guide from v0.6.x</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
 </ul>
@@ -318,6 +320,45 @@ Then we update the vectors <span class="math notranslate nohighlight">\(q\)</spa
 </pre></div>
 </div>
 </section>
+<section id="rust">
+<h2>Rust<a class="headerlink" href="#rust" title="Link to this heading"></a></h2>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">use</span><span class="w"> </span><span class="n">osqp</span><span class="p">::{</span><span class="n">CscMatrix</span><span class="p">,</span><span class="w"> </span><span class="n">Problem</span><span class="p">,</span><span class="w"> </span><span class="n">Settings</span><span class="p">};</span>
+
+<span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Define problem data</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="p">[[</span><span class="mf">4.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span>
+<span class="w">        </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">]];</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">];</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span>
+<span class="w">        </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span>
+<span class="w">        </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">]];</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">];</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7</span><span class="p">];</span>
+
+<span class="w">    </span><span class="c1">// Extract the upper triangular elements of `P`</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CscMatrix</span><span class="p">::</span><span class="n">from</span><span class="p">(</span><span class="n">P</span><span class="p">).</span><span class="n">into_upper_tri</span><span class="p">();</span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">settings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Settings</span><span class="p">::</span><span class="n">default</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Create an OSQP problem</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">prob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Problem</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">settings</span><span class="p">).</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;failed to setup problem&quot;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Solve problem</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prob</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Update problem</span>
+<span class="w">    </span><span class="n">prob</span><span class="p">.</span><span class="n">update_lin_cost</span><span class="p">(</span><span class="o">&amp;</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">prob</span><span class="p">.</span><span class="n">update_bounds</span><span class="p">(</span><span class="o">&amp;</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">1.0</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span><span class="w"> </span><span class="mf">2.5</span><span class="p">]);</span>
+
+<span class="w">    </span><span class="c1">// Solve updated problem</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prob</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Print the solution</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;{:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">x</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;failed to solve problem&quot;</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -331,7 +372,7 @@ Then we update the vectors <span class="math notranslate nohighlight">\(q\)</spa
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+    <p>&#169; Copyright 2025, OSQP Developer Team.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

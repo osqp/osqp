@@ -86,6 +86,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration guide from v0.6.x</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
 </ul>
@@ -144,19 +145,14 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="nb">setenv</span><span class="p">(</span><span class="s">&#39;MW_MINGW64_LOC&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;C:\TDM-GCC-64&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>where <code class="code docutils literal notranslate"><span class="pre">C:TDM-GCC-64</span></code> is the installation folder for TDM-GCC.</p>
+<p>where <code class="code docutils literal notranslate"><span class="pre">C:\TDM-GCC-64</span></code> is the installation folder for TDM-GCC.</p>
 </div>
 <p>You can now build the interface by running inside Matlab</p>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="sx">!git clone --recurse-submodules https://github.com/osqp/osqp-matlab</span>
-<span class="nb">cd</span><span class="w"> </span><span class="n">osqp</span><span class="o">-</span><span class="n">matlab</span>
-<span class="n">make_osqp</span>
+<span class="n">osqp</span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="s">&#39;osqp_mex&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Then you can add the interface to the search path by executing from the same directory</p>
-<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="nb">addpath</span><span class="p">(</span><span class="nb">pwd</span><span class="p">)</span>
-<span class="nb">savepath</span>
-</pre></div>
-</div>
+<p>You are now ready to start using the Matlab interface.</p>
 </section>
 </section>
 
@@ -171,7 +167,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+    <p>&#169; Copyright 2025, OSQP Developer Team.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
