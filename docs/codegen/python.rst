@@ -35,31 +35,28 @@ Additional codegen options are shown in the following table
 || :code:`printing_enable`     || Enable printing                                  || :code:`False` (default)     |
 ||                             ||                                                  || :code:`True`                |
 +------------------------------+---------------------------------------------------+------------------------------+
-|| Enable profiling            || Enable profiling                                 || :code:`False` (default)     |
+|| :code:`profiling_enable`    || Enable profiling                                 || :code:`False` (default)     |
 ||                             ||                                                  || :code:`True`                |
 +------------------------------+---------------------------------------------------+------------------------------+
-|| Enable interrupts           || Enable interrupts                                || :code:`False` (default)     |
+|| :code:`interrupt_enable`    || Enable interrupts                                || :code:`False` (default)     |
 ||                             ||                                                  || :code:`True`                |
 +------------------------------+---------------------------------------------------+------------------------------+
-|| :code:`include_codegen_src` || Include codegen source code                      || :code:`True` (default)      |
-||                             ||                                                  || :code:`False`               |
+|| :code:`include_codegen_src` || Include codegen source code (this includes       || :code:`True` (default)      |
+||                             || headers/sources/Makefile in the output folder,   || :code:`False`               |
+||                             || creating a self-contained compilable folder.     ||                             |
 +------------------------------+---------------------------------------------------+------------------------------+
-|| :code:`prefix`              || Prefix to add                                    || :code:`''` (default)        |
-||                             ||                                                  || string                      |
+|| :code:`prefix`              || Prefix for filenames and C variables,            || :code:`''` (default)        |
+||                             || useful if generating multiple problems.          || string                      |
 +------------------------------+---------------------------------------------------+------------------------------+
-|| :code:`compile`             || Compile the code                                 || :code:`False` (default)     |
-||                             ||                                                  || :code:`True`                |
+|| :code:`compile`             || Compile the above python extension into an       || :code:`False` (default)     |
+||                             || importable module, allowing "import emosqp"      || :code:`True`                |
 +------------------------------+---------------------------------------------------+------------------------------+
 
 The options are passed using named arguments, e.g.,
 
 .. code:: python
 
-    m.codegen('code', parameters='matrices', extension_name='emosqp')
-
-If the :code:`project_type` argument is not passed or is set to :code:`''`,
-then no build files are generated.
-
+    m.codegen('code', parameters='matrices', extension_name='myosqpext')
 
 
 Extension module API
@@ -68,9 +65,9 @@ Once the code is generated, you can import a light python wrapper with
 
 .. code:: python
 
-    import emosqp
+    import myosqpext
 
-where :code:`emosqp` is the extension name given in the previous section. The module imports the following functions
+where :code:`myosqpext` is the extension name given in the previous section. The module imports the following functions
 
 .. py:function:: solve()
    :noindex:
@@ -171,4 +168,4 @@ You can update all the nonzero entries in matrix :math:`A` by running
 
 .. code:: python
 
-    emosqp.update_A(Ax_new, None, 0);
+    myosqpext.update_A(Ax_new, None, 0);
