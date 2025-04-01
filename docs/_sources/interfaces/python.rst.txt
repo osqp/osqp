@@ -49,6 +49,7 @@ The problem can be solved by
 
    results = m.solve()
 
+An optional parameter :code:`raise_error` (default :code:`False`) can be passed to the :code:`solve` method. If set to :code:`True`, the method will raise an exception if the solver status is not :code:`OSQP_SOLVED`. See :ref:`status_values` for more details.
 
 The :code:`results` object contains the primal solution :code:`x`, the dual solution :code:`y`, certificate of primal infeasibility :code:`prim_inf_cert`, certificate of dual infeasibility :code:`dual_inf_cert` and the :code:`info` object containing the solver statistics defined in the following table
 
