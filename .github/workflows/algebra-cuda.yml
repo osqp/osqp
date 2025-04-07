@@ -1,0 +1,70 @@
+name: 'Algebra: Cuda'
+
+on:
+  push:
+    branches: [ master, develop** ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master, develop** ]
+
+jobs:
+
+  build_and_test:
+      runs-on: [self-hosted, gpu]
+
+      strategy:
+        matrix:
+          os: [ubuntu-latest]
+          python-version: [3.9]
+          cmake_flags: ['-DOSQP_BUILD_UNITTESTS=ON -DOSQP_ALGEBRA_BACKEND=cuda -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_CUDA_HOST_COMPILER=g++-10']
+
+          include:
+            - os: ubuntu-latest
+              cmake_generator: "Unix Makefiles"
+
+      defaults:
+        run:
+          # Required when using an activated conda environment in steps
+          # See https://github.com/conda-incubator/setup-miniconda#IMPORTANT
+          shell: bash -l {0}
+
+      env:
+        OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
+        CTEST_OUTPUT_ON_FAILURE: 1
+
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            lfs: false
+            submodules: recursive
+
+        - name: Set up conda environment for testing
+          uses: conda-incubator/setup-miniconda@v3
+          with:
+            auto-update-conda: true
+            python-version: ${{ matrix.python-version }}
+            activate-environment: osqp-test
+            environment-file: tests/testenv.yml
+            auto-activate-base: false
+
+        - name: Setup (Linux)
+          run: |
+            echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
+
+        - name: Build
+          run: |
+            cmake -G "${{ matrix.cmake_generator }}" \
+                  -S . -B $OSQP_BUILD_DIR_PREFIX \
+                  ${{ matrix.cmake_flags }}
+            cmake --build $OSQP_BUILD_DIR_PREFIX
+
+        # useful for inspecting the OSQP version information
+        - name: OSQP Demo
+          run: |
+            $OSQP_BUILD_DIR_PREFIX/out/osqp_demo
+
+        - name: Test
+          run: |
+            cmake --build $OSQP_BUILD_DIR_PREFIX --target test
+
