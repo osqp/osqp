@@ -284,10 +284,10 @@ OSQP_API OSQPInt osqp_setup(OSQPSolver**         solverp,
  * The solution is stored in the  \a solver->solution  structure
  *
  * If the problem is primal infeasible, the certificate is stored
- * in \a solver->delta_y
+ * in \a solver->solution->prim_inf_cert
  *
- * If the problem is dual infeasible, the certificate is stored in \a
- * solver->delta_x
+ * If the problem is dual infeasible, the certificate is stored
+ * in \a solver->solution->dual_inf_cert
  *
  * @param  solver Solver
  * @return        Exitflag for errors (0 if no errors)
