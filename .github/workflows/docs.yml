@@ -2,7 +2,7 @@ name: Docs
 
 on:
   push:
-    branches: [ master, release-0.6.3 ]
+    branches: [ master, release-0.6.3, vb/marimo ]
     tags:
       - '*'
 
