@@ -956,8 +956,8 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <dd><p>Solve quadratic program</p>
 <p>The final solver information is stored in the <em>solver-&gt;info</em> structure</p>
 <p>The solution is stored in the <em>solver-&gt;solution</em> structure</p>
-<p>If the problem is primal infeasible, the certificate is stored in <em>solver-&gt;delta_y</em></p>
-<p>If the problem is dual infeasible, the certificate is stored in <em>solver-&gt;delta_x</em></p>
+<p>If the problem is primal infeasible, the certificate is stored in <em>solver-&gt;solution-&gt;prim_inf_cert</em></p>
+<p>If the problem is dual infeasible, the certificate is stored in <em>solver-&gt;solution-&gt;dual_inf_cert</em></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>solver</strong> – Solver </p>
