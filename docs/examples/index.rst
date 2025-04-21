@@ -25,4 +25,12 @@ Applications
    mpc.rst
    portfolio.rst
    svm.rst
+
+
+Torch
+-----
+
+.. toctree::
+   :maxdepth: 1
+
    torch.rst
