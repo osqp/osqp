@@ -69,7 +69,7 @@ typedef struct cudss_solver_ {
   cudssMatrix_t vecB;         ///<  RHS vector descriptor
 
   /* KKT matrix storage */
-  OSQPCscMatrix* KKT;         ///<  KKT matrix (stored in CSR format)
+  OSQPCscMatrix* KKT;         ///<  KKT matrix (CSR data in OSQPCscMatrix structure)
   OSQPInt*   d_KKT_i;         ///<  KKT column indices (device memory)
   OSQPInt*   d_KKT_p;         ///<  KKT row pointers (device memory)
   OSQPFloat* d_KKT_x;         ///<  KKT matrix values (device memory)

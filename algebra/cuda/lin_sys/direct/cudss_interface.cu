@@ -200,7 +200,7 @@ OSQPInt init_linsys_solver_cudss(cudss_solver**      sp,
 
   nnzKKT = s->KKT->p[n_plus_m];
 
-  // Copy KKT matrix to device in CSR format (already in CSR from form_KKT)
+  // Copy KKT matrix to device (KKT data is in CSR format from form_KKT call with format=1)
   if (cuda_malloc((void**)&s->d_KKT_p, (n_plus_m + 1) * sizeof(OSQPInt)) ||
       cuda_malloc((void**)&s->d_KKT_i, nnzKKT * sizeof(OSQPInt)) ||
       cuda_malloc((void**)&s->d_KKT_x, nnzKKT * sizeof(OSQPFloat))) {
