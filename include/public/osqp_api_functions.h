@@ -37,12 +37,12 @@ extern "C" {
  * @param  p     Vector of column pointers
  * @return       Pointer to new CSC matrix, or null on error
  */
-OSQPCscMatrix* OSQPCscMatrix_new(OSQPInt    m,
-                                 OSQPInt    n,
-                                 OSQPInt    nzmax,
-                                 OSQPFloat* x,
-                                 OSQPInt*   i,
-                                 OSQPInt*   p);
+OSQP_API OSQPCscMatrix* OSQPCscMatrix_new(OSQPInt    m,
+                                          OSQPInt    n,
+                                          OSQPInt    nzmax,
+                                          OSQPFloat* x,
+                                          OSQPInt*   i,
+                                          OSQPInt*   p);
 
 /**
  * Free a CSC matrix object allocated by @ref OSQPCscMatrix_new.
@@ -55,7 +55,7 @@ OSQPCscMatrix* OSQPCscMatrix_new(OSQPInt    m,
  *
  * @param mat Matrix to free
  */
-void OSQPCscMatrix_free(OSQPCscMatrix* mat);
+OSQP_API void OSQPCscMatrix_free(OSQPCscMatrix* mat);
 
 /**
  * Allocates a new Compressed-Column-Sparse (CSC) matrix with zero entries.
@@ -68,8 +68,8 @@ void OSQPCscMatrix_free(OSQPCscMatrix* mat);
  * @param  n Number of columns
  * @return   Pointer to new CSC matrix, or null on error
  */
-OSQPCscMatrix* OSQPCscMatrix_zeros(OSQPInt m,
-                                   OSQPInt n);
+OSQP_API OSQPCscMatrix* OSQPCscMatrix_zeros(OSQPInt m,
+                                            OSQPInt n);
 
 /**
  * Allocates a new Compressed-Column-Sparse (CSC) identity with 1s on the diagonal.
@@ -79,7 +79,7 @@ OSQPCscMatrix* OSQPCscMatrix_zeros(OSQPInt m,
  * @param  m Number of rows/columns
  * @return   Pointer to new CSC matrix, or null on error
  */
-OSQPCscMatrix* OSQPCscMatrix_identity(OSQPInt m);
+OSQP_API OSQPCscMatrix* OSQPCscMatrix_identity(OSQPInt m);
 
 /**
  * Allocates a new Compressed-Column-Sparse (CSC) diagonal matrix with a given value.
@@ -94,9 +94,9 @@ OSQPCscMatrix* OSQPCscMatrix_identity(OSQPInt m);
  * @param  scalar Scalar value to put on the diagonal
  * @return        Pointer to new CSC matrix, or null on error
  */
-OSQPCscMatrix* OSQPCscMatrix_diag_scalar(OSQPInt   m,
-                                         OSQPInt   n,
-                                         OSQPFloat scalar);
+OSQP_API OSQPCscMatrix* OSQPCscMatrix_diag_scalar(OSQPInt   m,
+                                                  OSQPInt   n,
+                                                  OSQPFloat scalar);
 
 /**
  * Allocates a new Compressed-Column-Sparse (CSC) diagonal matrix with given values on the diagonal.
@@ -111,9 +111,9 @@ OSQPCscMatrix* OSQPCscMatrix_diag_scalar(OSQPInt   m,
  * @param  vals Values to put on the diagonal - length min(n,m)
  * @return      Pointer to new CSC matrix, or null on error
  */
-OSQPCscMatrix* OSQPCscMatrix_diag_vec(OSQPInt    m,
-                                      OSQPInt    n,
-                                      OSQPFloat* vals);
+OSQP_API OSQPCscMatrix* OSQPCscMatrix_diag_vec(OSQPInt    m,
+                                               OSQPInt    n,
+                                               OSQPFloat* vals);
 
 #endif
 
@@ -152,7 +152,7 @@ OSQP_API void OSQPCscMatrix_set_data(OSQPCscMatrix* M,
  *
  * @return Pointer to new settings object, or null on error
  */
-OSQPSettings* OSQPSettings_new();
+OSQP_API OSQPSettings* OSQPSettings_new();
 
 /**
  * Free an OSQPSettings object.
@@ -161,7 +161,7 @@ OSQPSettings* OSQPSettings_new();
  *
  * @param settings The settings object to free
  */
-void OSQPSettings_free(OSQPSettings* settings);
+OSQP_API void OSQPSettings_free(OSQPSettings* settings);
 #endif
 
 /** @} */
@@ -179,7 +179,7 @@ void OSQPSettings_free(OSQPSettings* settings);
  *
  * @return Pointer to new codegen defines object, or null on error
  */
-OSQPCodegenDefines* OSQPCodegenDefines_new();
+OSQP_API OSQPCodegenDefines* OSQPCodegenDefines_new();
 
 /**
  * Free an OSQPCodegenDefines object.
@@ -188,7 +188,7 @@ OSQPCodegenDefines* OSQPCodegenDefines_new();
  *
  * @param defs The defines object to free
  */
-void OSQPCodegenDefines_free(OSQPCodegenDefines* defs);
+OSQP_API void OSQPCodegenDefines_free(OSQPCodegenDefines* defs);
 #endif
 
 /** @} */
@@ -303,7 +303,7 @@ OSQP_API OSQPInt osqp_solve(OSQPSolver* solver);
  * @param  solution Solution object to store result in
  * @return          Error flag
  */
-OSQPInt osqp_get_solution(OSQPSolver* solver, OSQPSolution* solution);
+OSQP_API OSQPInt osqp_get_solution(OSQPSolver* solver, OSQPSolution* solution);
 
 # ifndef OSQP_EMBEDDED_MODE
 
