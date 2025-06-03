@@ -39,6 +39,7 @@ def _(np, osqp, sparse):
     print('Status:', res.info.status)
     print('Objective value:', res.info.obj_val)
     print('Optimal solution x:', res.x)
+    print('Done!')
     return
 
 
