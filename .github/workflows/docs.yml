@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: [3.9]
+        python: [3.12]
 
     steps:
       - uses: actions/checkout@v4
@@ -31,12 +31,16 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install sphinx sphinx-rtd-theme breathe
+          pip install sphinx sphinx-rtd-theme breathe marimo
 
       - name: Setup Envvars
         run: |
             if [[ $GITHUB_REF = "refs/tags/"* ]] ; then echo "OSQP_VERSION=${GITHUB_REF/refs\/tags\//}" ; else echo "OSQP_VERSION=0.0.0" ; fi >> $GITHUB_ENV
             if [[ $GITHUB_REF = "refs/tags/"* ]] ; then echo "OSQP_NAME=osqp-${GITHUB_REF/refs\/tags\//}-${{ runner.os }}" ; else echo "OSQP_NAME=osqp-0.0.0-${{ runner.os }}" ; fi >> $GITHUB_ENV
+
+      - name: Build marimo notebooks
+        run: |
+          cd docs/marimo && yes | marimo export html-wasm basic.py -o ../../site/wasm --mode edit
 
       - name: Build docs
         run: |
