@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Examples &mdash; OSQP  documentation</title>
+  <title>Live Demo &mdash; OSQP  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Live Demo" href="live-demo.html" />
-    <link rel="prev" title="Python" href="../codegen/python.html" />
+    <link rel="next" title="Setup and solve" href="setup-and-solve.html" />
+    <link rel="prev" title="Examples" href="index.html" />
 <meta name="twitter:card" content="summary_large_image" >
 <meta name="twitter:creator" content="@bstellato" >
 <meta name="twitter:image"
@@ -70,27 +70,13 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../interfaces/index.html">Interfaces</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#live-demo">Live Demo</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="live-demo.html">Live Demo</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#live-demo">Live Demo</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Live Demo</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#demo">Demo</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="setup-and-solve.html">Setup and solve</a></li>
-<li class="toctree-l3"><a class="reference internal" href="update-vectors.html">Update vectors</a></li>
-<li class="toctree-l3"><a class="reference internal" href="update-matrices.html">Update matrices</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#applications">Applications</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="huber.html">Huber fitting</a></li>
-<li class="toctree-l3"><a class="reference internal" href="lasso.html">Lasso</a></li>
-<li class="toctree-l3"><a class="reference internal" href="least-squares.html">Least-squares</a></li>
-<li class="toctree-l3"><a class="reference internal" href="mpc.html">Model predictive control (MPC)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="portfolio.html">Portfolio optimization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="svm.html">Support vector machine (SVM)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="torch.html">Torch</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#demo">Demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#applications">Applications</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced features</a></li>
@@ -113,9 +99,10 @@ content="https://osqp.org/docs/_static/img/logo.png">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Examples</li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Live Demo</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/osqp/osqp/blob/master/docs/examples/index.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/osqp/osqp/blob/master/docs/examples/live-demo.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -123,48 +110,23 @@ content="https://osqp.org/docs/_static/img/logo.png">
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="examples">
-<span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
-<section id="live-demo">
-<h2>Live Demo<a class="headerlink" href="#live-demo" title="Link to this heading"></a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="live-demo.html">Live Demo</a></li>
-</ul>
-</div>
-</section>
-<section id="demo">
-<h2>Demo<a class="headerlink" href="#demo" title="Link to this heading"></a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="setup-and-solve.html">Setup and solve</a></li>
-<li class="toctree-l1"><a class="reference internal" href="update-vectors.html">Update vectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="update-matrices.html">Update matrices</a></li>
-</ul>
-</div>
-</section>
-<section id="applications">
-<h2>Applications<a class="headerlink" href="#applications" title="Link to this heading"></a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="huber.html">Huber fitting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lasso.html">Lasso</a></li>
-<li class="toctree-l1"><a class="reference internal" href="least-squares.html">Least-squares</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mpc.html">Model predictive control (MPC)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="portfolio.html">Portfolio optimization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="svm.html">Support vector machine (SVM)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="torch.html">Torch</a></li>
-</ul>
-</div>
-</section>
+  <section id="live-demo">
+<span id="id1"></span><h1>Live Demo<a class="headerlink" href="#live-demo" title="Link to this heading"></a></h1>
+<p>OSQP is available on <a class="reference external" href="https://pyodide.org/">Pyodide</a>, a tool that runs Python entirely in your web browser
+using <em>WebAssembly</em>, a technology that lets code run at near-native speed inside the browser. This means you can start
+using OSQP without having to install anything, not even Python!</p>
+<p>Visit <a class="reference external" href="https://osqp.org/wasm">https://osqp.org/wasm</a> to see OSQP in action with a live demo. 🚀</p>
+<p>This URL runs a <a class="reference external" href="https://marimo.io">Marimo</a> notebook, which is very similar to a Jupyter notebook. You can add/edit
+cells, and use OSQP along with <code class="code docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="code docutils literal notranslate"><span class="pre">scipy</span></code>, and many other libraries.</p>
+<p>See <a class="reference internal" href="index.html#examples"><span class="std std-ref">Examples</span></a> on how to start using OSQP.</p>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../codegen/python.html" class="btn btn-neutral float-left" title="Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="live-demo.html" class="btn btn-neutral float-right" title="Live Demo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="setup-and-solve.html" class="btn btn-neutral float-right" title="Setup and solve" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
