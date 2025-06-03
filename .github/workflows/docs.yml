@@ -40,7 +40,7 @@ jobs:
 
       - name: Build marimo notebooks
         run: |
-          cd docs/marimo && yes | marimo export html-wasm basic.py -o ../../site/wasm --mode edit
+          cd docs/notebooks && yes | marimo export html-wasm basic.py -o ../../site/wasm --mode edit
 
       - name: Build docs
         run: |
