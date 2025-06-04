@@ -106,6 +106,7 @@ Numerical benchmarks against other solvers are available `here <https://github.c
    solver/index
    get_started/index
    interfaces/index
+   backends/index
    parsers/index
    codegen/index
    examples/index

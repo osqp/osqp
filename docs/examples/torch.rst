@@ -1,11 +1,8 @@
 Torch
 =============
 
-In this example we show how to use OSQP.torch.nn.
-
-
-Python
-------
+In this example we show how to construct and solve a differentiable QP problem using
+:code:`PyTorch` and the :code:`osqp.nn.torch.OSQP` differentiable QP solver.
 
 .. code:: python
 

@@ -221,7 +221,7 @@ Adjoint derivatives of the QP problem can be computed at the current solution.
 .. doxygenfunction:: osqp_adjoint_derivative_get_vec
 
 Code generation functions
-"""""""""""""""""""""""""
+-------------------------
 
 .. doxygenfunction:: osqp_codegen
 
