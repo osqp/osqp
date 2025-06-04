@@ -17,7 +17,7 @@
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -71,11 +71,6 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l2"><a class="reference internal" href="C.html">C</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Python</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pip">Pip</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#using-alternative-algebra-backends">Using Alternative Algebra Backends</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#checking-which-backends-are-installed">Checking which backends are installed</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#switching-algebra-backends">Switching algebra backends</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="julia.html">Julia</a></li>
@@ -86,6 +81,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../interfaces/index.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../backends/index.html">Algebra Backends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
@@ -146,74 +142,8 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <p class="admonition-title">Note</p>
 <p>These commands install osqp with the <em>mkl</em> or <em>cu12</em> “extras”, which provide the <code class="code docutils literal notranslate"><span class="pre">osqp-mkl</span></code> or <code class="code docutils literal notranslate"><span class="pre">osqp-cuda</span></code> packages respectively.
 These extension modules are directly importable using <code class="code docutils literal notranslate"><span class="pre">import</span> <span class="pre">osqp_mkl</span></code> or <code class="code docutils literal notranslate"><span class="pre">import</span> <span class="pre">osqp_cuda</span></code>, though you will never directly need to do this.</p>
+<p>See <a class="reference internal" href="../backends/python.html#backends-python"><span class="std std-ref">Algebra Backends -&gt; Python</span></a> for more information on how to use these backends.</p>
 </div>
-</section>
-<section id="using-alternative-algebra-backends">
-<h2>Using Alternative Algebra Backends<a class="headerlink" href="#using-alternative-algebra-backends" title="Link to this heading"></a></h2>
-<section id="checking-which-backends-are-installed">
-<h3>Checking which backends are installed<a class="headerlink" href="#checking-which-backends-are-installed" title="Link to this heading"></a></h3>
-<p>Use the <code class="code docutils literal notranslate"><span class="pre">algebras_available</span></code> function to check what algebra backends you have available locally:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import algebras_available; print(algebras_available())&quot;</span>
-<span class="o">[</span><span class="s1">&#39;cuda&#39;</span>,<span class="w"> </span><span class="s1">&#39;mkl&#39;</span>,<span class="w"> </span><span class="s1">&#39;builtin&#39;</span><span class="o">]</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Installing alternative algebras like <em>mkl</em> or <em>cu12</em> <strong>does not automatically</strong> install the runtime MKL or Cuda libraries for your system.
-If you have installed osqp with the <em>mkl</em> or <em>cu12</em> extras but do not see the expected algebra(s) available, you may need to install these libraries separately, and ensure that they are available to the Python interpreter at runtime.</p>
-<p>For example, to use <em>mkl</em>, you might need to run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>mkl-devel<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$LD_LIBRARY_PATH</span>:.venv/lib
-</pre></div>
-</div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>install<span class="w"> </span>conda-forge::mkl
-</pre></div>
-</div>
-<p>To use <em>cuda</em>, you might need to install the <a class="reference external" href="https://developer.nvidia.com/cuda-toolkit-archive">Cuda toolkit</a>
-for your system, or (more easily) for your python environment:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>nvidia-cublas-cu12<span class="w"> </span>nvidia-cusparse-cu12<span class="w"> </span>nvidia-cuda-runtime-cu12
-<span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$LD_LIBRARY_PATH</span>:.venv/lib/nvidia/cusparse/lib
-</pre></div>
-</div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>conda-forge::cudatoolkit
-</pre></div>
-</div>
-<p>The exact path to the libraries will vary depending on your system. If unsure, you can try to directly import the extension modules to see what additional runtime libraries are needed:</p>
-<blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import osqp_mkl&quot;</span>
-Traceback<span class="w"> </span><span class="o">(</span>most<span class="w"> </span>recent<span class="w"> </span>call<span class="w"> </span>last<span class="o">)</span>:
-<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;&lt;string&gt;&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>&lt;module&gt;
-ImportError:<span class="w"> </span>libmkl_rt.so.2:<span class="w"> </span>cannot<span class="w"> </span>open<span class="w"> </span>shared<span class="w"> </span>object<span class="w"> </span>file:<span class="w"> </span>No<span class="w"> </span>such<span class="w"> </span>file<span class="w"> </span>or<span class="w"> </span>directory
-
-$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import osqp_cuda&quot;</span>
-</pre></div>
-</div>
-</div></blockquote>
-<p>If you’re using osqp in a cluster environment, it might be sufficient to just activate a module that provides the necessary libraries. For example, on our clusters, we do a <code class="code docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">intel-mkl/2024.0</span></code> or <code class="code docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">cudatoolkit/12.6</span></code> to get the necessary libraries.</p>
-</div>
-</section>
-<section id="switching-algebra-backends">
-<h3>Switching algebra backends<a class="headerlink" href="#switching-algebra-backends" title="Link to this heading"></a></h3>
-<p>Use the <code class="code docutils literal notranslate"><span class="pre">default_algebra</span></code> function to check what algebra backend is currently set as the default:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import default_algebra; print(default_algebra())&quot;</span>
-cuda
-</pre></div>
-</div>
-<p>By default, <code class="code docutils literal notranslate"><span class="pre">osqp</span></code> uses the <em>best</em> algebra that is available (<code class="code docutils literal notranslate"><span class="pre">cuda</span></code> being preferred over <code class="code docutils literal notranslate"><span class="pre">mkl</span></code>, which is preferred over <code class="code docutils literal notranslate"><span class="pre">builtin</span></code>).
-The default algebra can be overridden by setting the <code class="code docutils literal notranslate"><span class="pre">OSQP_ALGEBRA_BACKEND</span></code> environment variable to one of <code class="code docutils literal notranslate"><span class="pre">builtin</span></code>, <code class="code docutils literal notranslate"><span class="pre">mkl</span></code>, or <code class="code docutils literal notranslate"><span class="pre">cuda</span></code>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nv">OSQP_ALGEBRA_BACKEND</span><span class="o">=</span><span class="nb">builtin</span><span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import default_algebra; print(default_algebra())&quot;</span>
-<span class="nb">builtin</span>
-</pre></div>
-</div>
-<p>You can set this environment variable in your shell, or in your python script, before importing <code class="code docutils literal notranslate"><span class="pre">osqp</span></code>.
-Alternatively, you can specify the <code class="code docutils literal notranslate"><span class="pre">algebra</span></code> argument to <code class="code docutils literal notranslate"><span class="pre">osqp.OSQP</span></code> to use a specific algebra backend for a particular problem.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import OSQP; problem = OSQP(algebra=&#39;mkl&#39;); print(problem.algebra)&quot;</span>
-mkl
-
-$<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from osqp import OSQP; problem = OSQP(algebra=&#39;builtin&#39;); print(problem.algebra)&quot;</span>
-<span class="nb">builtin</span>
-</pre></div>
-</div>
-</section>
 </section>
 </section>
 

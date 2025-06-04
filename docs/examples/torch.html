@@ -17,7 +17,7 @@
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -68,22 +68,14 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../interfaces/index.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../backends/index.html">Algebra Backends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="index.html#live-demo">Live Demo</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#demo">Demo</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html#applications">Applications</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="huber.html">Huber fitting</a></li>
-<li class="toctree-l3"><a class="reference internal" href="lasso.html">Lasso</a></li>
-<li class="toctree-l3"><a class="reference internal" href="least-squares.html">Least-squares</a></li>
-<li class="toctree-l3"><a class="reference internal" href="mpc.html">Model predictive control (MPC)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="portfolio.html">Portfolio optimization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="svm.html">Support vector machine (SVM)</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Torch</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#python">Python</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#applications">Applications</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#torch">Torch</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Torch</a></li>
 </ul>
 </li>
 </ul>
@@ -121,9 +113,8 @@ content="https://osqp.org/docs/_static/img/logo.png">
              
   <section id="torch">
 <h1>Torch<a class="headerlink" href="#torch" title="Link to this heading"></a></h1>
-<p>In this example we show how to use OSQP.torch.nn.</p>
-<section id="python">
-<h2>Python<a class="headerlink" href="#python" title="Link to this heading"></a></h2>
+<p>In this example we show how to construct and solve a differentiable QP problem using
+<code class="code docutils literal notranslate"><span class="pre">PyTorch</span></code> and the <code class="code docutils literal notranslate"><span class="pre">osqp.nn.torch.OSQP</span></code> differentiable QP solver.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy.random</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npr</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -174,7 +165,6 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
 </pre></div>
 </div>
-</section>
 </section>
 
 
