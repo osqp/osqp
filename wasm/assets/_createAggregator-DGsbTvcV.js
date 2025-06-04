@@ -1,0 +1,1 @@
+import{b as i,a as c}from"./_baseEach-B07JCD58.js";import{al as e}from"./index-aRpq2G87.js";function l(r,o,u,t){for(var n=-1,a=r==null?0:r.length;++n<a;){var f=r[n];o(t,f,u(f),r)}return t}function m(r,o,u,t){return i(r,function(n,a,f){o(t,n,u(n),f)}),t}function s(r,o){return function(u,t){var n=e(u)?l:m,a=o?o():{};return n(u,r,c(t),a)}}export{s as c};
