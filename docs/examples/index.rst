@@ -1,5 +1,16 @@
+.. _examples:
+
 Examples
 ========
+
+
+Live Demo
+---------
+
+.. toctree::
+   :maxdepth: 1
+
+   live-demo.rst
 
 
 Demo
