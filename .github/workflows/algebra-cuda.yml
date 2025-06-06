@@ -48,10 +48,6 @@ jobs:
             environment-file: tests/testenv.yml
             auto-activate-base: false
 
-        - name: Setup (Linux)
-          run: |
-            echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
-
         - name: Build
           run: |
             cmake -G "${{ matrix.cmake_generator }}" \
