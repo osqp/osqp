@@ -1,5 +1,6 @@
 # The Operator Splitting QP Solver
 
+
 [![CI](https://github.com/osqp/osqp/actions/workflows/main.yml/badge.svg)](https://github.com/osqp/osqp/actions/workflows/main.yml)
 [![Code coverage](https://coveralls.io/repos/github/osqp/osqp/badge.svg?branch=master)](https://coveralls.io/github/osqp/osqp?branch=master)
 ![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)
