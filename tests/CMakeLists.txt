@@ -66,6 +66,11 @@ add_subdirectory(solve_linsys)
 add_subdirectory(unconstrained)
 add_subdirectory(update_matrices)
 
+# CUDA-specific tests
+if(OSQP_ALGEBRA_CUDA)
+  add_subdirectory(cuda)
+endif()
+
 # ----------------------------------------------
 # Test Data Generation
 # ----------------------------------------------
