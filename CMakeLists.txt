@@ -235,14 +235,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
 # CUDA support
 # ----------------------------------------------
 if(OSQP_ALGEBRA_CUDA)
-  # Our backend uses both CUDA and C++
-  enable_language(CXX)
-  enable_language(CUDA)
-  find_package(CUDA)
-
-  # Locate the individual CUDA libraries and create targets for them
-  find_package(CUDAToolkit)
-
   # sm_75 -> Turing support
   if(OSQP_USE_FLOAT)
     set(CMAKE_CUDA_ARCHITECTURES 52 75)
@@ -252,6 +244,14 @@ if(OSQP_ALGEBRA_CUDA)
     set(CMAKE_CUDA_ARCHITECTURES 60 75)
     # set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_60 --gpu-code=sm_60,sm_75")
   endif()
+
+  # Our backend uses both CUDA and C++
+  enable_language(CXX)
+  enable_language(CUDA)
+  find_package(CUDA)
+
+  # Locate the individual CUDA libraries and create targets for them
+  find_package(CUDAToolkit)
 endif()
 
 
