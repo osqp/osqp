@@ -109,16 +109,11 @@ add_executable(osqp_tester
                ${CMAKE_CURRENT_SOURCE_DIR}/utils/test_utils.cpp)
 target_include_directories(osqp_tester PRIVATE
                            ${OSQP_TESTCASE_DIRS}
+                           ${OSQP_TESTCASE_INCLUDE_DIRS}
                            ${CMAKE_CURRENT_SOURCE_DIR}
                            ${CMAKE_CURRENT_SOURCE_DIR}/utils/
                            ${CMAKE_CURRENT_SOURCE_DIR}/../include/private
                            ${osqplib_includes})
-
-if(OSQP_ALGEBRA_CUDA)
-  target_include_directories(osqp_tester PRIVATE
-                             ${CMAKE_CURRENT_SOURCE_DIR}/../../algebra/cuda/
-                             ${CMAKE_CURRENT_SOURCE_DIR}/../../algebra/cuda/include/)
-endif()
 
 target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 ${osqplib_link_libs})
 
