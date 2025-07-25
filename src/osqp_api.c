@@ -302,6 +302,10 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->sigma         = (OSQPFloat)OSQP_SIGMA;  /* ADMM step */
   settings->alpha         = (OSQPFloat)OSQP_ALPHA;  /* relaxation parameter */
 
+  settings->beta          = (OSQPFloat)OSQP_BETA;       /* restart parameter */
+  settings->lambd         = (OSQPFloat)OSQP_LAMBDA;     /* Reflected Halpern parameter */
+  settings->ini_rest_len  = (OSQPInt)OSQP_INI_REST_LEN; /* Initial Restart length */
+
   settings->cg_max_iter      = OSQP_CG_MAX_ITER;             /* maximum number of CG iterations */
   settings->cg_tol_reduction = OSQP_CG_TOL_REDUCTION;        /* CG tolerance parameter */
   settings->cg_tol_fraction  = OSQP_CG_TOL_FRACTION;         /* CG tolerance parameter */
@@ -421,13 +425,24 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   work->ztilde_view = OSQPVectorf_view(work->xz_tilde,n,m);
   work->x_prev      = OSQPVectorf_calloc(n);
   work->z_prev      = OSQPVectorf_calloc(m);
+  work->v_prev      = OSQPVectorf_calloc(m);
+  work->x_outer     = OSQPVectorf_calloc(n);
+  work->v_outer     = OSQPVectorf_calloc(m);
   work->y           = OSQPVectorf_calloc(m);
+  work->v           = OSQPVectorf_calloc(m);
   if (!(work->x) || !(work->z) || !(work->xz_tilde))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
   if (!(work->xtilde_view) || !(work->ztilde_view))
-      return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->x_prev) || !(work->z_prev) || !(work->y))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if (!(work->x_prev) || !(work->z_prev) || !(work->v_prev))
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if (!(work->x_outer) || !(work->v_outer))
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if (!(work->y) || !(work->v))
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+
+  // Restart variables
+  work->delta_v = OSQPVectorf_calloc(m);
 
   // Primal and dual residuals variables
   work->Ax  = OSQPVectorf_calloc(m);
@@ -561,6 +576,7 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 # endif /* ifdef OSQP_ENABLE_PROFILING */
   solver->info->rho_updates   = 0;                      // Rho updates set to 0
   solver->info->rho_estimate  = solver->settings->rho;  // Best rho estimate
+  solver->info->restart       = 0;                      // Number of restarts set to 0
   solver->info->obj_val       = OSQP_INFTY;
   solver->info->prim_res      = OSQP_INFTY;
   solver->info->dual_res      = OSQP_INFTY;
@@ -636,11 +652,12 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 OSQPInt osqp_solve(OSQPSolver *solver) {
 
   OSQPInt exitflag;
-  OSQPInt iter, max_iter;
+  OSQPInt iter, max_iter, restart_iter;
 
   OSQPInt can_print = 0;             // boolean, whether to print or not
   OSQPInt can_adapt_rho = 0;         // boolean, adapt rho or not
   OSQPInt can_check_termination = 0; // boolean, check termination or not
+  OSQPInt can_restart = 0;           // boolean, restart or not
 
   OSQPWorkspace* work;
   OSQPSettings*  settings;
@@ -697,10 +714,22 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
   max_iter = settings->max_iter;
   for (iter = 1; iter <= max_iter; iter++) {
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_ITER);
+    // c_print("work->v at beggining of loop %f\n", OSQPVectorf_data(work->v)[0]);
+    // c_print("work->x at beggining of loop %f\n", OSQPVectorf_data(work->x)[0]);
 
-    // Update x_prev, z_prev (preallocated, no malloc)
-    swap_vectors(&(work->x), &(work->x_prev));
-    swap_vectors(&(work->z), &(work->z_prev));
+    // Update x_prev, z_prev, v_prev (preallocated, no malloc)
+    // swap_vectors(&(work->x), &(work->x_prev));
+    // swap_vectors(&(work->z), &(work->z_prev));
+    // swap_vectors(&(work->v), &(work->v_prev));
+    OSQPVectorf_copy(work->x_prev, work->x);
+    OSQPVectorf_copy(work->z_prev, work->z);
+    OSQPVectorf_copy(work->v_prev, work->v);
+
+    // c_print("work->v at beggining of loop %f\n", OSQPVectorf_data(work->v)[0]);
+    // c_print("work->x at beggining of loop %f\n", OSQPVectorf_data(work->x)[0]);
+
+    // // Update norm_prev
+    // work->norm_prev = work->norm_cur
 
     /* ADMM STEPS */
     /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
@@ -722,6 +751,112 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     update_y(solver);
 
     /* End of ADMM Steps */
+
+#ifdef OSQP_REFLECTED_HALPERN
+    /* Reflected Halpern Step*/
+    // Pure Reflected Halpern prior to first restart
+    if (iter < settings->ini_rest_len) {
+      // compute_obj_val_dual_gap(solver, work->x, work->y,
+      //                        &(solver->info->obj_val),
+      //                        &(solver->info->dual_obj_val),
+      //                        &(solver->info->duality_gap));
+      // c_print("Testing at iter %d obj %f\n", iter, solver->info->obj_val);
+      // c_print("last_rest_iter %d\n", work->last_rest_iter);
+      // c_print("iter - last_rest_iter %d", iter - work->last_rest_iter);
+      update_reflected_halpern(solver, iter - work->last_rest_iter);
+      // if (iter == 4)
+      //   break;
+      // break;
+      // compute_obj_val_dual_gap(solver, work->x, work->y,
+      //                        &(solver->info->obj_val),
+      //                        &(solver->info->dual_obj_val),
+      //                        &(solver->info->duality_gap));
+      // c_print("Testing at iter %d value of %f\n", iter, solver->info->obj_val);
+    }
+    // First restart
+    else if (iter == settings->ini_rest_len) {
+      c_print("\nFirst Restart\n");
+      can_adapt_rho = 1;
+
+      if (can_adapt_rho) {
+        c_print("\nNew Restart\n");
+        c_print("iter %d, last_rest_iter %d \n", iter, work->last_rest_iter);
+
+        // Add rho update here
+        osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
+        c_print("Rho Update at restart iter = %d \n", iter);
+        if (adapt_rho(solver)) {
+            c_eprint("Failed rho update");
+            exitflag = 1;
+            goto exit;
+        }
+
+        // Update x_outer, v_outer
+        OSQPVectorf_copy(work->x_outer, work->x);
+        OSQPVectorf_copy(work->v_outer, work->v);
+
+        // Update last_rest_iter
+        work->last_rest_iter = iter;
+      }
+    }
+#ifdef OSQP_ADAPTIVE_RHO_UPDATE_NORM
+
+    else {
+      if (iter - work->last_rest_iter == 1) {
+        // Update work->norm_cur
+        fixed_point_norm(solver);
+
+        // Update work->norm_outer
+        work->norm_outer = work->norm_cur;
+        c_print("\nUpdating Outer Norm = %f\n", work->norm_outer);
+      }
+      else {
+        // Update work->norm_cur
+        fixed_point_norm(solver);
+
+        // Check if restart condition is satisfied
+        can_adapt_rho = should_restart(solver);
+        // c_print("Comparing norms. (norm_cur = %f), (norm_outer = %f)\n", work->norm_cur, work->norm_outer);
+
+        if (can_adapt_rho) {
+          c_print("\nNew Restart\n");
+          c_print("iter %d, last_rest_iter %d \n", iter, work->last_rest_iter);
+
+          // Add rho update here
+          osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
+          c_print("Rho Update at restart iter = %d \n", iter);
+          if (adapt_rho(solver)) {
+              c_eprint("Failed rho update");
+              exitflag = 1;
+              goto exit;
+          }
+
+          // Update x_outer, v_outer
+          OSQPVectorf_copy(work->x_outer, work->x);
+          OSQPVectorf_copy(work->v_outer, work->v);
+
+          // Update last_rest_iter
+          work->last_rest_iter = iter;
+        }
+        else {
+          // c_print("Performing a Reflected Halpern step as no restarts are triggered\n");
+          update_reflected_halpern(solver, iter - work->last_rest_iter);
+        }
+      }
+    }
+    
+#else  // Fallback when the macro is not defined
+
+    else {
+      update_reflected_halpern(solver, iter - work->last_rest_iter);
+    }
+
+#endif /* ifdef OSQP_ADAPTIVE_RHO_UPDATE_NORM */
+
+    /* End of Reflected Halpern Step */
+
+#endif /* ifdef OSQP_REFLECTED_HALPERN */
+
     osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_UPDATE);
     osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_ITER);
 
@@ -866,7 +1001,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
     work->rho_updated = 0;
 #if OSQP_EMBEDDED_MODE != 1
-    // Further processing to determine if the KKT error has decresed
+    // Further processing to determine if the KKT error has decreased
     // This requires values computed in update_info, so must be done here.
     if(can_adapt_rho && (settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR)) {
       if(solver->info->rel_kkt_error <= ( settings->adaptive_rho_fraction * work->last_rel_kkt) ) {
@@ -880,6 +1015,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     // Actually update rho if requested
     if(can_adapt_rho) {
       osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
+      c_print("\nRho Update at iter = %d \n", iter);
 
       if (adapt_rho(solver)) {
         c_eprint("Failed rho update");
@@ -1298,6 +1434,7 @@ void osqp_cold_start(OSQPSolver *solver) {
   OSQPVectorf_set_scalar(work->x, 0.);
   OSQPVectorf_set_scalar(work->z, 0.);
   OSQPVectorf_set_scalar(work->y, 0.);
+  // OSQPVectorf_set_scalar(work->v, 0.);
 
   /* Cold start the linear system solver */
   work->linsys_solver->warm_start(work->linsys_solver, work->x);
@@ -1499,6 +1636,8 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   // rho_is_vec ignored
   // sigma      ignored
   settings->alpha = new_settings->alpha;
+
+  settings->beta = new_settings->beta;
 
   settings->cg_max_iter      = new_settings->cg_max_iter;
   settings->cg_tol_reduction = new_settings->cg_tol_reduction;

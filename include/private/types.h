@@ -131,9 +131,22 @@ struct OSQPWorkspace_ {
   OSQPVectorf* xz_tilde;    ///< Iterate xz_tilde
   OSQPVectorf* xtilde_view; ///< xtilde view into xz_tilde
   OSQPVectorf* ztilde_view; ///< ztilde view into xz_tilde
+  OSQPVectorf* v;           ///< Iterate v
 
   OSQPVectorf* x_prev;   ///< Previous x, used also as temp vector in primal info computation
   OSQPVectorf* z_prev;   ///< Previous z, used also as temp vector in dual info computation
+  OSQPVectorf* v_prev;   ///< Previous v
+
+  OSQPVectorf* x_outer;  ///< Previous outer loop x
+  OSQPVectorf* v_outer;  ///< Previous outer loop v
+
+  OSQPFloat norm_cur;      ///< ||s - T(s)|| evaluated at current iteration
+  OSQPFloat norm_prev;     ///< ||s - T(s)|| evaluated at previous iteration
+  OSQPFloat norm_outer;    ///< ||s - T(s)|| evaluated at previous restart iteration
+
+  OSQPVectorf* delta_v;  ///< difference between consecutive v iterates
+
+  OSQPInt last_rest_iter;   ///< Iteration at whihc the last restart was triggered
 
   /**
    * @name Primal and dual residuals workspace variables

@@ -68,6 +68,11 @@ typedef struct OSQP_ATTR_PACK {
   OSQPFloat sigma;                  ///< ADMM penalty parameter
   OSQPFloat alpha;                  ///< ADMM relaxation parameter
 
+  // Restart parameters
+  OSQPFloat beta;                   ///< ADMM restart convergence rate (0,1]
+  OSQPFloat lambd;                  ///< Reflected Halpern smoothing rate [0,1]
+  OSQPInt ini_rest_len;             ///< Iteration of first restart
+
   // CG settings
   OSQPInt           cg_max_iter;      ///< maximum number of CG iterations per solve
   OSQPInt           cg_tol_reduction; ///< number of consecutive zero CG iterations before the tolerance gets halved
@@ -145,6 +150,7 @@ typedef struct {
   OSQPInt   iter;         ///< Number of iterations taken
   OSQPInt   rho_updates;  ///< Number of rho updates performned
   OSQPFloat rho_estimate; ///< Best rho estimate so far from residuals
+  OSQPInt   restart;      ///< Number of restarts performed
 
   // timing information
   OSQPFloat setup_time;  ///< Setup phase time (seconds)

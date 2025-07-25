@@ -31,6 +31,8 @@ int main(void) {
   if (settings) {
     settings->polishing = 1;
 
+    settings->alpha = 1;
+
     //settings->linsys_solver = OSQP_DIRECT_SOLVER;
     //settings->linsys_solver = OSQP_INDIRECT_SOLVER;
   }

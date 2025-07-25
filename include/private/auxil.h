@@ -87,6 +87,25 @@ void update_y(OSQPSolver* solver);
 
 
 /**
+ * Perform a Reflected Halpern step
+ * Updates x, z, y
+ */
+void update_reflected_halpern(OSQPSolver* solver, OSQPInt k);
+
+/**
+ * Computes ||s - T(s)||
+ * Stores value in work-norm_cur
+ */
+void fixed_point_norm(OSQPSolver* solver);
+
+/**
+ * Determines wether we have had a contraction and should now restart
+ * Returns 1 if restart, 0 otherwise
+ */
+OSQPInt should_restart(OSQPSolver* solver);
+
+
+/**
  * Compute objective functions and duality gap from data at (x,y)
  * @param  solver       Solver
  * @param  x            Primal values x

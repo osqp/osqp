@@ -325,6 +325,10 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->sigma      = settings->sigma;
   new->alpha      = settings->alpha;
 
+  new->beta         = settings->beta;
+  new->lambd        = settings->lambd;
+  new->ini_rest_len = settings->ini_rest_len;
+
   new->cg_max_iter      = settings->cg_max_iter;
   new->cg_tol_reduction = settings->cg_tol_reduction;
   new->cg_tol_fraction  = settings->cg_tol_fraction;

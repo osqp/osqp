@@ -190,7 +190,7 @@ void update_z(OSQPSolver* solver) {
 
   // update z
   if (settings->rho_is_vec) {
-    OSQPVectorf_ew_prod(work->z, work->rho_inv_vec,work->y);
+    OSQPVectorf_ew_prod(work->z, work->rho_inv_vec, work->y);
     OSQPVectorf_add_scaled3(work->z,
                             1., work->z,
                             settings->alpha, work->ztilde_view,
@@ -202,6 +202,9 @@ void update_z(OSQPSolver* solver) {
                             (1.0 - settings->alpha), work->z_prev,
                             work->rho_inv, work->y);
   }
+
+  // Update v
+  OSQPVectorf_copy(work->v, work->z);
 
   // project z onto C = [l,u]
   OSQPVectorf_ew_bound_vec(work->z, work->z, work->data->l, work->data->u);
@@ -225,6 +228,93 @@ void update_y(OSQPSolver* solver) {
   }
 
   OSQPVectorf_plus(work->y, work->y, work->delta_y);
+
+}
+
+void update_reflected_halpern(OSQPSolver* solver, OSQPInt k) {
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+
+  OSQPFloat scalling = (k + 1.) / (k + 2.);
+
+  // c_print("v_prev norm %f\n", OSQPVectorf_norm_2(work->v_prev));
+  // c_print("x_prev norm %f\n", OSQPVectorf_norm_2(work->x_prev));
+  // c_print("First element of work->v_prev: %f\n", OSQPVectorf_data(work->v_prev)[0]);
+  // c_print("First element of work->x_prev: %f\n", OSQPVectorf_data(work->x_prev)[0]);
+  // c_print("v_outer norm %f\n", OSQPVectorf_norm_2(work->v_outer));
+  // c_print("x_outer norm %f\n", OSQPVectorf_norm_2(work->x_outer));
+  // c_print("First element of work->v_outer: %f\n", OSQPVectorf_data(work->v_outer)[0]);
+  // c_print("First element of work->x_outer: %f\n", OSQPVectorf_data(work->x_outer)[0]);
+  // c_print("First element of work->rho_vec: %f\n", OSQPVectorf_data(work->rho_vec)[0]);
+  // c_print("lambd %f\n", settings->lambd);
+  // c_print("alpha %f\n", settings->alpha);
+  // c_print("scalling %f\n", scalling);
+  // c_print("k %d\n", k);
+
+  // c_print("v norm before %f\n", OSQPVectorf_norm_2(work->v));
+  // c_print("x norm before %f\n", OSQPVectorf_norm_2(work->x));
+  // c_print("First element of work->v before: %f\n", OSQPVectorf_data(work->v)[0]);
+  // c_print("First element of work->x before: %f\n", OSQPVectorf_data(work->x)[0]);
+  OSQPVectorf_add_scaled(work->v, 1. + settings->lambd, work->v, -settings->lambd, work->v_prev);
+  OSQPVectorf_add_scaled(work->x, 1. + settings->lambd, work->x, -settings->lambd, work->x_prev);
+
+  OSQPVectorf_mult_scalar(work->v, scalling);
+  OSQPVectorf_mult_scalar(work->x, scalling);
+
+  OSQPVectorf_add_scaled(work->v, 1., work->v, (1. - scalling), work->v_outer);
+  OSQPVectorf_add_scaled(work->x, 1., work->x, (1. - scalling), work->x_outer);
+  // c_print("v norm after %f\n", OSQPVectorf_norm_2(work->v));
+  // c_print("x norm after %f\n", OSQPVectorf_norm_2(work->x));
+  // c_print("First element of work->v after: %f\n", OSQPVectorf_data(work->v)[0]);
+  // c_print("First element of work->x after: %f\n", OSQPVectorf_data(work->x)[0]);
+
+  // Update z
+  // c_print("z norm before %f\n", OSQPVectorf_norm_2(work->z));
+  // c_print("First element of work->data->l: %f\n", OSQPVectorf_data(work->data->l)[0]);
+  // c_print("First element of work->data->u: %f\n", OSQPVectorf_data(work->data->u)[0]);
+  // c_print("First element of work->z before: %f\n", OSQPVectorf_data(work->z)[0]);
+  OSQPVectorf_ew_bound_vec(work->z, work->v, work->data->l, work->data->u);
+  // c_print("z norm after %f\n", OSQPVectorf_norm_2(work->z));
+  // c_print("First element of work->z after: %f\n", OSQPVectorf_data(work->z)[0]);
+
+  // Update y
+  // c_print("y norm before %f\n", OSQPVectorf_norm_2(work->y));
+  // c_print("First element of work->y before: %f\n", OSQPVectorf_data(work->y)[0]);
+  OSQPVectorf_minus(work->y, work->v, work->z);
+  OSQPVectorf_ew_prod(work->y, work->y, work->rho_vec);
+  // c_print("y norm after %f\n", OSQPVectorf_norm_2(work->y));
+  // c_print("First element of work->y after: %f\n", OSQPVectorf_data(work->y)[0]);
+}
+
+void fixed_point_norm(OSQPSolver* solver) {
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+
+  // Compute x - T(x)
+  //  (can technically use work->x_prev instead of norm_delta_x as we will not use x_prev's value again)
+  OSQPVectorf_minus(work->delta_x, work->x, work->x_prev);
+
+  // Compute v - T(v)
+  //  (can technically use work->v_prev instead of norm_delta_v as we will not use v_prev's value again)
+  OSQPVectorf_minus(work->delta_v, work->v, work->v_prev);
+
+  OSQPFloat x_norm2 = OSQPVectorf_norm_2(work->delta_x);
+  OSQPFloat v_norm2 = OSQPVectorf_norm_2(work->delta_v);
+
+  work->norm_cur = c_sqrt(
+    settings->sigma * x_norm2 * x_norm2 + settings->rho * v_norm2 * v_norm2
+    // settings->sigma * x_norm2 + settings->rho * v_norm2
+  );
+}
+
+OSQPInt should_restart(OSQPSolver* solver) {
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+
+  if (work->norm_cur <= settings->beta * work->norm_outer)
+    return 1;
+  else 
+    return 0;
 
 }
 
@@ -1108,6 +1198,23 @@ OSQPInt validate_settings(const OSQPSettings* settings,
   if (settings->alpha <= 0.0 ||
       settings->alpha >= 2.0) {
     c_eprint("alpha must be strictly between 0 and 2");
+    return 1;
+  }
+
+  if (settings->beta <= 0.0 ||
+      settings->beta > 1.0) {
+    c_eprint("beta must be in (0,1]");
+    return 1;
+  }
+
+  if (settings->lambd < 0.0 ||
+      settings->lambd > 1.0) {
+    c_eprint("lambda must be between 0 and 1 inclusive");
+    return 1;
+  }
+
+  if (settings->ini_rest_len <= 0.0) {
+    c_eprint("Initial restart period must be larger than 0");
     return 1;
   }
 
