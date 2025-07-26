@@ -351,6 +351,7 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   // Validate data
   if (validate_data(P,q,A,l,u,m,n)) return osqp_error(OSQP_DATA_VALIDATION_ERROR);
 
+  c_print("settings->adaptive_rho %d\n", settings->adaptive_rho);
   // Validate settings
   if (validate_settings(settings, 1)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
 
@@ -587,6 +588,7 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   /* Setup adaptive rho things */
   work->rho_updated = 0;
 
+  // If we do Reflected Halpern then we will always skip this switch block
   switch(solver->settings->adaptive_rho)
   {
   case OSQP_ADAPTIVE_RHO_UPDATE_DISABLED:
@@ -775,29 +777,28 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     }
     // First restart
     else if (iter == settings->ini_rest_len) {
-      c_print("\nFirst Restart\n");
       can_adapt_rho = 1;
 
-      if (can_adapt_rho) {
-        c_print("\nNew Restart\n");
-        c_print("iter %d, last_rest_iter %d \n", iter, work->last_rest_iter);
+      // update_info(solver, iter, 0);
+      // c_print("\nFirst Restart\n");
+      // c_print("iter %d, last_rest_iter %d \n", iter, work->last_rest_iter);
 
-        // Add rho update here
-        osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
-        c_print("Rho Update at restart iter = %d \n", iter);
-        if (adapt_rho(solver)) {
-            c_eprint("Failed rho update");
-            exitflag = 1;
-            goto exit;
-        }
+      // Add rho update here
+      // osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
+      // c_print("Rho Update at restart iter = %d \n", iter);
+      // if (adapt_rho(solver)) {
+      //     c_eprint("Failed rho update");
+      //     exitflag = 1;
+      //     goto exit;
+      // }
+      // c_print("can_adapt_rho after adapting rho (first time) %d\n", can_adapt_rho);
 
-        // Update x_outer, v_outer
-        OSQPVectorf_copy(work->x_outer, work->x);
-        OSQPVectorf_copy(work->v_outer, work->v);
+      // Update x_outer, v_outer
+      OSQPVectorf_copy(work->x_outer, work->x);
+      OSQPVectorf_copy(work->v_outer, work->v);
 
-        // Update last_rest_iter
-        work->last_rest_iter = iter;
-      }
+      // Update last_rest_iter
+      work->last_rest_iter = iter;
     }
 #ifdef OSQP_ADAPTIVE_RHO_UPDATE_NORM
 
@@ -806,9 +807,11 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
         // Update work->norm_cur
         fixed_point_norm(solver);
 
+        can_adapt_rho = 0;
+
         // Update work->norm_outer
         work->norm_outer = work->norm_cur;
-        c_print("\nUpdating Outer Norm = %f\n", work->norm_outer);
+        // c_print("\nUpdating Outer Norm = %f\n", work->norm_outer);
       }
       else {
         // Update work->norm_cur
@@ -819,17 +822,18 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
         // c_print("Comparing norms. (norm_cur = %f), (norm_outer = %f)\n", work->norm_cur, work->norm_outer);
 
         if (can_adapt_rho) {
-          c_print("\nNew Restart\n");
-          c_print("iter %d, last_rest_iter %d \n", iter, work->last_rest_iter);
+          // c_print("\nNew Restart\n");
+          // c_print("iter %d, last_rest_iter %d \n", iter, work->last_rest_iter);
 
           // Add rho update here
-          osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
-          c_print("Rho Update at restart iter = %d \n", iter);
-          if (adapt_rho(solver)) {
-              c_eprint("Failed rho update");
-              exitflag = 1;
-              goto exit;
-          }
+          // osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
+          // c_print("Rho Update at restart iter = %d \n", iter);
+          // if (adapt_rho(solver)) {
+          //     c_eprint("Failed rho update");
+          //     exitflag = 1;
+          //     goto exit;
+          // }
+          // c_print("can_adapt_rho after adapting rho (inside loop) %d\n", can_adapt_rho);
 
           // Update x_outer, v_outer
           OSQPVectorf_copy(work->x_outer, work->x);
@@ -1015,7 +1019,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     // Actually update rho if requested
     if(can_adapt_rho) {
       osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
-      c_print("\nRho Update at iter = %d \n", iter);
+      // c_print("\nRho Update at iter = %d \n", iter);
 
       if (adapt_rho(solver)) {
         c_eprint("Failed rho update");
