@@ -351,7 +351,6 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   // Validate data
   if (validate_data(P,q,A,l,u,m,n)) return osqp_error(OSQP_DATA_VALIDATION_ERROR);
 
-  c_print("settings->adaptive_rho %d\n", settings->adaptive_rho);
   // Validate settings
   if (validate_settings(settings, 1)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
 
@@ -626,12 +625,12 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 # ifdef OSQP_ENABLE_DERIVATIVES
   work->derivative_data = c_calloc(1, sizeof(OSQPDerivativeData));
   if (!(work->derivative_data)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->derivative_data->y_u = OSQPVectorf_malloc(m);
   work->derivative_data->y_l = OSQPVectorf_malloc(m);
+  work->derivative_data->y_u = OSQPVectorf_malloc(m);
   work->derivative_data->ryl = OSQPVectorf_malloc(m);
   work->derivative_data->ryu = OSQPVectorf_malloc(m);
   work->derivative_data->rhs = OSQPVectorf_malloc(2 * (n + 2*m));
-  if (!(work->derivative_data->y_u) || !(work->derivative_data->y_l) ||
+  if (!(work->derivative_data->y_l) || !(work->derivative_data->y_u) ||
     !(work->derivative_data->ryl) || !(work->derivative_data->ryu))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 # endif /* ifdef OSQP_ENABLE_DERIVATIVES */
@@ -663,6 +662,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
   OSQPWorkspace* work;
   OSQPSettings*  settings;
+  OSQPInfo* info;
 
 #ifdef OSQP_ENABLE_PROFILING
   OSQPFloat temp_run_time;       // Temporary variable to store current run time
@@ -673,6 +673,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
   work = solver->work;
   settings = solver->settings;
+  info = solver->info;
 
 #ifdef OSQP_ENABLE_PROFILING
   if (work->clear_update_time == 1)
@@ -683,6 +684,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   // Initialize variables
   exitflag              = 0;
   can_check_termination = 0;
+  info->restart         = 0;
 #ifdef OSQP_ENABLE_PRINTING
   can_print = settings->verbose;
 #endif /* ifdef OSQP_ENABLE_PRINTING */
@@ -789,6 +791,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     else if (iter == settings->ini_rest_len) {
       can_adapt_rho = 1;
       did_restart = 1;
+      info->restart += 1;
 
       // update_info(solver, iter, 0);
       // c_print("\nFirst Restart\n");
@@ -834,6 +837,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
         if (can_adapt_rho) {
           did_restart = 1;
+          info->restart += 1;
           // c_print("\nNew Restart\n");
           // c_print("iter %d, last_rest_iter %d \n", iter, work->last_rest_iter);
 
@@ -1277,17 +1281,17 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
     OSQPVectori_free(work->constr_type);
 #endif
     OSQPVectorf_free(work->x);
-    OSQPVectorf_free(work->y);
     OSQPVectorf_free(work->z);
     OSQPVectorf_free(work->xz_tilde);
     OSQPVectorf_view_free(work->xtilde_view);
     OSQPVectorf_view_free(work->ztilde_view);
-    OSQPVectorf_free(work->v);
     OSQPVectorf_free(work->x_prev);
     OSQPVectorf_free(work->z_prev);
     OSQPVectorf_free(work->v_prev);
     OSQPVectorf_free(work->x_outer);
     OSQPVectorf_free(work->v_outer);
+    OSQPVectorf_free(work->y);
+    OSQPVectorf_free(work->v);
     OSQPVectorf_free(work->delta_v);
     OSQPVectorf_free(work->Ax);
     OSQPVectorf_free(work->Px);
