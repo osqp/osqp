@@ -1014,7 +1014,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     }
 
     // Saving prim_res, dual_res, duality_gap, and did_restart to csv
-    fprintf(fp, "%d,%f,%f,%f,%d\n", 
+    fprintf(fp, "%d,%.3e,%.3e,%.3e,%d\n", 
       iter, solver->info->prim_res, solver->info->dual_res, solver->info->duality_gap, did_restart);
 
     // Check algorithm termination if desired
