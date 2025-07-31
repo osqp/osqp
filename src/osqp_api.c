@@ -715,7 +715,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
   // Main ADMM algorithm
 
-  FILE *fp = fopen("../plot/residuals.csv", "w");
+  FILE *fp = fopen("../../osqp/plot/residuals.csv", "w");
   if (fp == NULL) {
     perror("Unable to open file");
     exitflag = 1;

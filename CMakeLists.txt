@@ -477,6 +477,10 @@ if(OSQP_BUILD_DEMO_EXE)
                               ${OSQP_EXAMPLES_DIR}/problems )
   target_link_libraries(osqp_demo osqpstatic ${osqplib_link_libs})
 
+  # add_executable(maros_meszaros
+  #                ${OSQP_EXAMPLES_DIR}/maros_meszaros.c )
+  # target_link_libraries(maros_meszaros osqpstatic ${osqplib_link_libs})
+
   if(OSQP_CODEGEN)
     add_executable(osqp_codegen_demo ${OSQP_EXAMPLES_DIR}/osqp_codegen_demo.c)
     target_link_libraries(osqp_codegen_demo osqpstatic)
