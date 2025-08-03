@@ -126,8 +126,8 @@ extern const char * OSQP_ERROR_MESSAGE[];
 /*******************************
  * Halpern methods *
  *******************************/
-#define OSQP_HALPERN                (1)
-#define OSQP_REFLECTED_HALPERN      (2)
+// #define OSQP_HALPERN                (1)
+// #define OSQP_REFLECTED_HALPERN      (2)
 
 /*******************************
  * Adaptive rho update methods *
@@ -141,8 +141,11 @@ extern const char * OSQP_ERROR_MESSAGE[];
 // Sentinel value, not for user use
 #define _OSQP_ADAPTIVE_RHO_UPDATE_LAST_VALUE (5)
 
-// #define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS)
-#define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_NORM)
+// #define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_DISABLED)
+#define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS)
+// #define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_TIME)
+// #define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR)
+// #define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_NORM)
 
 
 #define OSQP_ADAPTIVE_RHO_INTERVAL  (50)       ///< Default interval for iteration-based rho update
@@ -168,13 +171,17 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_ADAPTIVE_RHO_FIXED (100)
 
 // termination parameters
-# define OSQP_MAX_ITER              (4000)
-# define OSQP_EPS_ABS               (1E-3)
-# define OSQP_EPS_REL               (1E-3)
+// # define OSQP_MAX_ITER              (4000)
+# define OSQP_MAX_ITER              (25000)
+// # define OSQP_EPS_ABS               (1E-3)
+# define OSQP_EPS_ABS               (1E-6)
+// # define OSQP_EPS_REL               (1E-3)
+# define OSQP_EPS_REL               (0)
 # define OSQP_EPS_PRIM_INF          (1E-4)
 # define OSQP_EPS_DUAL_INF          (1E-4)
 # define OSQP_SCALED_TERMINATION    (0)
-# define OSQP_TIME_LIMIT            (1e10)     ///< Disable time limit by default
+// # define OSQP_TIME_LIMIT            (1e10)     ///< Disable time limit by default
+# define OSQP_TIME_LIMIT            (1e30)
 
 // Disable the duality gap termination criteria on float builds by default for now, because
 // floats can't always give the necessary precision in the current solver architecture.

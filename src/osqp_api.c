@@ -728,22 +728,14 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
   for (iter = 1; iter <= max_iter; iter++) {
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_ITER);
     did_restart = 0;
-    // c_print("work->v at beggining of loop %f\n", OSQPVectorf_data(work->v)[0]);
-    // c_print("work->x at beggining of loop %f\n", OSQPVectorf_data(work->x)[0]);
 
     // Update x_prev, z_prev, v_prev (preallocated, no malloc)
-    // swap_vectors(&(work->x), &(work->x_prev));
-    // swap_vectors(&(work->z), &(work->z_prev));
-    // swap_vectors(&(work->v), &(work->v_prev));
-    OSQPVectorf_copy(work->x_prev, work->x);
-    OSQPVectorf_copy(work->z_prev, work->z);
-    OSQPVectorf_copy(work->v_prev, work->v);
-
-    // c_print("work->v at beggining of loop %f\n", OSQPVectorf_data(work->v)[0]);
-    // c_print("work->x at beggining of loop %f\n", OSQPVectorf_data(work->x)[0]);
-
-    // // Update norm_prev
-    // work->norm_prev = work->norm_cur
+    swap_vectors(&(work->x), &(work->x_prev));
+    swap_vectors(&(work->z), &(work->z_prev));
+    swap_vectors(&(work->v), &(work->v_prev));
+    // OSQPVectorf_copy(work->x_prev, work->x);
+    // OSQPVectorf_copy(work->z_prev, work->z);
+    // OSQPVectorf_copy(work->v_prev, work->v);
 
     /* ADMM STEPS */
     /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
@@ -770,42 +762,13 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     /* Reflected Halpern Step*/
     // Pure Reflected Halpern prior to first restart
     if (iter < settings->ini_rest_len) {
-      // compute_obj_val_dual_gap(solver, work->x, work->y,
-      //                        &(solver->info->obj_val),
-      //                        &(solver->info->dual_obj_val),
-      //                        &(solver->info->duality_gap));
-      // c_print("Testing at iter %d obj %f\n", iter, solver->info->obj_val);
-      // c_print("last_rest_iter %d\n", work->last_rest_iter);
-      // c_print("iter - last_rest_iter %d", iter - work->last_rest_iter);
       update_reflected_halpern(solver, iter - work->last_rest_iter);
-      // if (iter == 4)
-      //   break;
-      // break;
-      // compute_obj_val_dual_gap(solver, work->x, work->y,
-      //                        &(solver->info->obj_val),
-      //                        &(solver->info->dual_obj_val),
-      //                        &(solver->info->duality_gap));
-      // c_print("Testing at iter %d value of %f\n", iter, solver->info->obj_val);
     }
     // First restart
     else if (iter == settings->ini_rest_len) {
       can_adapt_rho = 1;
       did_restart = 1;
       info->restart += 1;
-
-      // update_info(solver, iter, 0);
-      // c_print("\nFirst Restart\n");
-      // c_print("iter %d, last_rest_iter %d \n", iter, work->last_rest_iter);
-
-      // Add rho update here
-      // osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
-      // c_print("Rho Update at restart iter = %d \n", iter);
-      // if (adapt_rho(solver)) {
-      //     c_eprint("Failed rho update");
-      //     exitflag = 1;
-      //     goto exit;
-      // }
-      // c_print("can_adapt_rho after adapting rho (first time) %d\n", can_adapt_rho);
 
       // Update x_outer, v_outer
       OSQPVectorf_copy(work->x_outer, work->x);
@@ -825,7 +788,6 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
         // Update work->norm_outer
         work->norm_outer = work->norm_cur;
-        // c_print("\nUpdating Outer Norm = %f\n", work->norm_outer);
       }
       else {
         // Update work->norm_cur
@@ -933,6 +895,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     case OSQP_ADAPTIVE_RHO_UPDATE_DISABLED:
       /* Don't do anything, it is disabled*/
       can_adapt_rho = 0;
+      did_restart = 0;
       break;
 
     case OSQP_ADAPTIVE_RHO_UPDATE_TIME:
@@ -970,6 +933,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
         {
           /* Break out of the switch statement because we don't have an iteration value yet */
           can_adapt_rho = 0;
+          did_restart = 0;
           break;
         }
       }
@@ -991,8 +955,11 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       /* Update rho when the appropriate number of iterations have passed */
       if(settings->adaptive_rho_interval && (iter % settings->adaptive_rho_interval == 0)) {
         can_adapt_rho = 1;
+        did_restart   = 1;
+        info->restart += 1;
       } else {
         can_adapt_rho = 0;
+        did_restart   = 0;
       }
       break;
     }
@@ -1013,13 +980,16 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       update_info(solver, iter, 0);
     }
 
-    // Saving prim_res, dual_res, duality_gap, and did_restart to csv
-    fprintf(fp, "%d,%.3e,%.3e,%.3e,%d\n", 
-      iter, solver->info->prim_res, solver->info->dual_res, solver->info->duality_gap, did_restart);
+    // // Saving prim_res, dual_res, duality_gap, and did_restart to csv
+    // fprintf(fp, "%d,%.3e,%.3e,%.3e,%d\n", 
+    //   iter, solver->info->prim_res, solver->info->dual_res, solver->info->duality_gap, did_restart);
 
     // Check algorithm termination if desired
     if (can_check_termination) {
       if (check_termination(solver, 0)) {
+        // Saving prim_res, dual_res, duality_gap, and did_restart to csv
+        fprintf(fp, "%d,%.3e,%.3e,%.3e,%d\n", 
+          iter, solver->info->prim_res, solver->info->dual_res, solver->info->duality_gap, did_restart);
         // Terminate algorithm
         break;
       }
@@ -1032,11 +1002,18 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     if(can_adapt_rho && (settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR)) {
       if(solver->info->rel_kkt_error <= ( settings->adaptive_rho_fraction * work->last_rel_kkt) ) {
         can_adapt_rho = 1;
+        did_restart   = 1;
+        info->restart += 1;
       }
       else {
         can_adapt_rho = 0;
+        did_restart   = 0;
       }
     }
+
+    // Saving prim_res, dual_res, duality_gap, and did_restart to csv
+    fprintf(fp, "%d,%.3e,%.3e,%.3e,%d\n", 
+      iter, solver->info->prim_res, solver->info->dual_res, solver->info->duality_gap, did_restart);
 
     // Actually update rho if requested
     if(can_adapt_rho) {
