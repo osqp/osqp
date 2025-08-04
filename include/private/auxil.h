@@ -87,6 +87,12 @@ void update_y(OSQPSolver* solver);
 
 
 /**
+ * Perform a Halpern step
+ * Updates x, z, y
+ */
+void update_halpern(OSQPSolver* solver, OSQPInt k);
+
+/**
  * Perform a Reflected Halpern step
  * Updates x, z, y
  */
@@ -104,6 +110,12 @@ void fixed_point_norm(OSQPSolver* solver);
  */
 OSQPInt should_restart(OSQPSolver* solver);
 
+/**
+ * Determines wether we have had a contraction, necessary decay + no local progress, 
+ * or the iterates are long and should now restart
+ * Returns 1 if restart, 0 otherwise
+ */
+OSQPInt should_restart_adapt(OSQPSolver* solver, OSQPInt k);
 
 /**
  * Compute objective functions and duality gap from data at (x,y)

@@ -71,6 +71,8 @@ typedef struct OSQP_ATTR_PACK {
   // Restart parameters
   OSQPFloat beta;                   ///< ADMM restart convergence rate (0,1]
   OSQPFloat lambd;                  ///< Reflected Halpern smoothing rate [0,1]
+  OSQPFloat restart_necessary;      ///< Adaptive restarts necessary decay rate (0,1)
+  OSQPFloat restart_artificial;     ///< Adaptive restarts artificial decay rate (0,1)
   OSQPInt ini_rest_len;             ///< Iteration of first restart
 
   // CG settings

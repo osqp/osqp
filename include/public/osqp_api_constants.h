@@ -105,6 +105,8 @@ extern const char * OSQP_ERROR_MESSAGE[];
 
 # define OSQP_BETA                  (0.7)
 # define OSQP_LAMBDA                (1.0)
+# define OSQP_NECESSARY             (1.0)
+# define OSQP_ARTIFICIAL            (1.0)
 # define OSQP_INI_REST_LEN          (10)
 
 # define OSQP_RHO_MIN               (1e-06)
@@ -124,12 +126,6 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_CG_TOL_FRACTION       (0.15)
 
 /*******************************
- * Halpern methods *
- *******************************/
-// #define OSQP_HALPERN                (1)
-// #define OSQP_REFLECTED_HALPERN      (2)
-
-/*******************************
  * Adaptive rho update methods *
  *******************************/
 #define OSQP_ADAPTIVE_RHO_UPDATE_DISABLED       (0) ///< Disable rho adaptation
@@ -142,10 +138,10 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #define _OSQP_ADAPTIVE_RHO_UPDATE_LAST_VALUE (5)
 
 // #define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_DISABLED)
-#define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS)
+// #define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS)
 // #define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_TIME)
 // #define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR)
-// #define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_NORM)
+#define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_NORM)
 
 
 #define OSQP_ADAPTIVE_RHO_INTERVAL  (50)       ///< Default interval for iteration-based rho update

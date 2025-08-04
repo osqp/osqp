@@ -302,9 +302,11 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->sigma         = (OSQPFloat)OSQP_SIGMA;  /* ADMM step */
   settings->alpha         = (OSQPFloat)OSQP_ALPHA;  /* relaxation parameter */
 
-  settings->beta          = (OSQPFloat)OSQP_BETA;       /* restart parameter */
-  settings->lambd         = (OSQPFloat)OSQP_LAMBDA;     /* Reflected Halpern parameter */
-  settings->ini_rest_len  = (OSQPInt)OSQP_INI_REST_LEN; /* Initial Restart length */
+  settings->beta                = (OSQPFloat)OSQP_BETA;       /* restart parameter */
+  settings->lambd               = (OSQPFloat)OSQP_LAMBDA;     /* Reflected Halpern parameter */
+  settings->restart_necessary   = (OSQPFloat)OSQP_NECESSARY;  /* Adaptive necessary restarts parameter */
+  settings->restart_artificial  = (OSQPFloat)OSQP_ARTIFICIAL; /* Adaptive artificial restarts parameter */
+  settings->ini_rest_len        = (OSQPInt)OSQP_INI_REST_LEN; /* Initial Restart length */
 
   settings->cg_max_iter      = OSQP_CG_MAX_ITER;             /* maximum number of CG iterations */
   settings->cg_tol_reduction = OSQP_CG_TOL_REDUCTION;        /* CG tolerance parameter */
@@ -659,6 +661,13 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   OSQPInt can_adapt_rho = 0;         // boolean, adapt rho or not
   OSQPInt can_check_termination = 0; // boolean, check termination or not
   OSQPInt did_restart = 0;           // boolean, restart or not
+  OSQPInt restart_scheme = -1;       // (0) No restarts
+                                     // (1) Halpern
+                                     // (2) Reflected Halpern
+                                     // (3) Averaged restarts
+                                     // (4) Reflected Halpern & Adaptive
+  OSQPInt first_digit = -1;          // helps determine restart_scheme
+  OSQPInt adaptive_rest = 0;         // Whether to do adaptive restarts ontop of Reflected Helpern restarts or not
 
   OSQPWorkspace* work;
   OSQPSettings*  settings;
@@ -724,10 +733,74 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
   fprintf(fp, "iteration,prim_res,dual_res,duality_gap,restart\n");
 
+  if (settings->alpha == 1) {
+    // No restarts [alpha: 1]
+    restart_scheme = 0;
+    settings->adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS;
+
+    settings->alpha = 1.6;
+  }
+  else if (settings->alpha > 0 && settings->alpha < 1) {
+    // Reflected Halpern restarts [alpha: (0,1)]
+    // alpha = 0.175 -> lambda = 1.7, beta = 0.5
+    restart_scheme = 2;
+    // first_digit = (int)(settings->alpha * 10) % 10;
+    // settings->lambd = first_digit / 10.;
+    // settings->beta = 10. * (settings->alpha - settings->lambd);
+    // settings->lambd = 1. * first_digit;
+    settings->lambd = ((int)(settings->alpha * 10)) % 10;
+    settings->lambd += (((int)(settings->alpha * 100)) % 10) / 10.;
+    settings->beta = (((int)(settings->alpha * 1000)) % 10) / 10.;
+
+    settings->alpha = 1.0;
+  }
+  else if (settings->alpha > 1 && settings->alpha < 1.2) {
+    // Halpern restarts [alpha: (1,1.2)]
+    // alpha = 1.7 -> beta = 0.7
+    restart_scheme = 1;
+    settings->beta = 10. * (settings->alpha - 1.1);
+
+    settings->alpha = 1.6;
+  }
+  else if (settings->alpha > 1.2 && settings->alpha < 1.3) {
+    // Averaged restarts [alpha: (1.2, 1.3)]
+    // alpha = 1.27 -> beta = 0.7
+    restart_scheme = 3;
+    settings->beta = 10. * (settings->alpha - 1.2);
+
+    settings->alpha = 1.6;
+  }
+  else if (settings->alpha > 1.3 && settings->alpha < 1.4) {
+    // Reflected Halpern restarts & Adaptive restarts
+    // alpha = 1.307892 -> lambda = 0.7, beta = 0.8, restart_necessary = 0.9,
+    //                    restart_artificial = 0.2
+
+    restart_scheme = 2;
+    adaptive_rest = 1;
+    settings->lambd = ((int)(settings->alpha * 100)) % 10;
+    settings->lambd += (((int)(settings->alpha * 1000)) % 10) / 10.;
+    settings->beta = (((int)(settings->alpha * 10000)) % 10) / 10.;
+    settings->restart_necessary = (((int)(settings->alpha * 100000)) % 10) / 10.;
+    settings->restart_artificial = (((int)(settings->alpha * 1000000)) % 10) / 10.;
+
+
+    settings->alpha = 1.0;
+  }
+
+
+  if (restart_scheme == -1) {
+    c_print("Falied in setting restart scheme\n");
+    exitflag = 1;
+  }
+
   max_iter = settings->max_iter;
   for (iter = 1; iter <= max_iter; iter++) {
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_ITER);
     did_restart = 0;
+    if (adaptive_rest == 1) {
+      work->norm_prev = work->norm_cur;
+    }
+
 
     // Update x_prev, z_prev, v_prev (preallocated, no malloc)
     swap_vectors(&(work->x), &(work->x_prev));
@@ -758,86 +831,134 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
     /* End of ADMM Steps */
 
-#ifdef OSQP_REFLECTED_HALPERN
-    /* Reflected Halpern Step*/
-    // Pure Reflected Halpern prior to first restart
-    if (iter < settings->ini_rest_len) {
-      update_reflected_halpern(solver, iter - work->last_rest_iter);
-    }
-    // First restart
-    else if (iter == settings->ini_rest_len) {
-      can_adapt_rho = 1;
-      did_restart = 1;
-      info->restart += 1;
+    /* Restart Schemes */
 
-      // Update x_outer, v_outer
-      OSQPVectorf_copy(work->x_outer, work->x);
-      OSQPVectorf_copy(work->v_outer, work->v);
-
-      // Update last_rest_iter
-      work->last_rest_iter = iter;
-    }
-#ifdef OSQP_ADAPTIVE_RHO_UPDATE_NORM
-
-    else {
-      if (iter - work->last_rest_iter == 1) {
-        // Update work->norm_cur
-        fixed_point_norm(solver);
-
-        can_adapt_rho = 0;
-
-        // Update work->norm_outer
-        work->norm_outer = work->norm_cur;
+    if (restart_scheme == 1) {
+      /* Halpern Step */
+      // Pure Halpern prior to first restart
+      if (iter < settings->ini_rest_len) {
+        update_halpern(solver, iter - work->last_rest_iter);
       }
+
+      // First restart
+      else if (iter == settings->ini_rest_len) {
+        can_adapt_rho = 1;
+        did_restart = 1;
+        info->restart += 1;
+
+        // Update x_outer, v_outer
+        OSQPVectorf_copy(work->x_outer, work->x);
+        OSQPVectorf_copy(work->v_outer, work->v);
+
+        // Update last_rest_iter
+        work->last_rest_iter = iter;
+      }
+
       else {
-        // Update work->norm_cur
-        fixed_point_norm(solver);
+        if (iter - work->last_rest_iter == 1) {
+          // Update work->norm_cur
+          fixed_point_norm(solver);
 
-        // Check if restart condition is satisfied
-        can_adapt_rho = should_restart(solver);
-        // c_print("Comparing norms. (norm_cur = %f), (norm_outer = %f)\n", work->norm_cur, work->norm_outer);
+          can_adapt_rho = 0;
 
-        if (can_adapt_rho) {
-          did_restart = 1;
-          info->restart += 1;
-          // c_print("\nNew Restart\n");
-          // c_print("iter %d, last_rest_iter %d \n", iter, work->last_rest_iter);
-
-          // Add rho update here
-          // osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
-          // c_print("Rho Update at restart iter = %d \n", iter);
-          // if (adapt_rho(solver)) {
-          //     c_eprint("Failed rho update");
-          //     exitflag = 1;
-          //     goto exit;
-          // }
-          // c_print("can_adapt_rho after adapting rho (inside loop) %d\n", can_adapt_rho);
-
-          // Update x_outer, v_outer
-          OSQPVectorf_copy(work->x_outer, work->x);
-          OSQPVectorf_copy(work->v_outer, work->v);
-
-          // Update last_rest_iter
-          work->last_rest_iter = iter;
+          // Update work->norm_outer
+          work->norm_outer = work->norm_cur;
         }
         else {
-          // c_print("Performing a Reflected Halpern step as no restarts are triggered\n");
-          update_reflected_halpern(solver, iter - work->last_rest_iter);
+          // Update work->norm_cur
+          fixed_point_norm(solver);
+
+          // Check if restart condition is satisfied
+          can_adapt_rho = should_restart(solver);
+
+          if (can_adapt_rho) {
+            did_restart = 1;
+            info->restart += 1;
+
+            // Update x_outer, v_outer
+            OSQPVectorf_copy(work->x_outer, work->x);
+            OSQPVectorf_copy(work->v_outer, work->v);
+
+            // Update last_rest_iter
+            work->last_rest_iter = iter;
+          }
+          else {
+            update_halpern(solver, iter - work->last_rest_iter);
+          }
         }
       }
-    }
-    
-#else  // Fallback when the macro is not defined
-
-    else {
-      update_reflected_halpern(solver, iter - work->last_rest_iter);
+      /* End of Halpern Step*/
     }
 
-#endif /* ifdef OSQP_ADAPTIVE_RHO_UPDATE_NORM */
+    else if (restart_scheme == 2) {
+      /* Reflected Halpern Step */
+      // Pure Reflected Halpern prior to first restart
+      if (iter < settings->ini_rest_len) {
+        update_reflected_halpern(solver, iter - work->last_rest_iter);
+      }
 
+      // First restart
+      else if (iter == settings->ini_rest_len) {
+        can_adapt_rho = 1;
+        did_restart = 1;
+        info->restart += 1;
+
+        // Update x_outer, v_outer
+        OSQPVectorf_copy(work->x_outer, work->x);
+        OSQPVectorf_copy(work->v_outer, work->v);
+
+        // Update last_rest_iter
+        work->last_rest_iter = iter;
+      }
+
+      else {
+        if (iter - work->last_rest_iter == 1) {
+          // Update work->norm_cur
+          fixed_point_norm(solver);
+
+          can_adapt_rho = 0;
+
+          // Update work->norm_outer
+          work->norm_outer = work->norm_cur;
+        }
+        else {
+          // Update work->norm_cur
+          fixed_point_norm(solver);
+
+          // Check if restart condition is satisfied
+          if (adaptive_rest) {
+            can_adapt_rho = should_restart_adapt(solver, iter - work->last_rest_iter);
+          }
+          else {
+            can_adapt_rho = should_restart(solver);
+          }
+
+          if (can_adapt_rho) {
+            did_restart = 1;
+            info->restart += 1;
+
+            // Update x_outer, v_outer
+            OSQPVectorf_copy(work->x_outer, work->x);
+            OSQPVectorf_copy(work->v_outer, work->v);
+
+            // Update last_rest_iter
+            work->last_rest_iter = iter;
+          }
+          else {
+            update_reflected_halpern(solver, iter - work->last_rest_iter);
+          }
+        }
+      }
     /* End of Reflected Halpern Step */
+    }
 
-#endif /* ifdef OSQP_REFLECTED_HALPERN */
+    else if (restart_scheme == 3) {
+      /* Averaged Restarts Step */
+
+      /* End of Averaged Restarts Step */
+    }
+
+    /* End of Restart Schemes */
 
     osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_UPDATE);
     osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_ITER);
