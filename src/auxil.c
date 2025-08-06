@@ -61,10 +61,12 @@ OSQPInt adapt_rho(OSQPSolver* solver) {
 
   // Set rho estimate in info
   info->rho_estimate = rho_new;
+  c_print("adaptive_rho_tolerance_greater 2: %f\n", settings->adaptive_rho_tolerance_greater);
+  c_print("adaptive_rho_tolerance_less 2: %f\n", settings->adaptive_rho_tolerance_less);
 
   // Check if the new rho is large or small enough and update it in case
-  if ((rho_new > settings->rho * settings->adaptive_rho_tolerance) ||
-      (rho_new < settings->rho / settings->adaptive_rho_tolerance)) {
+  if ((rho_new > settings->rho * settings->adaptive_rho_tolerance_greater) ||
+      (rho_new < settings->rho / settings->adaptive_rho_tolerance_less)) {
     exitflag                 = osqp_update_rho(solver, rho_new);
     info->rho_updates += 1;
     solver->work->rho_updated = 1;
@@ -1227,6 +1229,12 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     return 1;
   }
 
+  if (settings->adaptive_rest != 0 &&
+      settings->adaptive_rest != 1) {
+    c_eprint("adaptive_rest must be either 0 or 1");
+    return 1;
+  }
+
   if (settings->ini_rest_len <= 0.0) {
     c_eprint("Initial restart period must be larger than 0");
     return 1;
@@ -1272,8 +1280,13 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     return 1;
   }
 
-  if (from_setup && settings->adaptive_rho_tolerance < 1.0) {
-    c_eprint("adaptive_rho_tolerance must be >= 1");
+  if (from_setup && settings->adaptive_rho_tolerance_greater < 0.0) {
+    c_eprint("adaptive_rho_tolerance_greater must be >= 0");
+    return 1;
+  }
+
+  if (from_setup && settings->adaptive_rho_tolerance_less < 0.0) {
+    c_eprint("adaptive_rho_tolerance_less must be >= 0");
     return 1;
   }
 

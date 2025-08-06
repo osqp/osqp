@@ -144,6 +144,7 @@ void print_setup_header(const OSQPSolver* solver) {
   c_print(",\n          ");
   c_print("sigma = %.2e, alpha = %.2f, ",
           settings->sigma, settings->alpha);
+  c_print("beta =%.2e, ", settings->beta);
   c_print("max_iter = %i\n", (int)settings->max_iter);
 
   if (settings->check_termination) {
@@ -328,19 +329,27 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->sigma      = settings->sigma;
   new->alpha      = settings->alpha;
 
-  new->beta         = settings->beta;
-  new->lambd        = settings->lambd;
-  new->ini_rest_len = settings->ini_rest_len;
+  new->beta               = settings->beta;
+  new->lambd              = settings->lambd;
+  new->restart_necessary  = settings->restart_necessary;
+  new->restart_artificial = settings->restart_artificial;
+  new->ini_rest_len       = settings->ini_rest_len;
+  new->adaptive_rest      = settings->adaptive_rest;
+  // new->restart_type       = settings->restart_type;
+  strncpy(new->restart_type, settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN);
+  new->restart_type[OSQP_MAX_RESTART_TYPE_LEN-1] = '\0';
 
   new->cg_max_iter      = settings->cg_max_iter;
   new->cg_tol_reduction = settings->cg_tol_reduction;
   new->cg_tol_fraction  = settings->cg_tol_fraction;
   new->cg_precond       = settings->cg_precond;
 
-  new->adaptive_rho           = settings->adaptive_rho;
-  new->adaptive_rho_interval  = settings->adaptive_rho_interval;
-  new->adaptive_rho_fraction  = settings->adaptive_rho_fraction;
-  new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;
+  new->adaptive_rho                   = settings->adaptive_rho;
+  new->adaptive_rho_interval          = settings->adaptive_rho_interval;
+  new->adaptive_rho_fraction          = settings->adaptive_rho_fraction;
+  // new->adaptive_rho_tolerance         = settings->adaptive_rho_tolerance;
+  new->adaptive_rho_tolerance_greater = settings->adaptive_rho_tolerance_greater;
+  new->adaptive_rho_tolerance_less    = settings->adaptive_rho_tolerance_less;
 
   new->max_iter           = settings->max_iter;
   new->eps_abs            = settings->eps_abs;

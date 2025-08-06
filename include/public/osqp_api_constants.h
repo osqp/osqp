@@ -108,6 +108,9 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_NECESSARY             (1.0)
 # define OSQP_ARTIFICIAL            (1.0)
 # define OSQP_INI_REST_LEN          (10)
+# define OSQP_RESTART_TYPE          ("none")
+# define OSQP_MAX_RESTART_TYPE_LEN  (20)
+# define OSQP_ADAPTIVE_REST         (0)
 
 # define OSQP_RHO_MIN               (1e-06)
 # define OSQP_RHO_MAX               (1e06)

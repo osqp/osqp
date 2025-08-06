@@ -69,11 +69,13 @@ typedef struct OSQP_ATTR_PACK {
   OSQPFloat alpha;                  ///< ADMM relaxation parameter
 
   // Restart parameters
-  OSQPFloat beta;                   ///< ADMM restart convergence rate (0,1]
-  OSQPFloat lambd;                  ///< Reflected Halpern smoothing rate [0,1]
-  OSQPFloat restart_necessary;      ///< Adaptive restarts necessary decay rate (0,1)
-  OSQPFloat restart_artificial;     ///< Adaptive restarts artificial decay rate (0,1)
-  OSQPInt ini_rest_len;             ///< Iteration of first restart
+  OSQPFloat beta;                                 ///< ADMM restart convergence rate (0,1]
+  OSQPFloat lambd;                                ///< Reflected Halpern smoothing rate [0,1]
+  OSQPFloat restart_necessary;                    ///< Adaptive restarts necessary decay rate (0,1)
+  OSQPFloat restart_artificial;                   ///< Adaptive restarts artificial decay rate (0,1)
+  OSQPInt ini_rest_len;                           ///< Iteration of first restart
+  OSQPInt adaptive_rest;                          ///< boolean; include the two adaptive restart condition or not?
+  char restart_type[OSQP_MAX_RESTART_TYPE_LEN];   ///< Determines if we do no restarts, Halpern, Reflected, or Averaged restarts
 
   // CG settings
   OSQPInt           cg_max_iter;      ///< maximum number of CG iterations per solve
@@ -114,6 +116,8 @@ typedef struct OSQP_ATTR_PACK {
    * New rho must be X times larger or smaller than the current one to change it
    */
   OSQPFloat adaptive_rho_tolerance;
+  OSQPFloat adaptive_rho_tolerance_greater;
+  OSQPFloat adaptive_rho_tolerance_less;
 
   // termination parameters
   OSQPInt   max_iter;               ///< maximum number of iterations

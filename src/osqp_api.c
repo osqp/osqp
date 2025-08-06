@@ -302,21 +302,26 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->sigma         = (OSQPFloat)OSQP_SIGMA;  /* ADMM step */
   settings->alpha         = (OSQPFloat)OSQP_ALPHA;  /* relaxation parameter */
 
-  settings->beta                = (OSQPFloat)OSQP_BETA;       /* restart parameter */
-  settings->lambd               = (OSQPFloat)OSQP_LAMBDA;     /* Reflected Halpern parameter */
-  settings->restart_necessary   = (OSQPFloat)OSQP_NECESSARY;  /* Adaptive necessary restarts parameter */
-  settings->restart_artificial  = (OSQPFloat)OSQP_ARTIFICIAL; /* Adaptive artificial restarts parameter */
-  settings->ini_rest_len        = (OSQPInt)OSQP_INI_REST_LEN; /* Initial Restart length */
+  settings->beta                = (OSQPFloat)OSQP_BETA;                               /* restart parameter */
+  settings->lambd               = (OSQPFloat)OSQP_LAMBDA;                             /* Reflected Halpern parameter */
+  settings->restart_necessary   = (OSQPFloat)OSQP_NECESSARY;                          /* Adaptive necessary restarts parameter */
+  settings->restart_artificial  = (OSQPFloat)OSQP_ARTIFICIAL;                         /* Adaptive artificial restarts parameter */
+  settings->ini_rest_len        = (OSQPInt)OSQP_INI_REST_LEN;                         /* Initial Restart length */
+  settings->adaptive_rest       = (OSQPInt)OSQP_ADAPTIVE_REST;                        /* adaptive restarts boolean */
+  strncpy(settings->restart_type, OSQP_RESTART_TYPE, OSQP_MAX_RESTART_TYPE_LEN - 1);
+  settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';                       /* restart format */
 
   settings->cg_max_iter      = OSQP_CG_MAX_ITER;             /* maximum number of CG iterations */
   settings->cg_tol_reduction = OSQP_CG_TOL_REDUCTION;        /* CG tolerance parameter */
   settings->cg_tol_fraction  = OSQP_CG_TOL_FRACTION;         /* CG tolerance parameter */
   settings->cg_precond       = OSQP_DIAGONAL_PRECONDITIONER; /* Preconditioner to use in CG */
 
-  settings->adaptive_rho           = OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT;
-  settings->adaptive_rho_interval  = OSQP_ADAPTIVE_RHO_INTERVAL;
-  settings->adaptive_rho_fraction  = (OSQPFloat)OSQP_ADAPTIVE_RHO_FRACTION;
-  settings->adaptive_rho_tolerance = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
+  settings->adaptive_rho                    = OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT;
+  settings->adaptive_rho_interval           = OSQP_ADAPTIVE_RHO_INTERVAL;
+  settings->adaptive_rho_fraction           = (OSQPFloat)OSQP_ADAPTIVE_RHO_FRACTION;
+  // settings->adaptive_rho_tolerance          = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
+  settings->adaptive_rho_tolerance_greater  = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
+  settings->adaptive_rho_tolerance_less     = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
 
   settings->max_iter           = OSQP_MAX_ITER;                 /* maximum number of ADMM iterations */
   settings->eps_abs            = (OSQPFloat)OSQP_EPS_ABS;       /* absolute convergence tolerance */
@@ -667,7 +672,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
                                      // (3) Averaged restarts
                                      // (4) Reflected Halpern & Adaptive
   OSQPInt first_digit = -1;          // helps determine restart_scheme
-  OSQPInt adaptive_rest = 0;         // Whether to do adaptive restarts ontop of Reflected Helpern restarts or not
+  // OSQPInt adaptive_rest = 0;         // Whether to do adaptive restarts ontop of Reflected Helpern restarts or not
 
   OSQPWorkspace* work;
   OSQPSettings*  settings;
@@ -732,8 +737,19 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
   }
 
   fprintf(fp, "iteration,prim_res,dual_res,duality_gap,restart\n");
+  c_print("beta: %f\n", settings->beta);
+  c_print("lambd: %f\n", settings->lambd);
+  c_print("restart_necessary: %f\n", settings->restart_necessary);
+  c_print("restart_artificial: %f\n", settings->restart_artificial);
+  c_print("ini_rest_len: %d\n", settings->ini_rest_len);
+  c_print("restart_type: %s\n", settings->restart_type);
+  // c_print("adaptive_rho_tolerance: %f\n", settings->adaptive_rho_tolerance);
+  c_print("adaptive_rho_tolerance_greater: %f\n", settings->adaptive_rho_tolerance_greater);
+  c_print("adaptive_rho_tolerance_less: %f\n", settings->adaptive_rho_tolerance_less);
+  c_print("adaptive_rest: %d\n", settings->adaptive_rest);
 
-  if (settings->alpha == 1) {
+  // if (settings->alpha == 1) {
+  if (settings->restart_type == "none") {
     // No restarts [alpha: 1]
     restart_scheme = 0;
     settings->adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS;
@@ -744,10 +760,6 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     // Reflected Halpern restarts [alpha: (0,1)]
     // alpha = 0.175 -> lambda = 1.7, beta = 0.5
     restart_scheme = 2;
-    // first_digit = (int)(settings->alpha * 10) % 10;
-    // settings->lambd = first_digit / 10.;
-    // settings->beta = 10. * (settings->alpha - settings->lambd);
-    // settings->lambd = 1. * first_digit;
     settings->lambd = ((int)(settings->alpha * 10)) % 10;
     settings->lambd += (((int)(settings->alpha * 100)) % 10) / 10.;
     settings->beta = (((int)(settings->alpha * 1000)) % 10) / 10.;
@@ -776,7 +788,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     //                    restart_artificial = 0.2
 
     restart_scheme = 2;
-    adaptive_rest = 1;
+    settings->adaptive_rest = 1;
     settings->lambd = ((int)(settings->alpha * 100)) % 10;
     settings->lambd += (((int)(settings->alpha * 1000)) % 10) / 10.;
     settings->beta = (((int)(settings->alpha * 10000)) % 10) / 10.;
@@ -797,7 +809,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
   for (iter = 1; iter <= max_iter; iter++) {
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_ITER);
     did_restart = 0;
-    if (adaptive_rest == 1) {
+    if (settings->adaptive_rest) {
       work->norm_prev = work->norm_cur;
     }
 
@@ -926,7 +938,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
           fixed_point_norm(solver);
 
           // Check if restart condition is satisfied
-          if (adaptive_rest) {
+          if (settings->adaptive_rest) {
             can_adapt_rho = should_restart_adapt(solver, iter - work->last_rest_iter);
           }
           else {
@@ -1769,7 +1781,14 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   // sigma      ignored
   settings->alpha = new_settings->alpha;
 
-  settings->beta = new_settings->beta;
+  settings->beta                = new_settings->beta;
+  settings->lambd               = new_settings->lambd;
+  settings->restart_necessary   = new_settings->restart_necessary;
+  settings->restart_artificial  = new_settings->restart_artificial;
+  settings->ini_rest_len        = new_settings->ini_rest_len;
+  settings->adaptive_rest       = new_settings->adaptive_rest;
+  strncpy(settings->restart_type, new_settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN - 1);
+  settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';
 
   settings->cg_max_iter      = new_settings->cg_max_iter;
   settings->cg_tol_reduction = new_settings->cg_tol_reduction;
