@@ -69,13 +69,21 @@ typedef struct OSQP_ATTR_PACK {
   OSQPFloat alpha;                  ///< ADMM relaxation parameter
 
   // Restart parameters
-  OSQPFloat beta;                                 ///< ADMM restart convergence rate (0,1]
-  OSQPFloat lambd;                                ///< Reflected Halpern smoothing rate [0,1]
-  OSQPFloat restart_necessary;                    ///< Adaptive restarts necessary decay rate (0,1)
-  OSQPFloat restart_artificial;                   ///< Adaptive restarts artificial decay rate (0,1)
-  OSQPInt ini_rest_len;                           ///< Iteration of first restart
-  OSQPInt adaptive_rest;                          ///< boolean; include the two adaptive restart condition or not?
-  char restart_type[OSQP_MAX_RESTART_TYPE_LEN];   ///< Determines if we do no restarts, Halpern, Reflected, or Averaged restarts
+  OSQPFloat beta;                                   ///< ADMM restart convergence rate (0,1]
+  OSQPFloat lambd;                                  ///< Reflected Halpern smoothing rate [0,1]
+  OSQPFloat restart_necessary;                      ///< Adaptive restarts necessary decay rate (0,1)
+  OSQPFloat restart_artificial;                     ///< Adaptive restarts artificial decay rate (0,1)
+  OSQPFloat xi;                                     ///< Averaged restarts parameter (0,1)
+  OSQPInt ini_rest_len;                             ///< Iteration of first restart
+  OSQPInt adaptive_rest;                            ///< boolean; include the two adaptive restart condition or not
+  OSQPInt alpha_adjustment_reflected_halpern;       ///< boolean; include the alpha correction term in reflected halpern or not (allows for alpha other than 1.0 for reflected halpern)
+  OSQPInt rho_custom_condition;                     ///< boolean; include extra rho adaptation conditions
+  OSQPInt custom_average_rest;                      ///< boolean; reset the values to not the averaged but instead to a modified version or not
+  OSQPInt vector_rho_in_averaged_KKT;               ///< boolean; use vectarized rho in the smoothed duality gap computation or not
+  OSQPInt adapt_rho_on_restart;                     ///< boolean; adapt rho on every restart
+  char restart_type[OSQP_MAX_RESTART_TYPE_LEN];     ///< Determines if we do no restarts, Halpern, Reflected, or Averaged restarts: {"none", "halpern", "reflected halpern", "averaged"}
+  char halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN]; ///< Determines if we adapt the Halpern smoothing parameter [(k + 1) / (k + 2)]: {"none", "adaptive"} 
+
 
   // CG settings
   OSQPInt           cg_max_iter;      ///< maximum number of CG iterations per solve
@@ -118,6 +126,7 @@ typedef struct OSQP_ATTR_PACK {
   OSQPFloat adaptive_rho_tolerance;
   OSQPFloat adaptive_rho_tolerance_greater;
   OSQPFloat adaptive_rho_tolerance_less;
+  OSQPFloat rho_custom_tolerance;
 
   // termination parameters
   OSQPInt   max_iter;               ///< maximum number of iterations
@@ -153,10 +162,11 @@ typedef struct {
   OSQPFloat duality_gap;  ///< Duality gap (Primal obj - Dual obj)
 
   // algorithm information
-  OSQPInt   iter;         ///< Number of iterations taken
-  OSQPInt   rho_updates;  ///< Number of rho updates performned
-  OSQPFloat rho_estimate; ///< Best rho estimate so far from residuals
-  OSQPInt   restart;      ///< Number of restarts performed
+  OSQPInt   iter;             ///< Number of iterations taken
+  OSQPInt   rho_updates;      ///< Number of rho updates performned
+  OSQPFloat rho_estimate;     ///< Best rho estimate so far from residuals
+  OSQPInt   restart;          ///< Number of restarts performed
+  OSQPInt   inner_loop_iter;  ///< Number of iterations since restarting
 
   // timing information
   OSQPFloat setup_time;  ///< Setup phase time (seconds)

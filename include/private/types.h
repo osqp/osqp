@@ -132,6 +132,7 @@ struct OSQPWorkspace_ {
   OSQPVectorf* xtilde_view; ///< xtilde view into xz_tilde
   OSQPVectorf* ztilde_view; ///< ztilde view into xz_tilde
   OSQPVectorf* v;           ///< Iterate v
+  OSQPVectorf* w;           ///< Iterate w
 
   OSQPVectorf* x_prev;   ///< Previous x, used also as temp vector in primal info computation
   OSQPVectorf* z_prev;   ///< Previous z, used also as temp vector in dual info computation
@@ -140,13 +141,55 @@ struct OSQPWorkspace_ {
   OSQPVectorf* x_outer;  ///< Previous outer loop x
   OSQPVectorf* v_outer;  ///< Previous outer loop v
 
+  OSQPVectorf* y_pred;  ///< Predicted y value used in pure averaged and inexact averaged restart schemes
+  OSQPVectorf* w_pred;  ///< Predicted w value used in pure averaged and inexact averaged restart schemes
+
+  OSQPVectorf* sum_x;           ///< Sum of y iterates
+  OSQPVectorf* sum_y;           ///< Sum of y iterates
+  OSQPVectorf* sum_z;           ///< Sum of z iterates
+  OSQPVectorf* sum_xz_tilde;    ///< Sum of xz_tilde iterates
+  OSQPVectorf* sum_xtilde_view; ///< Sum of xtilde view into xz_tilde
+  OSQPVectorf* sum_ztilde_view; ///< Sum of ztilde view into xz_tilde
+  OSQPVectorf* sum_y_pred;      ///< Sum of predicted y iterates
+  OSQPVectorf* sum_w_pred;      ///< Sum of predicted w iterates
+  OSQPVectorf* sum_w;           ///< Sum of w iterates
+  OSQPVectorf* sum_v;           ///< Sum of v iterates
+
+  OSQPVectorf* avg_x;           ///< Average of x iterates
+  OSQPVectorf* avg_y;           ///< Average of y iterates
+  OSQPVectorf* avg_z;           ///< Average of z iterates
+  OSQPVectorf* avg_xz_tilde;    ///< Average of xz_tilde iterates
+  OSQPVectorf* avg_xtilde_view; ///< Sum of xtilde view into xz_tilde
+  OSQPVectorf* avg_ztilde_view; ///< Sum of ztilde view into xz_tilde
+  OSQPVectorf* avg_y_pred;      ///< Average of y_pred iterates
+  OSQPVectorf* avg_w_pred;      ///< Average of w_pred iterates
+  OSQPVectorf* avg_w;           ///< Average of w iterates
+  OSQPVectorf* avg_v;           ///< Average of v iterates
+
   OSQPFloat norm_cur;      ///< ||s - T(s)|| evaluated at current iteration
   OSQPFloat norm_prev;     ///< ||s - T(s)|| evaluated at previous iteration
   OSQPFloat norm_outer;    ///< ||s - T(s)|| evaluated at previous restart iteration
 
-  OSQPVectorf* delta_v;  ///< difference between consecutive v iterates
+  OSQPFloat duality_gap_cur;    ///< Evaluates the smoothed duality gap at the current average iterate
+  OSQPFloat duality_gap_outer;  ///< Evaluates the smoothed duality gap at the previous restart iteration
 
-  OSQPInt last_rest_iter;   ///< Iteration at whihc the last restart was triggered
+  OSQPVectorf* delta_v;         ///< difference between consecutive v iterates
+  OSQPVectorf* delta_w;         ///< difference between consecutive w iterates
+  OSQPVectorf* delta_x_loop;    ///< difference between inner and outer loop x iterates
+  OSQPVectorf* delta_v_loop;    ///< difference between inner and outer loop v iterates
+
+  OSQPVectorf* y_z;       ///< A common term used in computing the smoothed duality gap (y_z = (1 / xi) * y + z)
+  OSQPVectorf* temp_1_m;  ///< A temporary vector of size m
+  // OSQPVectorf* temp_2_m;  ///< A temporary vector of size m
+  // OSQPVectorf* temp_3_m;  ///< A temporary vector of size m
+  OSQPVectorf* temp_1_n;  ///< A temporary vector of size n
+  // OSQPVectorf* temp_2_n;  ///< A temporary vector of size n
+  // OSQPVectorf* temp_3_n;  ///< A temporary vector of size n
+  OSQPVectorf* temp_xz_tilde;       ///< A temporary vector of size n + m
+  OSQPVectorf* temp_xtilde_view;    ///< A view into the first n elements of temp_xz_tilde
+  OSQPVectorf* temp_ztilde_view;    ///< A view into the last m elements of temp_xz_tilde
+
+  // OSQPInt last_rest_iter;   ///< Iteration at which the last restart was triggered
 
   /**
    * @name Primal and dual residuals workspace variables

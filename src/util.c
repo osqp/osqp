@@ -329,15 +329,23 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->sigma      = settings->sigma;
   new->alpha      = settings->alpha;
 
-  new->beta               = settings->beta;
-  new->lambd              = settings->lambd;
-  new->restart_necessary  = settings->restart_necessary;
-  new->restart_artificial = settings->restart_artificial;
-  new->ini_rest_len       = settings->ini_rest_len;
-  new->adaptive_rest      = settings->adaptive_rest;
+  new->beta                               = settings->beta;
+  new->lambd                              = settings->lambd;
+  new->restart_necessary                  = settings->restart_necessary;
+  new->restart_artificial                 = settings->restart_artificial;
+  new->xi                                 = settings->xi;
+  new->ini_rest_len                       = settings->ini_rest_len;
+  new->adaptive_rest                      = settings->adaptive_rest;
+  new->alpha_adjustment_reflected_halpern = settings->alpha_adjustment_reflected_halpern;
+  new->rho_custom_condition               = settings->rho_custom_condition;
+  new->custom_average_rest                = settings->custom_average_rest;
+  new->vector_rho_in_averaged_KKT         = settings->vector_rho_in_averaged_KKT;
+  new->adapt_rho_on_restart               = settings->adapt_rho_on_restart;
   // new->restart_type       = settings->restart_type;
-  strncpy(new->restart_type, settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN);
+  strncpy(new->restart_type, settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN-1);
   new->restart_type[OSQP_MAX_RESTART_TYPE_LEN-1] = '\0';
+  strncpy(new->halpern_scheme, settings->halpern_scheme, OSQP_MAX_HALPERN_SCHEME_LEN-1);
+  new->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN-1] = '\0';
 
   new->cg_max_iter      = settings->cg_max_iter;
   new->cg_tol_reduction = settings->cg_tol_reduction;
@@ -350,6 +358,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   // new->adaptive_rho_tolerance         = settings->adaptive_rho_tolerance;
   new->adaptive_rho_tolerance_greater = settings->adaptive_rho_tolerance_greater;
   new->adaptive_rho_tolerance_less    = settings->adaptive_rho_tolerance_less;
+  new->rho_custom_tolerance           = settings->rho_custom_tolerance;
 
   new->max_iter           = settings->max_iter;
   new->eps_abs            = settings->eps_abs;

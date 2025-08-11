@@ -81,22 +81,71 @@ void update_z(OSQPSolver* solver);
 /**
  * Update y variable (fourth ADMM step)
  * Update also delta_y to check for primal infeasibility
+ * Update also the y_pred to do averaged restarts
  * @param solver Solver
  */
 void update_y(OSQPSolver* solver);
 
+/**
+ * Update w variable (fifth ADMM step)
+ * Update also w_pred to do averaged restarts
+ */
+void update_w(OSQPSolver* solver);
+
+/**
+ * Reset all of the variables involved in inexact ADMM "averaged restarts" to 0
+ */
+void reset_sum(OSQPSolver* solver);
+
+/**
+ * Reset all of the variables involved in averaged restarts to 0
+ */
+void reset_avg(OSQPSolver* solver);
+
+/**
+ * Adds current iterates to the loop sum (used for inexact ADMM "average restarts")
+ */
+void sum_add(OSQPSolver* solver, OSQPFloat weight);
+
+/**
+ * Computes the average iterate
+ */
+void update_average(OSQPSolver* solver);
+
+/**
+ * Updates current iterates to their average
+ */
+void restart_to_average(OSQPSolver* solver);
+
+/**
+ * Perform the additional steps required for Reflected Halpern
+ *    as opposed to pure Halpern
+ */
+void reflected_halpern_step(OSQPSolver* solver, OSQPFloat scalling);
 
 /**
  * Perform a Halpern step
  * Updates x, z, y
  */
-void update_halpern(OSQPSolver* solver, OSQPInt k);
+void update_halpern(OSQPSolver* solver);
+
+// /**
+//  * Perform a Reflected Halpern step
+//  * Updates x, z, y
+//  */
+// void update_reflected_halpern(OSQPSolver* solver, OSQPInt k);
 
 /**
- * Perform a Reflected Halpern step
- * Updates x, z, y
+ * Compute the smoothed duality gap
  */
-void update_reflected_halpern(OSQPSolver* solver, OSQPInt k);
+OSQPFloat smoothed_duality_gap(OSQPSolver*  solver,
+                               OSQPVectorf* x,
+                               OSQPVectorf* z,
+                               OSQPVectorf* y,
+                               OSQPVectorf* w,
+                               OSQPVectorf* xz_tilde,
+                               OSQPVectorf* xtilde_view,
+                               OSQPVectorf* ztilde_view);
 
 /**
  * Computes ||s - T(s)||
@@ -109,13 +158,6 @@ void fixed_point_norm(OSQPSolver* solver);
  * Returns 1 if restart, 0 otherwise
  */
 OSQPInt should_restart(OSQPSolver* solver);
-
-/**
- * Determines wether we have had a contraction, necessary decay + no local progress, 
- * or the iterates are long and should now restart
- * Returns 1 if restart, 0 otherwise
- */
-OSQPInt should_restart_adapt(OSQPSolver* solver, OSQPInt k);
 
 /**
  * Compute objective functions and duality gap from data at (x,y)

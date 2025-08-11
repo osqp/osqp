@@ -51,8 +51,9 @@ OSQPInt adapt_rho(OSQPSolver* solver) {
   OSQPInt   exitflag; // Exitflag
   OSQPFloat rho_new;  // New rho value
 
-  OSQPInfo*      info     = solver->info;
   OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+  OSQPInfo*      info     = solver->info;
 
   exitflag = 0;     // Initialize exitflag to 0
 
@@ -61,10 +62,26 @@ OSQPInt adapt_rho(OSQPSolver* solver) {
 
   // Set rho estimate in info
   info->rho_estimate = rho_new;
-  c_print("adaptive_rho_tolerance_greater 2: %f\n", settings->adaptive_rho_tolerance_greater);
-  c_print("adaptive_rho_tolerance_less 2: %f\n", settings->adaptive_rho_tolerance_less);
 
   // Check if the new rho is large or small enough and update it in case
+  if (settings->rho_custom_condition){
+    OSQPFloat first_part_norm = 0.0;
+    OSQPFloat second_part_norm = 0.0;
+
+    OSQPVectorf_minus(work->delta_x, work->x, work->x_prev);
+    OSQPVectorf_minus(work->delta_v, work->v, work->v_prev);
+
+    first_part_norm = OSQPVectorf_norm_2(work->delta_x);
+    second_part_norm = OSQPVectorf_norm_2(work->delta_v);
+
+    if ((rho_new > settings->rho * settings->adaptive_rho_tolerance_greater) ||
+        (rho_new < settings->rho / settings->adaptive_rho_tolerance_less) ||
+        (settings->rho_custom_tolerance < first_part_norm / second_part_norm)) {
+      exitflag                 = osqp_update_rho(solver, rho_new);
+      info->rho_updates += 1;
+      solver->work->rho_updated = 1;
+    }
+  }
   if ((rho_new > settings->rho * settings->adaptive_rho_tolerance_greater) ||
       (rho_new < settings->rho / settings->adaptive_rho_tolerance_less)) {
     exitflag                 = osqp_update_rho(solver, rho_new);
@@ -231,46 +248,371 @@ void update_y(OSQPSolver* solver) {
 
   OSQPVectorf_plus(work->y, work->y, work->delta_y);
 
+  if (strcmp(settings->restart_type, "averaged") == 0) {
+    // y_pred^{k+1} = y^{k+1} + \rho (z^{k+1} - z^{k}) + \rho (1 - \alpha) (\tilde{z}^{k+1} - z^{k})
+    // I don't know of a better way to do this other than the following three updates
+    OSQPVectorf_add_scaled3(
+      work->y_pred, 1., work->z, (settings->alpha - 2.), work->z_prev,
+      (1. - settings->alpha), work->ztilde_view
+    );
+    OSQPVectorf_ew_prod(work->y_pred, work->y_pred, work->rho_vec);
+    OSQPVectorf_plus(work->y_pred, work->y_pred, work->y);
+  }
 }
 
-void update_halpern(OSQPSolver* solver, OSQPInt k) {
+void update_w(OSQPSolver* solver) {
+  
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
-  OSQPFloat scalling = (k + 1.) / (k + 2.);
+  OSQPVectorf_add_scaled3(work->delta_w,
+                          settings->alpha, work->xtilde_view,
+                          (1.0 - settings->alpha), work->x_prev,
+                          -1.0, work->x);
 
+  OSQPVectorf_mult_scalar(work->delta_w, settings->sigma);
+
+  OSQPVectorf_plus(work->w, work->w, work->delta_w);
+
+  // w_pred^{k+1} = w^{k+1} + \sigma (x^{k+1} - x^{k}) + \sigma (1 - \alpha) (\tilde{x}^{k+1} - x^{k})
+  // I don't know of a better way to do this other than the following three updates
+  OSQPVectorf_add_scaled3(
+    work->w_pred, 1., work->x, (settings->alpha - 2.), work->x_prev,
+    (1. - settings->alpha), work->xtilde_view
+  );
+  OSQPVectorf_mult_scalar(work->w_pred, settings->sigma);
+  OSQPVectorf_plus(work->w_pred, work->w_pred, work->w);
+}
+
+void reset_sum(OSQPSolver* solver) {
+  OSQPWorkspace* work     = solver->work;
+
+  OSQPVectorf_set_scalar(work->sum_x, 0.0);
+  OSQPVectorf_set_scalar(work->sum_y, 0.0);
+  OSQPVectorf_set_scalar(work->sum_z, 0.0);
+  OSQPVectorf_set_scalar(work->sum_xz_tilde, 0.0);
+  OSQPVectorf_set_scalar(work->sum_y_pred, 0.0);
+  OSQPVectorf_set_scalar(work->sum_w_pred, 0.0);
+  OSQPVectorf_set_scalar(work->sum_w, 0.0);
+  OSQPVectorf_set_scalar(work->sum_v, 0.0);
+}
+
+void reset_avg(OSQPSolver* solver) {
+  OSQPWorkspace* work     = solver->work;
+
+  OSQPVectorf_set_scalar(work->avg_x, 0.0);
+  OSQPVectorf_set_scalar(work->avg_y, 0.0);
+  OSQPVectorf_set_scalar(work->avg_z, 0.0);
+  OSQPVectorf_set_scalar(work->avg_xz_tilde, 0.0);
+  OSQPVectorf_set_scalar(work->avg_y_pred, 0.0);
+  OSQPVectorf_set_scalar(work->avg_w_pred, 0.0);
+  OSQPVectorf_set_scalar(work->avg_w, 0.0);
+  OSQPVectorf_set_scalar(work->avg_v, 0.0);
+}
+
+void sum_add(OSQPSolver* solver, OSQPFloat weight) {
+  OSQPWorkspace* work     = solver->work;
+
+  OSQPVectorf_add_scaled(work->sum_x, 1., work->sum_x,  weight, work->x);
+  OSQPVectorf_add_scaled(work->sum_z, 1., work->sum_z, weight, work->z);
+  OSQPVectorf_add_scaled(work->sum_xz_tilde, 1., work->sum_xz_tilde, weight, work->xz_tilde);
+  OSQPVectorf_add_scaled(work->sum_y, 1., work->sum_y, weight, work->y);
+  OSQPVectorf_add_scaled(work->sum_w, 1., work->sum_w, weight, work->w);
+  OSQPVectorf_add_scaled(work->sum_v, 1., work->sum_v, weight, work->v);
+  OSQPVectorf_add_scaled(work->sum_y_pred, 1., work->sum_y_pred, weight, work->y_pred);
+  OSQPVectorf_add_scaled(work->sum_w_pred, 1., work->sum_w_pred, weight, work->w_pred);
+}
+
+void update_average(OSQPSolver* solver) {
+  OSQPWorkspace* work = solver->work;
+  OSQPInfo* info      = solver->info;
+
+  OSQPFloat scalling          = (info->inner_loop_iter - 1.) / (info->inner_loop_iter);
+  OSQPFloat reverse_scalling  = (1. - scalling);
+
+  OSQPVectorf_add_scaled(work->avg_x, scalling, work->avg_x, reverse_scalling, work->x);
+  OSQPVectorf_add_scaled(work->avg_z, scalling, work->avg_z, reverse_scalling, work->z);
+  OSQPVectorf_add_scaled(work->avg_xz_tilde, scalling, work->avg_xz_tilde, reverse_scalling, work->xz_tilde);
+  OSQPVectorf_add_scaled(work->avg_y, scalling, work->avg_y, reverse_scalling, work->y);
+  OSQPVectorf_add_scaled(work->avg_w, scalling, work->avg_w, reverse_scalling, work->w);
+  OSQPVectorf_add_scaled(work->avg_v, scalling, work->avg_v, reverse_scalling, work->v);
+  OSQPVectorf_add_scaled(work->avg_y_pred, scalling, work->avg_y_pred, reverse_scalling, work->y_pred);
+  OSQPVectorf_add_scaled(work->avg_w_pred, scalling, work->avg_w_pred, reverse_scalling, work->w_pred);
+}
+
+void restart_to_average(OSQPSolver* solver) {
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+
+  if (settings->custom_average_rest) {
+    // I temporarly use OSQPVectorf_copy() instead of swap_vectors(), to prevent errors
+    OSQPVectorf_ew_prod(work->v, work->rho_inv_vec, work->avg_y_pred);
+    OSQPVectorf_plus(work->v, work->v, work->avg_z);
+
+    OSQPVectorf_ew_bound_vec(work->z, work->v, work->data->l, work->data->u);
+
+    OSQPVectorf_minus(work->y, work->v, work->z);
+    OSQPVectorf_ew_prod(work->y, work->rho_vec, work->y);
+
+    OSQPVectorf_add_scaled(work->x, (1. / settings->sigma), work->avg_w_pred, 1., work->avg_x);
+    
+    OSQPVectorf_mult_scalar(work->w, 0.0);
+
+    OSQPVectorf_copy(work->xz_tilde, work->avg_xz_tilde);
+  }
+  else {
+    // I temporarly use OSQPVectorf_copy() instead of swap_vectors(), to prevent errors
+    OSQPVectorf_copy(work->x, work->avg_x);
+    OSQPVectorf_copy(work->z, work->avg_z);
+    OSQPVectorf_copy(work->xz_tilde, work->avg_xz_tilde);
+    OSQPVectorf_copy(work->y, work->avg_y_pred);
+    OSQPVectorf_copy(work->w, work->avg_w_pred);
+
+    OSQPVectorf_ew_prod(work->v, work->rho_inv_vec, work->y);
+    OSQPVectorf_plus(work->v, work->v, work->z);
+  }
+}
+
+void reflected_halpern_step(OSQPSolver* solver, OSQPFloat scalling) {
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+
+  OSQPFloat lambd_plus_one  = 1. + settings->lambd;
+
+  if (settings->alpha_adjustment_reflected_halpern) {
+    // 2 / alpha
+    // OSQPFloat alpha_adjustment = 2. / settings->alpha;
+    OSQPFloat alpha_adjustment = lambd_plus_one / settings->alpha;
+    // ((2 / alpha) - 1) * [(k + 1) / (k + 2)]
+    OSQPFloat alpha_minus_one_scalling  = (alpha_adjustment - 1.)  * scalling;
+    OSQPVectorf_add_scaled(work->v, alpha_adjustment, work->v, -alpha_minus_one_scalling, work->v_prev);
+    OSQPVectorf_add_scaled(work->x, alpha_adjustment, work->x, -alpha_minus_one_scalling, work->x_prev);
+  }
+  else {
+    OSQPFloat lambd_scalling  = settings->lambd * scalling;
+    OSQPVectorf_add_scaled(work->v, lambd_plus_one, work->v, -lambd_scalling, work->v_prev);
+    OSQPVectorf_add_scaled(work->x, lambd_plus_one, work->x, -lambd_scalling, work->x_prev);
+  }
+}
+
+void update_halpern(OSQPSolver* solver) {
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+  OSQPInfo* info          = solver->info;
+
+  OSQPFloat scalling;
+
+  if (strcmp(settings->halpern_scheme, "adaptive") == 0) {
+    OSQPVectorf_minus(work->delta_x, work->x_prev, work->x);
+    OSQPVectorf_minus(work->delta_x_loop, work->x_outer, work->x_prev);
+    OSQPVectorf_minus(work->delta_v, work->v_prev, work->v);
+    OSQPVectorf_minus(work->delta_v_loop, work->v_outer, work->v_prev);
+
+    OSQPFloat delta_x_norm = OSQPVectorf_norm_2(work->delta_x);
+    OSQPFloat delta_v_norm = OSQPVectorf_norm_2(work->delta_v);
+
+    OSQPFloat phi = 2. * (
+      (
+        settings->sigma * OSQPVectorf_dot_prod_signed(work->delta_x, work->delta_x_loop, 0) +
+        settings->rho * OSQPVectorf_dot_prod_signed(work->delta_v, work->delta_v_loop, 0)
+      ) / (
+        settings->sigma * delta_x_norm * delta_x_norm +
+        settings->rho * delta_v_norm * delta_v_norm
+      )
+    ) + 1.;
+
+    scalling = (phi) / (phi + 1.);
+  }
+  else {
+    scalling = (info->inner_loop_iter + 1.) / (info->inner_loop_iter + 2.);
+  }
+  // We compute [1 / (k + 2)] using [1.0 - scalling] as division is expensive/inaccurate (I think?)
+  OSQPFloat reverse_scalling  = (1. - scalling);
+
+  // (x^k, v^k) = [(k+1) / (k+2)] * T((x^k, v^k))
   OSQPVectorf_mult_scalar(work->v, scalling);
   OSQPVectorf_mult_scalar(work->x, scalling);
 
-  OSQPVectorf_add_scaled(work->v, 1., work->v, (1. - scalling), work->v_outer);
-  OSQPVectorf_add_scaled(work->x, 1., work->x, (1. - scalling), work->x_outer);
+  if (strcmp(settings->restart_type, "reflected halpern") == 0) {
+    // (x^k, v^k) = (lambd + 1) (x^k, v^k) - [(k+1) / (k+2)] * (x^k, v^k)
+    // or (x^k, v^k) = [(lambd + 1) / alpha] (x^k, v^k) - [(lambd + 1) / alpha] * [(k+1) / (k+2)] * (x^k, v^k)
+    reflected_halpern_step(solver, scalling);
+  }
 
+  // (x^k, v^k) = (x^k, v^k) + [1 / (k+2)] * (x^0, v^0)
+  OSQPVectorf_add_scaled(work->v, 1., work->v, reverse_scalling, work->v_outer);
+  OSQPVectorf_add_scaled(work->x, 1., work->x, reverse_scalling, work->x_outer);
+
+  // z^k = Proj_C (v^k)
   OSQPVectorf_ew_bound_vec(work->z, work->v, work->data->l, work->data->u);
 
+  // y^k = rho * (Id - Proj_C) (v^k)
   OSQPVectorf_minus(work->y, work->v, work->z);
   OSQPVectorf_ew_prod(work->y, work->y, work->rho_vec);
 }
 
-void update_reflected_halpern(OSQPSolver* solver, OSQPInt k) {
+// void update_reflected_halpern(OSQPSolver* solver, OSQPInt k) {
+//   OSQPSettings*  settings = solver->settings;
+//   OSQPWorkspace* work     = solver->work;
+
+//   OSQPFloat scalling = (k + 1.) / (k + 2.);
+
+//   OSQPVectorf_add_scaled(work->v, 1. + settings->lambd, work->v, -settings->lambd, work->v_prev);
+//   OSQPVectorf_add_scaled(work->x, 1. + settings->lambd, work->x, -settings->lambd, work->x_prev);
+
+//   OSQPVectorf_mult_scalar(work->v, scalling);
+//   OSQPVectorf_mult_scalar(work->x, scalling);
+
+//   OSQPVectorf_add_scaled(work->v, 1., work->v, (1. - scalling), work->v_outer);
+//   OSQPVectorf_add_scaled(work->x, 1., work->x, (1. - scalling), work->x_outer);
+
+//   OSQPVectorf_ew_bound_vec(work->z, work->v, work->data->l, work->data->u);
+
+//   OSQPVectorf_minus(work->y, work->v, work->z);
+//   OSQPVectorf_ew_prod(work->y, work->y, work->rho_vec);
+
+// }
+
+OSQPFloat smoothed_duality_gap(OSQPSolver*  solver,
+                               OSQPVectorf* x,
+                               OSQPVectorf* z,
+                               OSQPVectorf* y,
+                               OSQPVectorf* w,
+                               OSQPVectorf* xz_tilde,
+                               OSQPVectorf* xtilde_view,
+                               OSQPVectorf* ztilde_view) {
+  // At current implementation w is equal to 0 therefore it can be omitted from most steps
+
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
-  OSQPFloat scalling = (k + 1.) / (k + 2.);
+  OSQPFloat smoothed_gap;
+  OSQPFloat norm;
 
-  OSQPVectorf_add_scaled(work->v, 1. + settings->lambd, work->v, -settings->lambd, work->v_prev);
-  OSQPVectorf_add_scaled(work->x, 1. + settings->lambd, work->x, -settings->lambd, work->x_prev);
+  OSQPFloat xi_reciprocal     = 1. / settings->xi;
+  OSQPFloat sigma_reciprocal  = 1. / settings->sigma;
+  OSQPFloat rho_reciprocal    = 1. / settings->rho;
 
-  OSQPVectorf_mult_scalar(work->v, scalling);
-  OSQPVectorf_mult_scalar(work->x, scalling);
+  OSQPFloat xi_over_2     = settings->xi / 2.;
+  OSQPFloat sigma_over_2  = settings->sigma / 2.;
+  OSQPFloat rho_over_2    = settings->sigma / 2.;
 
-  OSQPVectorf_add_scaled(work->v, 1., work->v, (1. - scalling), work->v_outer);
-  OSQPVectorf_add_scaled(work->x, 1., work->x, (1. - scalling), work->x_outer);
+  OSQPFloat sigma_over_xi = settings->sigma / settings->xi;
+  OSQPFloat rho_over_xi   = settings->rho / settings->xi;
 
-  OSQPVectorf_ew_bound_vec(work->z, work->v, work->data->l, work->data->u);
+  // y_z = (1 / xi) y + z
+  OSQPVectorf_add_scaled(work->y_z, xi_reciprocal, work->y, 1., work->z);
 
-  OSQPVectorf_minus(work->y, work->v, work->z);
-  OSQPVectorf_ew_prod(work->y, work->y, work->rho_vec);
+  // OSQPVectorf* temp_1_m;  
+  // OSQPVectorf* temp_2_m;  
+  // OSQPVectorf* temp_3_m;  
+  // OSQPVectorf* temp_1_n;  
+  // OSQPVectorf* temp_2_n; 
+  // OSQPVectorf* temp_3_n;  
+  
+  // self.J = (self.settings.sigma / self.settings.xi) * sparse.eye(self.data.n, format='csc')
+  // self.L = (self.settings.rho / self.settings.xi) * sparse.eye(self.data.m, format='csc')
 
+
+  // 0.5 * x^T P x + q^T x
+  OSQPMatrix_Axpy(work->data->P, xtilde_view, work->temp_1_n, 1., 0.);
+  smoothed_gap = 0.5 * OSQPVectorf_dot_prod(xtilde_view, work->temp_1_n);
+  smoothed_gap += OSQPVectorf_dot_prod(work->data->q, xtilde_view);
+
+  // 0.5 * ||-q - w + sigma * x_tilde + A^T * (-y + rho z_tilde)||_{(P + sigma * I + rho * A^T A)^-1}
+  OSQPVectorf_add_scaled(work->temp_1_m, -1., y, settings->rho, ztilde_view);
+  OSQPMatrix_Atxpy(work->data->A, work->temp_1_m, work->temp_1_m, 1., 0.);
+  OSQPVectorf_add_scaled3(work->temp_1_m, -1., work->data->q, settings->sigma, xtilde_view, 1., work->temp_1_m);
+  OSQPVectorf_minus(work->temp_1_m, work->temp_1_m, w);
+  // Still need to do the semi-norm computation (need to compute the inverse)
+  //    If w=0 then we need to solve the same exact KKT system as for the tilde
+  //      iterates, but with the new choices of x, z, and y. After obtaining the
+  //      x_tilde value, we just compute the dot product of it with work->temp_1_m.
+
+  // temp_xz_tilde, temp_xtilde_view, temp_ztilde_view
+
+  // Preparing to solve the linear system for the inverse (same process as compute_rhs())
+  // OSQPVectorf_copy(work->temp_xz_tilde, xz_tilde);
+
+  //part related to x variables
+  OSQPVectorf_add_scaled3(work->temp_xtilde_view,
+                         settings->sigma,x,
+                         -1., work->data->q, -1., w);
+
+  if (settings->vector_rho_in_averaged_KKT) {
+    OSQPVectorf_ew_prod(work->temp_ztilde_view, work->rho_inv_vec, y);
+    OSQPVectorf_add_scaled(work->temp_ztilde_view,
+                          -1.0, work->temp_ztilde_view,
+                          1.0, z);
+  }
+  else {
+    OSQPVectorf_add_scaled(work->temp_ztilde_view,
+                          1.0, z,
+                          -work->rho_inv, y);
+  }
+
+  // Solve linear system
+  work->linsys_solver->solve(work->linsys_solver, work->temp_xz_tilde, solver->info->iter);
+
+  norm = OSQPVectorf_dot_prod_signed(work->temp_1_m, work->temp_xtilde_view, 0);
+  smoothed_gap += 0.5 * norm * norm;
+
+  // -(sigma / 2) ||x_tilde||^2
+  norm = OSQPVectorf_norm_2(xtilde_view);
+  smoothed_gap += - sigma_over_2 * norm * norm;
+
+  // -(rho / 2) ||z_tilde||^2
+  norm = OSQPVectorf_norm_2(ztilde_view);
+  smoothed_gap += - rho_over_2 * norm * norm;
+
+  // (xi / 2) ||(1 / xi) w + x||^2
+  OSQPVectorf_copy(work->temp_1_n, w);
+  OSQPVectorf_mult_scalar(work->temp_1_n, xi_reciprocal);
+  OSQPVectorf_plus(work->temp_1_n, work->temp_1_n, x);
+  norm = OSQPVectorf_norm_2(work->temp_1_n);
+  smoothed_gap += xi_over_2 * norm * norm;
+
+  // -(xi / 2) ||x||^2
+  norm = OSQPVectorf_norm_2(x);
+  smoothed_gap += - xi_over_2 * norm * norm;
+
+  // -(xi / 2) ||P_C (y_z) - y_z||^2
+  OSQPVectorf_ew_bound_vec(work->temp_1_m, work->y_z, work->data->l, work->data->u);
+  OSQPVectorf_minus(work->temp_1_m, work->temp_1_m, work->y_z);
+  norm = OSQPVectorf_norm_2(work->temp_1_m);
+  smoothed_gap += - xi_over_2 * norm * norm;
+
+  // (xi / 2) ||y_z||^2
+  norm = OSQPVectorf_norm_2(work->y_z);
+  smoothed_gap += xi_over_2 * norm * norm;
+
+  // -(xi / 2) ||z||^2
+  norm = OSQPVectorf_norm_2(z);
+  smoothed_gap += - xi_over_2 * norm * norm;
+
+  // (xi / 2) ||(1 / sigma) w + (sigma / xi) (x_tilde - x)||^2
+  OSQPVectorf_add_scaled3(work->temp_1_n, sigma_reciprocal, w, sigma_over_xi, xtilde_view, -sigma_over_xi, x);
+  norm = OSQPVectorf_norm_2(work->temp_1_n);
+  smoothed_gap += xi_over_2 * norm * norm;
+
+  // -(xi / 2) ||(1 / sigma) w||^2
+  OSQPVectorf_copy(work->temp_1_n, w);
+  OSQPVectorf_mult_scalar(work->temp_1_n, sigma_reciprocal);
+  norm = OSQPVectorf_norm_2(work->temp_1_n);
+  smoothed_gap += - xi_over_2 * norm * norm;
+
+  // (xi / 2) ||(1 / rho) y + (rho / xi) (z_tilde - z)||^2
+  OSQPVectorf_add_scaled3(work->temp_1_m, rho_reciprocal, y, rho_over_xi, ztilde_view, -rho_over_xi, z);
+  norm = OSQPVectorf_norm_2(work->temp_1_m);
+  smoothed_gap += xi_over_2 * norm * norm;
+
+  // -(xi / 2) ||y||^2
+  OSQPVectorf_copy(work->temp_1_m, y);
+  OSQPVectorf_mult_scalar(work->temp_1_m, rho_reciprocal);
+  norm = OSQPVectorf_norm_2(work->temp_1_m);
+  smoothed_gap += - xi_over_2 * norm * norm;
+
+  return smoothed_gap;
 }
 
 void fixed_point_norm(OSQPSolver* solver) {
@@ -297,40 +639,48 @@ void fixed_point_norm(OSQPSolver* solver) {
 OSQPInt should_restart(OSQPSolver* solver) {
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
+  OSQPInfo*      info     = solver->info;
 
-  if (work->norm_cur <= settings->beta * work->norm_outer)
-    return 1;
+  if (strcmp(settings->restart_type, "halpern") == 0 ||
+        strcmp(settings->restart_type, "reflected halpern") == 0) {
+    if (work->norm_cur <= settings->beta * work->norm_outer)
+      return 1;
+    else if (settings->adaptive_rest) {
+      if (
+        work->norm_cur <= settings->restart_necessary * work->norm_outer &&
+        work->norm_cur > work->norm_prev
+      )
+        return 1;
+      else if (
+        info->inner_loop_iter >= settings->restart_artificial * solver->info->iter
+      )
+        return 1;
+      else
+        return 0;
+    }
+    else
+      return 0;
+  }
+  else if (strcmp(settings->restart_type, "averaged") == 0) {
+    if (work->duality_gap_cur <= settings->beta * settings->beta * work->duality_gap_outer)
+      return 1;
+    else if (settings->adaptive_rest) {
+      if (
+        work->norm_cur <= settings->restart_necessary * work->norm_outer &&
+        work->norm_cur > work->norm_prev
+      )
+        return 1;
+      else if (
+        info->inner_loop_iter >= settings->restart_artificial * solver->info->iter
+      )
+        return 1;
+      else
+        return 0;
+    }
+    else
+      return 0;
+  }
   else 
-    return 0;
-
-}
-
-OSQPInt should_restart_adapt(OSQPSolver* solver, OSQPInt k) {
-  OSQPSettings*  settings = solver->settings;
-  OSQPWorkspace* work     = solver->work;
-
-  // c_print("\n");
-  // c_print("work->norm_cur: %f\n", work->norm_cur);
-  // c_print("work->norm_outer: %f\n", work->norm_outer);
-  // c_print("work->norm_prev: %f\n", work->norm_prev);
-  // c_print("k: %d\n", k);
-  // c_print("solver->info->iter: %d\n", solver->info->iter);
-  // c_print("settings->restart_necessary: %f\n", settings->restart_necessary);
-  // c_print("settings->restart_artificial: %f\n", settings->restart_artificial);
-  // c_print("\n");
-
-  if (work->norm_cur <= settings->beta * work->norm_outer)
-    return 1;
-  else if (
-    work->norm_cur <= settings->restart_necessary * work->norm_outer &&
-    work->norm_cur > work->norm_prev
-  ) {
-    return 1;
-  }
-  else if (k >= settings->restart_artificial * solver->info->iter) {
-    return 1;
-  }
-  else
     return 0;
 }
 
@@ -1205,6 +1555,18 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     c_eprint("rho_is_vec must be either 0 or 1");
     return 1;
   }
+  
+  if ((settings->vector_rho_in_averaged_KKT != 0) &&
+      (settings->vector_rho_in_averaged_KKT != 1)) {
+    c_eprint("vector_rho_in_averaged_KKT must be either 0 or 1");
+    return 1;
+  }
+
+  if ((settings->rho_is_vec == 0) && 
+      (settings->vector_rho_in_averaged_KKT != 0)) {
+    c_eprint("To perform vector_rho_in_averaged_KKT, rho_is_vec must be 1");
+    return 1;
+  }
 
   if (from_setup && settings->sigma <= 0.0) {
     c_eprint("sigma must be positive");
@@ -1225,13 +1587,60 @@ OSQPInt validate_settings(const OSQPSettings* settings,
 
   if (settings->lambd < 0.0 ||
       settings->lambd > 1.0) {
-    c_eprint("lambda must be between 0 and 1 inclusive");
+    c_eprint("lambda must be in [0,1]");
+    return 1;
+  }
+
+  if (settings->restart_necessary <= 0.0 ||
+      settings->restart_necessary > 1.0) {
+    c_eprint("restart_necessary must be in (0,1]");
+    return 1;
+  }
+
+  if (settings->restart_artificial <= 0.0 ||
+      settings->restart_artificial > 1.0) {
+    c_eprint("restart_artificial must be in (0,1]");
     return 1;
   }
 
   if (settings->adaptive_rest != 0 &&
       settings->adaptive_rest != 1) {
     c_eprint("adaptive_rest must be either 0 or 1");
+    return 1;
+  }
+
+  if (settings->alpha_adjustment_reflected_halpern != 0 &&
+      settings->alpha_adjustment_reflected_halpern != 1) {
+    c_eprint("alpha_adjustment_reflected_halpern must be either 0 or 1");
+    return 1;
+  }
+
+  if ((settings->alpha_adjustment_reflected_halpern != 0) &&
+      (settings->lambd > (2. / settings->alpha) - 1.)) {
+    c_eprint("lambda must be <= [(2 / alpha) - 1] if we use alpha_adjustment_reflected_halpern");
+    return 1;
+  }
+
+  if (settings->rho_custom_condition != 0 &&
+      settings->rho_custom_condition != 1) {
+    c_eprint("rho_custom_condition must be either 0 or 1");
+    return 1;
+  }
+
+  if (settings->custom_average_rest != 0 &&
+      settings->custom_average_rest != 1) {
+    c_eprint("custom_average_rest must be either 0 or 1");
+    return 1;
+  }
+
+  if (settings->adapt_rho_on_restart != 0 &&
+      settings->adapt_rho_on_restart != 1) {
+    c_eprint("adapt_rho_on_restart must be either 0 or 1");
+    return 1;
+  }
+
+  if (settings->rho_custom_tolerance <= 0) {
+    c_eprint("rho_custom_tolerance must be greater than 0");
     return 1;
   }
 
