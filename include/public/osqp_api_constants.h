@@ -110,7 +110,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_XI                                    (0.8)
 # define OSQP_INI_REST_LEN                          (10)
 # define OSQP_MAX_RESTART_TYPE_LEN                  (20)
-# define OSQP_MAX_HALPERN_SCHEME_LEN                (20)
+# define OSQP_MAX_HALPERN_SCHEME_LEN                (35)
 # define OSQP_ADAPTIVE_REST                         (0)
 # define OSQP_ALPHA_ADJUSTMENT_REFLECTED_HALPERN    (0)
 # define OSQP_RHO_CUSTOM_CONDITION                  (0)
@@ -118,8 +118,11 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_VECT_RHO_IN_AVG_KKT                   (0)
 # define OSQP_ADAPT_RHO_ON_REST                     (0)
 # define OSQP_RHO_CUSTOM_TOLERANCE                  (5)
+# define OSQP_HALPERN_STEP_FIRST_INNER_ITER         (0)
 # define OSQP_RESTART_TYPE                          ("none")
 # define OSQP_HALPERN_SCHEME                        ("none")
+
+# define OSQP_PLOT  (0)
 
 # define OSQP_RHO_MIN               (1e-06)
 # define OSQP_RHO_MAX               (1e06)
@@ -179,17 +182,13 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_ADAPTIVE_RHO_FIXED (100)
 
 // termination parameters
-// # define OSQP_MAX_ITER              (4000)
-# define OSQP_MAX_ITER              (25000)
-// # define OSQP_EPS_ABS               (1E-3)
-# define OSQP_EPS_ABS               (1E-6)
-// # define OSQP_EPS_REL               (1E-3)
-# define OSQP_EPS_REL               (0)
+# define OSQP_MAX_ITER              (4000)
+# define OSQP_EPS_ABS               (1E-3)
+# define OSQP_EPS_REL               (1E-3)
 # define OSQP_EPS_PRIM_INF          (1E-4)
 # define OSQP_EPS_DUAL_INF          (1E-4)
 # define OSQP_SCALED_TERMINATION    (0)
-// # define OSQP_TIME_LIMIT            (1e10)     ///< Disable time limit by default
-# define OSQP_TIME_LIMIT            (1e30)
+# define OSQP_TIME_LIMIT            (1e10)     ///< Disable time limit by default
 
 // Disable the duality gap termination criteria on float builds by default for now, because
 // floats can't always give the necessary precision in the current solver architecture.

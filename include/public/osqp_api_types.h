@@ -81,8 +81,11 @@ typedef struct OSQP_ATTR_PACK {
   OSQPInt custom_average_rest;                      ///< boolean; reset the values to not the averaged but instead to a modified version or not
   OSQPInt vector_rho_in_averaged_KKT;               ///< boolean; use vectarized rho in the smoothed duality gap computation or not
   OSQPInt adapt_rho_on_restart;                     ///< boolean; adapt rho on every restart
+  OSQPInt halpern_step_first_inner_iter;            ///< boolean; performe a halpern step on the first inner loop step
   char restart_type[OSQP_MAX_RESTART_TYPE_LEN];     ///< Determines if we do no restarts, Halpern, Reflected, or Averaged restarts: {"none", "halpern", "reflected halpern", "averaged"}
   char halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN]; ///< Determines if we adapt the Halpern smoothing parameter [(k + 1) / (k + 2)]: {"none", "adaptive"} 
+
+  OSQPInt plot;   ///< boolean; save each iteration for ploting purposes
 
 
   // CG settings

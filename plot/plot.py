@@ -10,7 +10,7 @@ qpbenchmark_data_dir = os.path.abspath(qpbenchmark_data_dir)
 qpbenchmark_names = [f[:-4] for f in os.listdir(qpbenchmark_data_dir) if f.endswith('.mat')]
 
 
-problem_name = sys.argv[1] if len(sys.argv) > 1 else "None"
+problem_name = sys.argv[1].upper() if len(sys.argv) > 1 else "None"
 if (problem_name == "None" or problem_name not in qpbenchmark_names):
     raise ValueError("Input should be a valid Maros Meszaros problem name")
 

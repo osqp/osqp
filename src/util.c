@@ -120,7 +120,7 @@ void print_setup_header(const OSQPSolver* solver) {
           settings->eps_abs, settings->eps_rel);
   c_print("eps_prim_inf = %.1e, eps_dual_inf = %.1e,\n          ",
           settings->eps_prim_inf, settings->eps_dual_inf);
-  c_print("rho = %.2e ", settings->rho);
+  c_print("rho = %.2e", settings->rho);
 
   switch(settings->adaptive_rho)
   {
@@ -142,9 +142,24 @@ void print_setup_header(const OSQPSolver* solver) {
   }
 
   c_print(",\n          ");
-  c_print("sigma = %.2e, alpha = %.2f, ",
-          settings->sigma, settings->alpha);
-  c_print("beta =%.2e, ", settings->beta);
+  c_print("sigma = %.2e, alpha = %.2f, ", settings->sigma, settings->alpha);
+  c_print("beta = %.2e,\n", settings->beta);
+  c_print("          lambda = %.2e, ", settings->lambd);
+  c_print("restart_necessary = %2.e,\n", settings->restart_necessary);
+  c_print("          restart_artificial = %2.e, ", settings->restart_artificial);
+  c_print("ini_rest_len = %i,\n", settings->ini_rest_len);
+  c_print("          restart_type = %s, ", settings->restart_type);
+  c_print("halpern_scheme = %s,\n", settings->halpern_scheme);
+  c_print("          adaptive_rho_tolerance_greater = %2f,\n", settings->adaptive_rho_tolerance_greater);
+  c_print("          adaptive_rho_tolerance_less = %2f,\n", settings->adaptive_rho_tolerance_less);
+  c_print("          adaptive_rest = %i, ", settings->adaptive_rest);
+  c_print("alpha_adjustment_reflected_halpern = %i,\n", settings->alpha_adjustment_reflected_halpern);
+  c_print("          rho_custom_condition = %i, ", settings->rho_custom_condition);
+  c_print("custom_average_rest = %i, ", settings->custom_average_rest);
+  c_print("vector_rho_in_averaged_KKT = %i,\n", settings->vector_rho_in_averaged_KKT);
+  c_print("          adapt_rho_on_restart = %i, ", settings->adapt_rho_on_restart);
+  c_print("rho_custom_tolerance = %2.e,\n", settings->rho_custom_tolerance);
+  c_print("halpern_step_first_inner_iter = %d, ", settings->halpern_step_first_inner_iter);
   c_print("max_iter = %i\n", (int)settings->max_iter);
 
   if (settings->check_termination) {
@@ -341,11 +356,14 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->custom_average_rest                = settings->custom_average_rest;
   new->vector_rho_in_averaged_KKT         = settings->vector_rho_in_averaged_KKT;
   new->adapt_rho_on_restart               = settings->adapt_rho_on_restart;
+  new->halpern_step_first_inner_iter      = settings->halpern_step_first_inner_iter;
   // new->restart_type       = settings->restart_type;
   strncpy(new->restart_type, settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN-1);
   new->restart_type[OSQP_MAX_RESTART_TYPE_LEN-1] = '\0';
   strncpy(new->halpern_scheme, settings->halpern_scheme, OSQP_MAX_HALPERN_SCHEME_LEN-1);
   new->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN-1] = '\0';
+
+  new->plot = settings->plot;
 
   new->cg_max_iter      = settings->cg_max_iter;
   new->cg_tol_reduction = settings->cg_tol_reduction;

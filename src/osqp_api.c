@@ -314,10 +314,14 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->custom_average_rest                 = (OSQPInt)OSQP_CUSTOM_AVERAGE_REST;                  /* modification to the values to which you restart */
   settings->vector_rho_in_averaged_KKT          = (OSQPInt)OSQP_VECT_RHO_IN_AVG_KKT;                  /* using a vectorized rho in the KKT system for smoothed duality gap computation */
   settings->adapt_rho_on_restart                = (OSQPInt)OSQP_ADAPT_RHO_ON_REST;                    /* adapt rho with restarts or not */
+  settings->halpern_step_first_inner_iter       = (OSQPInt)OSQP_HALPERN_STEP_FIRST_INNER_ITER;        /* perform a halpern step for the first inner loop iter */
   strncpy(settings->restart_type, OSQP_RESTART_TYPE, OSQP_MAX_RESTART_TYPE_LEN - 1);
   settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';                                       /* restart format */
   strncpy(settings->halpern_scheme, OSQP_HALPERN_SCHEME, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
   settings->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN - 1] = '\0';
+
+
+  settings->plot = (OSQPInt)OSQP_PLOT;  /* save each iterations metrics in a .csv file for ploting purposes*/
 
   settings->cg_max_iter      = OSQP_CG_MAX_ITER;             /* maximum number of CG iterations */
   settings->cg_tol_reduction = OSQP_CG_TOL_REDUCTION;        /* CG tolerance parameter */
@@ -767,6 +771,8 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   OSQPSettings*  settings;
   OSQPInfo* info;
 
+  FILE *fp = NULL;
+
 #ifdef OSQP_ENABLE_PROFILING
   OSQPFloat temp_run_time;       // Temporary variable to store current run time
 #endif /* ifdef OSQP_ENABLE_PROFILING */
@@ -819,31 +825,35 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
   // Main ADMM algorithm
 
-  FILE *fp = fopen("../../osqp/plot/residuals.csv", "w");
-  if (fp == NULL) {
-    perror("Unable to open file");
-    exitflag = 1;
-    goto exit;
+  if (settings->plot) {
+    fp = fopen("../../osqp/plot/residuals.csv", "w");
+    if (fp == NULL) {
+      perror("Unable to open file");
+      exitflag = 1;
+      goto exit;
+    }
+
+    fprintf(fp, "iteration,prim_res,dual_res,duality_gap,restart\n");
   }
 
-  fprintf(fp, "iteration,prim_res,dual_res,duality_gap,restart\n");
-  c_print("beta: %f\n", settings->beta);
-  c_print("lambd: %f\n", settings->lambd);
-  c_print("restart_necessary: %f\n", settings->restart_necessary);
-  c_print("restart_artificial: %f\n", settings->restart_artificial);
-  c_print("ini_rest_len: %d\n", settings->ini_rest_len);
-  c_print("restart_type: %s\n", settings->restart_type);
-  c_print("halpern_scheme: %s\n", settings->halpern_scheme);
+  // c_print("beta: %f\n", settings->beta);
+  // c_print("lambd: %f\n", settings->lambd);
+  // c_print("restart_necessary: %f\n", settings->restart_necessary);
+  // c_print("restart_artificial: %f\n", settings->restart_artificial);
+  // c_print("ini_rest_len: %d\n", settings->ini_rest_len);
+  // c_print("restart_type: %s\n", settings->restart_type);
+  // c_print("halpern_scheme: %s\n", settings->halpern_scheme);
   // c_print("adaptive_rho_tolerance: %f\n", settings->adaptive_rho_tolerance);
-  c_print("adaptive_rho_tolerance_greater: %f\n", settings->adaptive_rho_tolerance_greater);
-  c_print("adaptive_rho_tolerance_less: %f\n", settings->adaptive_rho_tolerance_less);
-  c_print("adaptive_rest: %d\n", settings->adaptive_rest);
-  c_print("alpha_adjustment_reflected_halpern: %d\n", settings->alpha_adjustment_reflected_halpern);
-  c_print("rho_custom_condition: %d\n", settings->rho_custom_condition);
-  c_print("custom_average_rest: %d\n", settings->custom_average_rest);
-  c_print("vector_rho_in_averaged_KKT: %d\n", settings->vector_rho_in_averaged_KKT);
-  c_print("adapt_rho_on_restart: %d\n", settings->adapt_rho_on_restart);
-  c_print("rho_custom_tolerance: %f\n", settings->rho_custom_tolerance);
+  // c_print("adaptive_rho_tolerance_greater: %f\n", settings->adaptive_rho_tolerance_greater);
+  // c_print("adaptive_rho_tolerance_less: %f\n", settings->adaptive_rho_tolerance_less);
+  // c_print("adaptive_rest: %d\n", settings->adaptive_rest);
+  // c_print("alpha_adjustment_reflected_halpern: %d\n", settings->alpha_adjustment_reflected_halpern);
+  // c_print("rho_custom_condition: %d\n", settings->rho_custom_condition);
+  // c_print("custom_average_rest: %d\n", settings->custom_average_rest);
+  // c_print("vector_rho_in_averaged_KKT: %d\n", settings->vector_rho_in_averaged_KKT);
+  // c_print("adapt_rho_on_restart: %d\n", settings->adapt_rho_on_restart);
+  // c_print("rho_custom_tolerance: %f\n", settings->rho_custom_tolerance);
+  // c_print("halpern_step_first_inner_iter: %d\n", settings->halpern_step_first_inner_iter);
 
 
   // if (settings->alpha == 1) {
@@ -908,9 +918,20 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
   max_iter = settings->max_iter;
   for (iter = 1; iter <= max_iter; iter++) {
+    // c_print("iter: %d\n", iter);
+    // OSQPFloat* x_data = OSQPVectorf_data(work->x);
+    // OSQPFloat* z_data = OSQPVectorf_data(work->z);
+    // OSQPFloat* y_data = OSQPVectorf_data(work->y);
+    // OSQPFloat* rho_vec_data = OSQPVectorf_data(work->rho_vec);
+    // c_print("First element of rho_vec: %f\n", rho_vec_data[0]);
+    // c_print("settings->rho: %f\n", settings->rho);
+    // c_print("Begining First element of x: %f\n", x_data[0]);
+    // c_print("Begining First element of z: %f\n", z_data[0]);
+    // c_print("Begining First element of y: %f\n", y_data[0]);
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_ITER);
     did_restart = 0;
     if (settings->adaptive_rest) {
+      // c_print("adaptive_rest %d\n", settings->adaptive_rest);
       work->norm_prev = work->norm_cur;
     }
     info->inner_loop_iter += 1;
@@ -940,6 +961,14 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     /* Compute y^{k+1} */
     update_y(solver);
 
+    // x_data = OSQPVectorf_data(work->x);
+    // z_data = OSQPVectorf_data(work->z);
+    // y_data = OSQPVectorf_data(work->y);
+    // c_print("First element of x: %f\n", x_data[0]);
+    // c_print("First element of z: %f\n", z_data[0]);
+    // c_print("First element of y: %f\n", y_data[0]);
+
+
     /* End of ADMM Steps */
 
     /* Restart Schemes */
@@ -949,13 +978,20 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
         strcmp(settings->restart_type, "reflected halpern") == 0) {
       /* Halpern Step */
       // Pure Halpern prior to first restart
+      // c_print("restart_type %s\n", settings->restart_type);
       if (iter < settings->ini_rest_len) {
         update_halpern(solver);
       }
 
       // First restart
       else if (iter == settings->ini_rest_len) {
-        can_adapt_rho = 1;
+        // c_print("ini_rest_len %d\n", settings->ini_rest_len);
+        if (settings->adapt_rho_on_restart) {
+          // c_print("adapt_rho_on_restart %d\n", settings->adapt_rho_on_restart);
+          can_adapt_rho = 1;
+        }
+        else 
+          can_adapt_rho = 0;
         did_restart = 1;
         info->restart += 1;
 
@@ -966,6 +1002,12 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
         // Update last_rest_iter
         info->inner_loop_iter = 0;
+
+        if (strcmp(settings->halpern_scheme, "adaptive only before init_rest_len") == 0) {
+          // c_print("halpern_scheme %s\n", settings->halpern_scheme);
+          strncpy(settings->halpern_scheme, OSQP_HALPERN_SCHEME, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
+          settings->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN - 1] = '\0';
+        }
       }
 
       else {
@@ -977,15 +1019,23 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
           // Update work->norm_outer
           work->norm_outer = work->norm_cur;
+
+          if (settings->halpern_step_first_inner_iter) {
+            // c_print("halpern_step_first_inner_iter %d\n", settings->halpern_step_first_inner_iter);
+            update_halpern(solver);
+          }
         }
         else {
           // Update work->norm_cur
           fixed_point_norm(solver);
 
           // Check if restart condition is satisfied
-          can_adapt_rho = should_restart(solver);
-
-          if (can_adapt_rho) {
+          if (should_restart(solver)) {
+            // c_print("restarting\n");
+            if (settings->adapt_rho_on_restart)
+              can_adapt_rho = 1;
+            else 
+              can_adapt_rho = 0;
             did_restart = 1;
             info->restart += 1;
 
@@ -1029,7 +1079,10 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
       // First restart
       else if (iter == settings->ini_rest_len) {
-        can_adapt_rho = 1;
+        if (settings->adapt_rho_on_restart)
+          can_adapt_rho = 1;
+        else 
+          can_adapt_rho = 0;
         did_restart = 1;
         info->restart += 1;
         
@@ -1068,9 +1121,11 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
                                                       work->avg_xtilde_view,
                                                       work->avg_ztilde_view);
 
-        can_adapt_rho = should_restart(solver);
-
-        if (can_adapt_rho) {
+        if (should_restart(solver)) {
+          if (settings->adapt_rho_on_restart)
+            can_adapt_rho = 1;
+          else 
+            can_adapt_rho = 0;
           did_restart += 1;
           info->restart += 1;
 
@@ -1081,6 +1136,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
           reset_avg(solver);
 
           if (settings->custom_average_rest) {
+            // c_print("custom_average_rest %d\n", settings->custom_average_rest);
             work->duality_gap_outer = smoothed_duality_gap(solver,
                                                           work->x,
                                                           work->z,
@@ -1251,8 +1307,10 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     if (can_check_termination) {
       if (check_termination(solver, 0)) {
         // Saving prim_res, dual_res, duality_gap, and did_restart to csv
-        fprintf(fp, "%d,%.3e,%.3e,%.3e,%d\n", 
-          iter, solver->info->prim_res, solver->info->dual_res, solver->info->duality_gap, did_restart);
+        if (settings->plot) {
+          fprintf(fp, "%d,%.3e,%.3e,%.3e,%d\n", 
+            iter, solver->info->prim_res, solver->info->dual_res, solver->info->duality_gap, did_restart);
+        }
         // Terminate algorithm
         break;
       }
@@ -1275,8 +1333,10 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     }
 
     // Saving prim_res, dual_res, duality_gap, and did_restart to csv
-    fprintf(fp, "%d,%.3e,%.3e,%.3e,%d\n", 
-      iter, solver->info->prim_res, solver->info->dual_res, solver->info->duality_gap, did_restart);
+    if (settings->plot) {
+      fprintf(fp, "%d,%.3e,%.3e,%.3e,%d\n", 
+        iter, solver->info->prim_res, solver->info->dual_res, solver->info->duality_gap, did_restart);
+    }
 
     // Actually update rho if requested
     if(can_adapt_rho) {
@@ -1305,7 +1365,8 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
   }        // End of ADMM for loop
 
   // Close csv file
-  fclose(fp);
+  if (settings->plot)
+    fclose(fp);
 
 
   // Update information and check termination condition if it hasn't been done
@@ -1959,10 +2020,13 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   settings->custom_average_rest                 = new_settings->custom_average_rest;
   settings->vector_rho_in_averaged_KKT          = new_settings->vector_rho_in_averaged_KKT;
   settings->adapt_rho_on_restart                = new_settings->adapt_rho_on_restart;
+  settings->halpern_step_first_inner_iter       = new_settings->halpern_step_first_inner_iter;
   strncpy(settings->restart_type, new_settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN - 1);
   settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';
   strncpy(settings->halpern_scheme, new_settings->halpern_scheme, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
   settings->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN - 1] = '\0';
+
+  settings->plot = new_settings->plot;
 
   settings->adaptive_rho_tolerance_greater = new_settings->adaptive_rho_tolerance_greater;
   settings->adaptive_rho_tolerance_less    = new_settings->adaptive_rho_tolerance_less;
