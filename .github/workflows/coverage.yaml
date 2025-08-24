@@ -64,7 +64,7 @@ jobs:
         - name: Install MKL
           if: matrix.algebra == 'mkl'
           run: |
-            conda install -c https://software.repos.intel.com/python/conda/ mkl-devel
+            conda install -c https://software.repos.intel.com/python/conda/ "mkl-devel<2025.1"
             conda info
             conda list
 
