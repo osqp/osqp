@@ -160,6 +160,12 @@ void print_setup_header(const OSQPSolver* solver) {
   c_print("          adapt_rho_on_restart = %i, ", settings->adapt_rho_on_restart);
   c_print("rho_custom_tolerance = %2.e,\n", settings->rho_custom_tolerance);
   c_print("halpern_step_first_inner_iter = %d, ", settings->halpern_step_first_inner_iter);
+  c_print("pid_controller = %d, ", settings->pid_controller);
+  c_print("pid_controller_sqrt = %d, ", settings->pid_controller_sqrt);
+  c_print("pid_controller_log = %d, ", settings->pid_controller_log);
+  c_print("KP = %d, ", settings->KP);
+  c_print("KI = %d, ", settings->KI);
+  c_print("KD = %d, ", settings->KD);
   c_print("max_iter = %i\n", (int)settings->max_iter);
 
   if (settings->check_termination) {
@@ -357,6 +363,12 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->vector_rho_in_averaged_KKT         = settings->vector_rho_in_averaged_KKT;
   new->adapt_rho_on_restart               = settings->adapt_rho_on_restart;
   new->halpern_step_first_inner_iter      = settings->halpern_step_first_inner_iter;
+  new->pid_controller                     = settings->pid_controller;
+  new->pid_controller_sqrt                = settings->pid_controller_sqrt;
+  new->pid_controller_log                 = settings->pid_controller_log;
+  new->KP                                 = settings->KP;
+  new->KI                                 = settings->KI;
+  new->KD                                 = settings->KD;
   // new->restart_type       = settings->restart_type;
   strncpy(new->restart_type, settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN-1);
   new->restart_type[OSQP_MAX_RESTART_TYPE_LEN-1] = '\0';

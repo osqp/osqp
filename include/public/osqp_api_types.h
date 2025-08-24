@@ -82,6 +82,12 @@ typedef struct OSQP_ATTR_PACK {
   OSQPInt vector_rho_in_averaged_KKT;               ///< boolean; use vectarized rho in the smoothed duality gap computation or not
   OSQPInt adapt_rho_on_restart;                     ///< boolean; adapt rho on every restart
   OSQPInt halpern_step_first_inner_iter;            ///< boolean; performe a halpern step on the first inner loop step
+  OSQPInt pid_controller;                           ///< boolean; use a pid controller as the rho update scheme or not
+  OSQPInt pid_controller_sqrt;                      ///< boolean; use the sqrt of the prim and dual residual ratios or not
+  OSQPInt pid_controller_log;                       ///< boolean; use the log of the prim and dual residual ratios or not
+  OSQPFloat KP;                                     ///< Coefficient for proportionality, used in pid controller
+  OSQPFloat KI;                                     ///< Coefficient for integrality, used in pid controller
+  OSQPFloat KD;                                     ///< Coefficient for derivative, used in pid controller
   char restart_type[OSQP_MAX_RESTART_TYPE_LEN];     ///< Determines if we do no restarts, Halpern, Reflected, or Averaged restarts: {"none", "halpern", "reflected halpern", "averaged"}
   char halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN]; ///< Determines if we adapt the Halpern smoothing parameter [(k + 1) / (k + 2)]: {"none", "adaptive"} 
 

@@ -4,7 +4,8 @@ import os
 import sys
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-qpbenchmark_data_dir = os.path.join(script_dir, "..", "..", "qpbenchmark", "maros_meszaros_qpbenchmark", "data")
+# qpbenchmark_data_dir = os.path.join(script_dir, "..", "..", "qpbenchmark", "maros_meszaros_qpbenchmark", "data")
+qpbenchmark_data_dir = os.path.join(script_dir, "..", "..", "maros_meszaros_qpbenchmark", "data")
 qpbenchmark_data_dir = os.path.abspath(qpbenchmark_data_dir)
 
 qpbenchmark_names = [f[:-4] for f in os.listdir(qpbenchmark_data_dir) if f.endswith('.mat')]

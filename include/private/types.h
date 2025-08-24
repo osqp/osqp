@@ -258,6 +258,11 @@ struct OSQPWorkspace_ {
   /// Reciprocal of rho
   OSQPFloat rho_inv;
 
+  /// Rho ratio sum
+  OSQPFloat rho_sum;
+  OSQPFloat rho_ratio;
+  OSQPFloat rho_delta;
+
 # ifdef OSQP_ENABLE_PROFILING
   OSQPTimer* timer;       ///< timer object
 

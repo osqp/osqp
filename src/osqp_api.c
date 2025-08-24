@@ -315,6 +315,12 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->vector_rho_in_averaged_KKT          = (OSQPInt)OSQP_VECT_RHO_IN_AVG_KKT;                  /* using a vectorized rho in the KKT system for smoothed duality gap computation */
   settings->adapt_rho_on_restart                = (OSQPInt)OSQP_ADAPT_RHO_ON_REST;                    /* adapt rho with restarts or not */
   settings->halpern_step_first_inner_iter       = (OSQPInt)OSQP_HALPERN_STEP_FIRST_INNER_ITER;        /* perform a halpern step for the first inner loop iter */
+  settings->pid_controller                      = (OSQPInt)OSQP_PID_CONTROLLER;                       /* use pid controller as the rho update scheme */
+  settings->pid_controller_sqrt                 = (OSQPInt)OSQP_PID_CONTROLLER_SQRT;                  /* use the sqrt of the prim and dual residual ratios */
+  settings->pid_controller_log                  = (OSQPInt)OSQP_PID_CONTROLLER_LOG;                   /* use the log of the prim and dual residual ratios */
+  settings->KP                                  = (OSQPFloat)OSQP_KP;                                 /* Coefficient for proportionality, used in pid controller */
+  settings->KI                                  = (OSQPFloat)OSQP_KI;                                 /* Coefficient for integrality, used in pid controller */
+  settings->KD                                  = (OSQPFloat)OSQP_KD;                                 /* Coefficient for derivative, used in pid controller */
   strncpy(settings->restart_type, OSQP_RESTART_TYPE, OSQP_MAX_RESTART_TYPE_LEN - 1);
   settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';                                       /* restart format */
   strncpy(settings->halpern_scheme, OSQP_HALPERN_SCHEME, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
@@ -795,6 +801,8 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   can_check_termination = 0;
   info->restart         = 0;
   info->inner_loop_iter = 0;
+  work->rho_sum         = 0;
+  work->rho_delta       = 0;
 #ifdef OSQP_ENABLE_PRINTING
   can_print = settings->verbose;
 #endif /* ifdef OSQP_ENABLE_PRINTING */
@@ -2021,6 +2029,12 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   settings->vector_rho_in_averaged_KKT          = new_settings->vector_rho_in_averaged_KKT;
   settings->adapt_rho_on_restart                = new_settings->adapt_rho_on_restart;
   settings->halpern_step_first_inner_iter       = new_settings->halpern_step_first_inner_iter;
+  settings->pid_controller                      = new_settings->pid_controller;
+  settings->pid_controller_sqrt                 = new_settings->pid_controller_sqrt;
+  settings->pid_controller_log                  = new_settings->pid_controller_log;
+  settings->KP                                  = new_settings->KP;
+  settings->KI                                  = new_settings->KI;
+  settings->KD                                  = new_settings->KD;
   strncpy(settings->restart_type, new_settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN - 1);
   settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';
   strncpy(settings->halpern_scheme, new_settings->halpern_scheme, OSQP_MAX_HALPERN_SCHEME_LEN - 1);

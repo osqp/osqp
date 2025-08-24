@@ -5,6 +5,7 @@
 #include "util.h"
 #include "printing.h"
 #include "timing.h"
+#include <math.h>
 
 /***********************************************************
 * Auxiliary functions needed to compute ADMM iterations * *
@@ -40,8 +41,39 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
   dual_res     /= (dual_res_norm + OSQP_DIVISION_TOL);
 
   // Return rho estimate
-  rho_estimate = settings->rho * c_sqrt(prim_res / dual_res);
-  rho_estimate = c_min(c_max(rho_estimate, OSQP_RHO_MIN), OSQP_RHO_MAX);
+  if (settings->pid_controller) {
+    if (settings->pid_controller_sqrt){
+      work->rho_ratio = sqrt((prim_res / dual_res) - 1.);
+      work->rho_delta += work->rho_ratio;
+      work->rho_sum += work->rho_ratio;
+      rho_estimate = log(settings->rho) - (
+        settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
+      );
+      rho_estimate = exp(rho_estimate);
+    }
+    else if (settings->pid_controller_log) {
+      work->rho_ratio = log((prim_res / dual_res) - 1.);
+      work->rho_delta += work->rho_ratio;
+      work->rho_sum += work->rho_ratio;
+      rho_estimate = log(settings->rho) - (
+        settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
+      );
+      rho_estimate = exp(rho_estimate);
+    }
+    else {
+      work->rho_ratio = (prim_res / dual_res) - 1.;
+      work->rho_delta += work->rho_ratio;
+      work->rho_sum += work->rho_ratio;
+      rho_estimate = log(settings->rho) - (
+        settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
+      );
+      rho_estimate = exp(rho_estimate);
+    }
+  }
+  else {
+    rho_estimate = settings->rho * c_sqrt(prim_res / dual_res);
+    rho_estimate = c_min(c_max(rho_estimate, OSQP_RHO_MIN), OSQP_RHO_MAX);
+  }
 
   return rho_estimate;
 }
@@ -84,6 +116,14 @@ OSQPInt adapt_rho(OSQPSolver* solver) {
       exitflag                 = osqp_update_rho(solver, rho_new);
       info->rho_updates += 1;
       solver->work->rho_updated = 1;
+
+      if (settings->pid_controller) {
+        work->rho_delta = -work->rho_ratio;
+      }
+    }
+    else if (settings->pid_controller) {
+      work->rho_sum -= work->rho_ratio;
+      work->rho_delta -= work->rho_ratio;
     }
   }
   if ((rho_new > settings->rho * settings->adaptive_rho_tolerance_greater) ||
@@ -91,6 +131,14 @@ OSQPInt adapt_rho(OSQPSolver* solver) {
     exitflag                 = osqp_update_rho(solver, rho_new);
     info->rho_updates += 1;
     solver->work->rho_updated = 1;
+
+    if (settings->pid_controller) {
+      work->rho_delta = -work->rho_ratio;
+    }
+  }
+  else if (settings->pid_controller) {
+    work->rho_sum -= work->rho_ratio;
+    work->rho_delta -= work->rho_ratio;
   }
 
   return exitflag;
@@ -1725,6 +1773,24 @@ OSQPInt validate_settings(const OSQPSettings* settings,
   if (settings->adapt_rho_on_restart != 0 &&
       settings->adapt_rho_on_restart != 1) {
     c_eprint("adapt_rho_on_restart must be either 0 or 1");
+    return 1;
+  }
+
+  if (settings->pid_controller != 0 &&
+      settings->pid_controller != 1) {
+    c_eprint("pid_controller must be either 0 or 1");
+    return 1;
+  }
+
+  if (settings->pid_controller_sqrt != 0 &&
+      settings->pid_controller_sqrt != 1) {
+    c_eprint("pid_controller_sqrt must be either 0 or 1");
+    return 1;
+  }
+
+  if (settings->pid_controller_log != 0 &&
+      settings->pid_controller_log != 1) {
+    c_eprint("pid_controller_log must be either 0 or 1");
     return 1;
   }
 

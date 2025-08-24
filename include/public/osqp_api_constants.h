@@ -119,6 +119,12 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_ADAPT_RHO_ON_REST                     (0)
 # define OSQP_RHO_CUSTOM_TOLERANCE                  (5)
 # define OSQP_HALPERN_STEP_FIRST_INNER_ITER         (0)
+# define OSQP_PID_CONTROLLER                        (0)
+# define OSQP_PID_CONTROLLER_SQRT                   (0)
+# define OSQP_PID_CONTROLLER_LOG                    (0)
+# define OSQP_KP                                    (1)
+# define OSQP_KI                                    (1)
+# define OSQP_KD                                    (0)
 # define OSQP_RESTART_TYPE                          ("none")
 # define OSQP_HALPERN_SCHEME                        ("none")
 
