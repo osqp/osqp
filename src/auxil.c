@@ -44,20 +44,28 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
   if (settings->pid_controller) {
     if (settings->pid_controller_sqrt){
       work->rho_ratio = sqrt((prim_res / dual_res) - 1.);
+      c_print("work->rho_ratio: %f\n", work->rho_ratio);
       work->rho_delta += work->rho_ratio;
+      c_print("work->rho_delta: %f\n", work->rho_delta);
       work->rho_sum += work->rho_ratio;
+      c_print("work->rho_sum: %f\n", work->rho_sum);
       rho_estimate = log(settings->rho) - (
         settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
       );
+      c_print("rho_estimate before exp: %f\n",rho_estimate);
       rho_estimate = exp(rho_estimate);
     }
     else if (settings->pid_controller_log) {
       work->rho_ratio = log((prim_res / dual_res) - 1.);
+      c_print("work->rho_ratio: %f\n", work->rho_ratio);
       work->rho_delta += work->rho_ratio;
+      c_print("work->rho_delta: %f\n", work->rho_delta);
       work->rho_sum += work->rho_ratio;
+      c_print("work->rho_sum: %f\n", work->rho_sum);
       rho_estimate = log(settings->rho) - (
         settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
       );
+      c_print("rho_estimate before exp: %f\n",rho_estimate);
       rho_estimate = exp(rho_estimate);
     }
     else {
