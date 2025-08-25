@@ -51,6 +51,22 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
       );
       rho_estimate = exp(rho_estimate);
     }
+    else if (settings->pid_controller_sqrt_mult) {
+      work->rho_ratio = sqrt((prim_res / dual_res) - 1.);
+      work->rho_delta += work->rho_ratio;
+      work->rho_sum += work->rho_ratio;
+      rho_estimate = settings->rho * (
+        settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
+      );
+    }
+    else if (settings->pid_controller_sqrt_mult_2) {
+      work->rho_ratio = sqrt((prim_res / dual_res));
+      work->rho_delta += work->rho_ratio;
+      work->rho_sum += work->rho_ratio;
+      rho_estimate = settings->rho * (
+        settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
+      );
+    }
     else if (settings->pid_controller_log) {
       work->rho_ratio = log((prim_res / dual_res) - 1.);
       work->rho_delta += work->rho_ratio;
@@ -1785,6 +1801,18 @@ OSQPInt validate_settings(const OSQPSettings* settings,
   if (settings->pid_controller_sqrt != 0 &&
       settings->pid_controller_sqrt != 1) {
     c_eprint("pid_controller_sqrt must be either 0 or 1");
+    return 1;
+  }
+
+  if (settings->pid_controller_sqrt_mult != 0 &&
+      settings->pid_controller_sqrt_mult != 1) {
+    c_eprint("pid_controller_sqrt_mult must be either 0 or 1");
+    return 1;
+  }
+
+  if (settings->pid_controller_sqrt_mult_2 != 0 &&
+      settings->pid_controller_sqrt_mult_2 != 1) {
+    c_eprint("pid_controller_sqrt_mult_2 must be either 0 or 1");
     return 1;
   }
 

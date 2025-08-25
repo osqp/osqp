@@ -84,6 +84,8 @@ typedef struct OSQP_ATTR_PACK {
   OSQPInt halpern_step_first_inner_iter;            ///< boolean; performe a halpern step on the first inner loop step
   OSQPInt pid_controller;                           ///< boolean; use a pid controller as the rho update scheme or not
   OSQPInt pid_controller_sqrt;                      ///< boolean; use the sqrt of the prim and dual residual ratios or not
+  OSQPInt pid_controller_sqrt_mult;                 ///< boolean; use the sqrt of the prim and dual residual ratios as a multiple or not
+  OSQPInt pid_controller_sqrt_mult_2;               ///< boolean; use the sqrt of the prim and dual residual ratios as a multiple or not
   OSQPInt pid_controller_log;                       ///< boolean; use the log of the prim and dual residual ratios or not
   OSQPFloat KP;                                     ///< Coefficient for proportionality, used in pid controller
   OSQPFloat KI;                                     ///< Coefficient for integrality, used in pid controller

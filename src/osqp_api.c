@@ -317,6 +317,8 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->halpern_step_first_inner_iter       = (OSQPInt)OSQP_HALPERN_STEP_FIRST_INNER_ITER;        /* perform a halpern step for the first inner loop iter */
   settings->pid_controller                      = (OSQPInt)OSQP_PID_CONTROLLER;                       /* use pid controller as the rho update scheme */
   settings->pid_controller_sqrt                 = (OSQPInt)OSQP_PID_CONTROLLER_SQRT;                  /* use the sqrt of the prim and dual residual ratios */
+  settings->pid_controller_sqrt_mult            = (OSQPInt)OSQP_PID_CONTROLLER_SQRT_MULT;             /* use the sqrt of the prim and dual residual ratios as a multiple */
+  settings->pid_controller_sqrt_mult_2          = (OSQPInt)OSQP_PID_CONTROLLER_SQRT_MULT_2;           /* use the sqrt of the prim and dual residual ratios as a multiple */
   settings->pid_controller_log                  = (OSQPInt)OSQP_PID_CONTROLLER_LOG;                   /* use the log of the prim and dual residual ratios */
   settings->KP                                  = (OSQPFloat)OSQP_KP;                                 /* Coefficient for proportionality, used in pid controller */
   settings->KI                                  = (OSQPFloat)OSQP_KI;                                 /* Coefficient for integrality, used in pid controller */
@@ -2031,6 +2033,8 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   settings->halpern_step_first_inner_iter       = new_settings->halpern_step_first_inner_iter;
   settings->pid_controller                      = new_settings->pid_controller;
   settings->pid_controller_sqrt                 = new_settings->pid_controller_sqrt;
+  settings->pid_controller_sqrt_mult            = new_settings->pid_controller_sqrt_mult;
+  settings->pid_controller_sqrt_mult_2          = new_settings->pid_controller_sqrt_mult_2;
   settings->pid_controller_log                  = new_settings->pid_controller_log;
   settings->KP                                  = new_settings->KP;
   settings->KI                                  = new_settings->KI;

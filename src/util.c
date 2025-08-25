@@ -162,6 +162,8 @@ void print_setup_header(const OSQPSolver* solver) {
   c_print("halpern_step_first_inner_iter = %d, ", settings->halpern_step_first_inner_iter);
   c_print("pid_controller = %d, ", settings->pid_controller);
   c_print("pid_controller_sqrt = %d, ", settings->pid_controller_sqrt);
+  c_print("pid_controller_sqrt_mult = %d, ", settings->pid_controller_sqrt_mult);
+  c_print("pid_controller_sqrt_mult_2 = %d, ", settings->pid_controller_sqrt_mult_2);
   c_print("pid_controller_log = %d, ", settings->pid_controller_log);
   c_print("KP = %d, ", settings->KP);
   c_print("KI = %d, ", settings->KI);
@@ -365,6 +367,8 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->halpern_step_first_inner_iter      = settings->halpern_step_first_inner_iter;
   new->pid_controller                     = settings->pid_controller;
   new->pid_controller_sqrt                = settings->pid_controller_sqrt;
+  new->pid_controller_sqrt_mult           = settings->pid_controller_sqrt_mult;
+  new->pid_controller_sqrt_mult_2         = settings->pid_controller_sqrt_mult_2;
   new->pid_controller_log                 = settings->pid_controller_log;
   new->KP                                 = settings->KP;
   new->KI                                 = settings->KI;

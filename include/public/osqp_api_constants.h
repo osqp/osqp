@@ -121,6 +121,8 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_HALPERN_STEP_FIRST_INNER_ITER         (0)
 # define OSQP_PID_CONTROLLER                        (0)
 # define OSQP_PID_CONTROLLER_SQRT                   (0)
+# define OSQP_PID_CONTROLLER_SQRT_MULT              (0)
+# define OSQP_PID_CONTROLLER_SQRT_MULT_2            (0)
 # define OSQP_PID_CONTROLLER_LOG                    (0)
 # define OSQP_KP                                    (1)
 # define OSQP_KI                                    (1)
