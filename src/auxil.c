@@ -72,8 +72,8 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
   }
   else {
     rho_estimate = settings->rho * c_sqrt(prim_res / dual_res);
-    rho_estimate = c_min(c_max(rho_estimate, OSQP_RHO_MIN), OSQP_RHO_MAX);
   }
+  rho_estimate = c_min(c_max(rho_estimate, OSQP_RHO_MIN), OSQP_RHO_MAX);
 
   return rho_estimate;
 }
