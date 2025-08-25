@@ -68,6 +68,7 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
         settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
       );
       rho_estimate = exp(rho_estimate);
+      c_print("rho_estimate %f", rho_estimate);
     }
   }
   else {
