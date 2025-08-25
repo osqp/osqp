@@ -37,7 +37,7 @@ jobs:
         OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
 
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@v5
           with:
             lfs: false
             submodules: recursive
