@@ -62,11 +62,15 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
     }
     else {
       work->rho_ratio = (prim_res / dual_res) - 1.;
+      c_print("work->rho_ratio: %f\n", work->rho_ratio);
       work->rho_delta += work->rho_ratio;
+      c_print("work->rho_delta: %f\n", work->rho_delta);
       work->rho_sum += work->rho_ratio;
+      c_print("work->rho_sum: %f\n", work->rho_sum);
       rho_estimate = log(settings->rho) - (
         settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
       );
+      c_print("rho_estimate before exp: %f\n",rho_estimate);
       rho_estimate = exp(rho_estimate);
     }
   }
@@ -75,7 +79,7 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
     rho_estimate = c_min(c_max(rho_estimate, OSQP_RHO_MIN), OSQP_RHO_MAX);
   }
 
-  c_print("rho_estimate %f", rho_estimate);
+  c_print("rho_estimate %f\n", rho_estimate);
   return rho_estimate;
 }
 
