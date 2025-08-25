@@ -1,0 +1,1 @@
+import{_ as l}from"./mermaid-D59lkToe.js";function s(c,e){var i,a,o;c.accDescr&&((i=e.setAccDescription)==null||i.call(e,c.accDescr)),c.accTitle&&((a=e.setAccTitle)==null||a.call(e,c.accTitle)),c.title&&((o=e.setDiagramTitle)==null||o.call(e,c.title))}l(s,"populateCommonDb");export{s as p};
