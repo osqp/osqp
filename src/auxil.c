@@ -1520,7 +1520,6 @@ OSQPInt check_termination(OSQPSolver* solver,
   info->dual_integral = info->dual_integral * current_solve_time;
   info->duality_gap_integral = info->duality_gap_integral;
   info->integral_sum += (info->prim_integral + info->dual_integral + info->duality_gap_integral);
-  c_print("Updated the integral_sum at iteration: %d with solve_time of: %f\n", info->iter, current_solve_time);
 
   // Compare checks to determine solver status
   if (prim_res_check && dual_res_check && duality_gap_check) {
