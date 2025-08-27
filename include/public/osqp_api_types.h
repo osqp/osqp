@@ -166,11 +166,15 @@ typedef struct {
   OSQPInt status_polish;  ///< Polishing status: successful (1), unperformed (0), unsuccessful (-1)
 
   // solution quality
-  OSQPFloat obj_val;      ///< Primal objective value
-  OSQPFloat dual_obj_val; ///< Dual objective value
-  OSQPFloat prim_res;     ///< Norm of primal residual
-  OSQPFloat dual_res;     ///< Norm of dual residual
-  OSQPFloat duality_gap;  ///< Duality gap (Primal obj - Dual obj)
+  OSQPFloat obj_val;              ///< Primal objective value
+  OSQPFloat dual_obj_val;         ///< Dual objective value
+  OSQPFloat prim_res;             ///< Norm of primal residual
+  OSQPFloat dual_res;             ///< Norm of dual residual
+  OSQPFloat duality_gap;          ///< Duality gap (Primal obj - Dual obj)
+  OSQPFloat prim_integral;        ///< Primal residual integral
+  OSQPFloat dual_integral;        ///< Dual residual integral
+  OSQPFloat duality_gap_integral; ///< Duality gap integral
+  OSQPFloat integral_sum;         ///< Integral sum (prim_integral + dual_integral + duality_gap_integral)
 
   // algorithm information
   OSQPInt   iter;             ///< Number of iterations taken

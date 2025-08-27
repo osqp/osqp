@@ -910,6 +910,9 @@ static OSQPFloat compute_duality_gap_tol(const OSQPSolver* solver,
     max_rel_eps = work->scaling->cinv * max_rel_eps;
   }
 
+  // Update the duality_gap_integral
+  solver->info->duality_gap_integral = solver->info->duality_gap / (1. + max_rel_eps);
+
   // eps_duality_gap
   return eps_abs + eps_rel * max_rel_eps;
 }
@@ -972,6 +975,9 @@ static OSQPFloat compute_prim_tol(const OSQPSolver* solver,
     // Choose maximum
     max_rel_eps = c_max(max_rel_eps, temp_rel_eps);
   }
+
+  // Update the prim_integral
+  solver->info->prim_integral = solver->info->prim_res / (1. + max_rel_eps);
 
   // eps_prim
   return eps_abs + eps_rel * max_rel_eps;
@@ -1061,6 +1067,9 @@ static OSQPFloat compute_dual_tol(const OSQPSolver* solver,
     temp_rel_eps = OSQPVectorf_norm_inf(work->Px);
     max_rel_eps  = c_max(max_rel_eps, temp_rel_eps);
   }
+
+  // Update the dual_integral
+  solver->info->dual_integral = solver->info->dual_res / (1. + max_rel_eps);
 
   // eps_dual
   return eps_abs + eps_rel * max_rel_eps;
@@ -1421,6 +1430,7 @@ OSQPInt check_termination(OSQPSolver* solver,
   OSQPInt   exitflag;
   OSQPInt   prim_res_check, dual_res_check, duality_gap_check, prim_inf_check, dual_inf_check;
   OSQPFloat eps_abs, eps_rel;
+  OSQPFloat current_solve_time;
 
   OSQPInfo*      info     = solver->info;
   OSQPSettings*  settings = solver->settings;
@@ -1504,6 +1514,13 @@ OSQPInt check_termination(OSQPSolver* solver,
     // Force to 1 to bypass the check
     duality_gap_check = 1;
   }
+
+  current_solve_time = osqp_toc(work->timer);
+  info->prim_integral = info->prim_integral * current_solve_time;
+  info->dual_integral = info->dual_integral * current_solve_time;
+  info->duality_gap_integral = info->duality_gap_integral;
+  info->integral_sum += (info->prim_integral + info->dual_integral + info->duality_gap_integral);
+  c_print("Updated the integral_sum at iteration: %d with solve_time of: %f\n", info->iter, current_solve_time);
 
   // Compare checks to determine solver status
   if (prim_res_check && dual_res_check && duality_gap_check) {
