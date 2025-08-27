@@ -90,6 +90,7 @@ typedef struct OSQP_ATTR_PACK {
   OSQPFloat KP;                                     ///< Coefficient for proportionality, used in pid controller
   OSQPFloat KI;                                     ///< Coefficient for integrality, used in pid controller
   OSQPFloat KD;                                     ///< Coefficient for derivative, used in pid controller
+  OSQPInt negate_K;                                 ///< boolean; negate all of pid controller values or not
   char restart_type[OSQP_MAX_RESTART_TYPE_LEN];     ///< Determines if we do no restarts, Halpern, Reflected, or Averaged restarts: {"none", "halpern", "reflected halpern", "averaged"}
   char halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN]; ///< Determines if we adapt the Halpern smoothing parameter [(k + 1) / (k + 2)]: {"none", "adaptive"} 
 

@@ -127,6 +127,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_KP                                    (1)
 # define OSQP_KI                                    (1)
 # define OSQP_KD                                    (0)
+# define OSQP_NEGATE_K                              (0)
 # define OSQP_RESTART_TYPE                          ("none")
 # define OSQP_HALPERN_SCHEME                        ("none")
 

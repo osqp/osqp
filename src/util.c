@@ -165,9 +165,10 @@ void print_setup_header(const OSQPSolver* solver) {
   c_print("pid_controller_sqrt_mult = %d, ", settings->pid_controller_sqrt_mult);
   c_print("pid_controller_sqrt_mult_2 = %d, ", settings->pid_controller_sqrt_mult_2);
   c_print("pid_controller_log = %d, ", settings->pid_controller_log);
-  c_print("KP = %d, ", settings->KP);
-  c_print("KI = %d, ", settings->KI);
-  c_print("KD = %d, ", settings->KD);
+  c_print("KP = %.2e, ", settings->KP);
+  c_print("KI = %.2e, ", settings->KI);
+  c_print("KD = %.2e, ", settings->KD);
+  c_print("negate_K = %d, ", settings->negate_K);
   c_print("max_iter = %i\n", (int)settings->max_iter);
 
   if (settings->check_termination) {
@@ -373,6 +374,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->KP                                 = settings->KP;
   new->KI                                 = settings->KI;
   new->KD                                 = settings->KD;
+  new->negate_K                           = settings->negate_K;
   // new->restart_type       = settings->restart_type;
   strncpy(new->restart_type, settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN-1);
   new->restart_type[OSQP_MAX_RESTART_TYPE_LEN-1] = '\0';

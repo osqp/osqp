@@ -323,6 +323,7 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->KP                                  = (OSQPFloat)OSQP_KP;                                 /* Coefficient for proportionality, used in pid controller */
   settings->KI                                  = (OSQPFloat)OSQP_KI;                                 /* Coefficient for integrality, used in pid controller */
   settings->KD                                  = (OSQPFloat)OSQP_KD;                                 /* Coefficient for derivative, used in pid controller */
+  settings->negate_K                            = (OSQPInt)OSQP_NEGATE_K;                             /* Negate all of the pid controller values */
   strncpy(settings->restart_type, OSQP_RESTART_TYPE, OSQP_MAX_RESTART_TYPE_LEN - 1);
   settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';                                       /* restart format */
   strncpy(settings->halpern_scheme, OSQP_HALPERN_SCHEME, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
@@ -2040,6 +2041,7 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   settings->KP                                  = new_settings->KP;
   settings->KI                                  = new_settings->KI;
   settings->KD                                  = new_settings->KD;
+  settings->negate_K                            = new_settings->negate_K;
   strncpy(settings->restart_type, new_settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN - 1);
   settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';
   strncpy(settings->halpern_scheme, new_settings->halpern_scheme, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
