@@ -911,7 +911,7 @@ static OSQPFloat compute_duality_gap_tol(const OSQPSolver* solver,
   }
 
   // Update the duality_gap_integral
-  solver->info->duality_gap_integral = solver->info->duality_gap / (1. + max_rel_eps);
+  solver->info->duality_gap_integral = c_absval(solver->info->duality_gap) / (1. + max_rel_eps);
 
   // eps_duality_gap
   return eps_abs + eps_rel * max_rel_eps;
@@ -1518,7 +1518,7 @@ OSQPInt check_termination(OSQPSolver* solver,
   current_solve_time = osqp_toc(work->timer);
   info->prim_integral = info->prim_integral * current_solve_time;
   info->dual_integral = info->dual_integral * current_solve_time;
-  info->duality_gap_integral = info->duality_gap_integral;
+  info->duality_gap_integral = info->duality_gap_integral * current_solve_time;
   info->integral_sum += (info->prim_integral + info->dual_integral + info->duality_gap_integral);
 
   // Compare checks to determine solver status
