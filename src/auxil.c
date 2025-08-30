@@ -1368,6 +1368,9 @@ void update_info(OSQPSolver* solver,
 
   // Update timing
 #ifdef OSQP_ENABLE_PROFILING
+  info->delta_solve_time = osqp_toc(work->timer) - *run_time;
+  info->run_time_prev = *run_time;
+  c_print("info->delta_solve_time for iter %d is %f in func update_info", info->iter, info->delta_solve_time);
   *run_time = osqp_toc(work->timer);
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
@@ -1430,7 +1433,6 @@ OSQPInt check_termination(OSQPSolver* solver,
   OSQPInt   exitflag;
   OSQPInt   prim_res_check, dual_res_check, duality_gap_check, prim_inf_check, dual_inf_check;
   OSQPFloat eps_abs, eps_rel;
-  OSQPFloat current_solve_time;
 
   OSQPInfo*      info     = solver->info;
   OSQPSettings*  settings = solver->settings;
@@ -1515,11 +1517,13 @@ OSQPInt check_termination(OSQPSolver* solver,
     duality_gap_check = 1;
   }
 
-  current_solve_time = osqp_toc(work->timer);
-  info->prim_integral = info->prim_integral * current_solve_time;
-  info->dual_integral = info->dual_integral * current_solve_time;
-  info->duality_gap_integral = info->duality_gap_integral * current_solve_time;
-  info->integral_sum += (info->prim_integral + info->dual_integral + info->duality_gap_integral);
+  info->delta_solve_time = osqp_toc(work->timer) - info->run_time_prev;
+  c_print("info->delta_solve_time for iter %d is %f in func check_termination", info->iter, info->delta_solve_time);
+  // delta_time = osqp_toc(work->timer) - current_solve_time;
+  info->prim_integral = info->prim_integral * info->delta_solve_time;
+  info->dual_integral = info->dual_integral * info->delta_solve_time;
+  info->duality_gap_integral = info->duality_gap_integral * info->delta_solve_time;
+  info->total_integral += (info->prim_integral + info->dual_integral + info->duality_gap_integral);
 
   // Compare checks to determine solver status
   if (prim_res_check && dual_res_check && duality_gap_check) {

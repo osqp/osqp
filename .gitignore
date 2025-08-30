@@ -224,3 +224,6 @@ algebra/default/lin_sys/direct/qdldl_sources
 
 # _deps
 _deps/
+
+# Problem results
+plot/stats_della.csv

@@ -930,7 +930,8 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
   max_iter = settings->max_iter;
   for (iter = 1; iter <= max_iter; iter++) {
-    // c_print("iter: %d\n", iter);
+    c_print("iter: %d\n", iter);
+    c_print("osqp_toc(work->timer): %f", osqp_toc(work->timer));
     // OSQPFloat* x_data = OSQPVectorf_data(work->x);
     // OSQPFloat* z_data = OSQPVectorf_data(work->z);
     // OSQPFloat* y_data = OSQPVectorf_data(work->y);

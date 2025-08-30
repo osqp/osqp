@@ -175,7 +175,7 @@ typedef struct {
   OSQPFloat prim_integral;        ///< Primal residual integral
   OSQPFloat dual_integral;        ///< Dual residual integral
   OSQPFloat duality_gap_integral; ///< Duality gap integral
-  OSQPFloat integral_sum;         ///< Integral sum (prim_integral + dual_integral + duality_gap_integral)
+  OSQPFloat total_integral;       ///< Integral sum (prim_integral + dual_integral + duality_gap_integral)
 
   // algorithm information
   OSQPInt   iter;             ///< Number of iterations taken
@@ -185,11 +185,13 @@ typedef struct {
   OSQPInt   inner_loop_iter;  ///< Number of iterations since restarting
 
   // timing information
-  OSQPFloat setup_time;  ///< Setup phase time (seconds)
-  OSQPFloat solve_time;  ///< Solve phase time (seconds)
-  OSQPFloat update_time; ///< Update phase time (seconds)
-  OSQPFloat polish_time; ///< Polish phase time (seconds)
-  OSQPFloat run_time;    ///< Total solve time (seconds)
+  OSQPFloat setup_time;       ///< Setup phase time (seconds)
+  OSQPFloat solve_time;       ///< Solve phase time (seconds)
+  OSQPFloat update_time;      ///< Update phase time (seconds)
+  OSQPFloat polish_time;      ///< Polish phase time (seconds)
+  OSQPFloat run_time;         ///< Total solve time (seconds)
+  OSQPFloat run_time_prev;    ///< Total solve time since last iter (seconds)
+  OSQPFloat delta_solve_time; ///< Difference in time between consecutive iterations (seconds)
 
   // Convergence information
   OSQPFloat primdual_int;  ///< Integral of duality gap over time (Primal-dual integral), requires profiling
