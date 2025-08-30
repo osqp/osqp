@@ -1518,7 +1518,7 @@ OSQPInt check_termination(OSQPSolver* solver,
   }
 
   info->delta_solve_time = osqp_toc(work->timer) - info->run_time_prev;
-  c_print("info->delta_solve_time for iter %d is %f in func check_termination", info->iter, info->delta_solve_time);
+  c_print("info->delta_solve_time for iter %d is %f in func check_termination\n", info->iter, info->delta_solve_time);
   // delta_time = osqp_toc(work->timer) - current_solve_time;
   info->prim_integral = info->prim_integral * info->delta_solve_time;
   info->dual_integral = info->dual_integral * info->delta_solve_time;
