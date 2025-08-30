@@ -1456,6 +1456,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
 
 #ifndef OSQP_EMBEDDED_MODE
+  c_print("Testing if OSQP_EMBEDDED_MODE is defined");
   // Polish the obtained solution
   if (settings->polishing && (solver->info->status_val == OSQP_SOLVED)) {
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_POLISH);

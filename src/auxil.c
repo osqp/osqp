@@ -5,7 +5,7 @@
 #include "util.h"
 #include "printing.h"
 #include "timing.h"
-#include <math.h>
+// #include <math.h>
 
 /***********************************************************
 * Auxiliary functions needed to compute ADMM iterations * *
