@@ -806,7 +806,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   info->inner_loop_iter = 0;
   work->rho_sum         = 0;
   work->rho_delta       = 0;
-  info->integral_sum    = 0;
+  info->total_integral  = 0;
 #ifdef OSQP_ENABLE_PRINTING
   can_print = settings->verbose;
 #endif /* ifdef OSQP_ENABLE_PRINTING */
