@@ -1370,7 +1370,7 @@ void update_info(OSQPSolver* solver,
 #ifdef OSQP_ENABLE_PROFILING
   info->delta_solve_time = osqp_toc(work->timer) - *run_time;
   info->run_time_prev = *run_time;
-  c_print("info->delta_solve_time for iter %d is %f in func update_info", info->iter, info->delta_solve_time);
+  c_print("info->delta_solve_time for iter %d is %f in func update_info\n", info->iter, info->delta_solve_time);
   *run_time = osqp_toc(work->timer);
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
