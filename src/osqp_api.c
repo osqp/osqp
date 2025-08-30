@@ -1455,14 +1455,15 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
 # if OSQP_EMBEDDED_MODE != 1
-  c_print("OSQP_EMBEDDED_MODE value is 1");
+  c_print("OSQP_EMBEDDED_MODE value is 1\n");
 # endif // end OSQP_EMBEDDED_MODE
 
 # if OSQP_EMBEDDED_MODE != 2
-  c_print("OSQP_EMBEDDED_MODE value is 2");
+  c_print("OSQP_EMBEDDED_MODE value is 2\n");
 # endif // end OSQP_EMBEDDED_MODE
 
 #ifndef OSQP_EMBEDDED_MODE
+  c_print("Test OSQP_EMBEDDED_MODE is not defined");
   // Polish the obtained solution
   if (settings->polishing && (solver->info->status_val == OSQP_SOLVED)) {
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_POLISH);
