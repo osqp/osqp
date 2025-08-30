@@ -194,7 +194,6 @@ typedef struct {
   OSQPFloat delta_solve_time; ///< Difference in time between consecutive iterations (seconds)
 
   // Convergence information
-  OSQPFloat primdual_int;  ///< Integral of duality gap over time (Primal-dual integral), requires profiling
   OSQPFloat rel_kkt_error; ///< Relative KKT error
 } OSQPInfo;
 

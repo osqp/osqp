@@ -1361,11 +1361,6 @@ void update_info(OSQPSolver* solver,
   // Compute the objective and duality gap, store various temp values in work
   compute_obj_val_dual_gap(solver, x, y, prim_obj_val, dual_obj_val, dual_gap);
 
-  // Compute the duality gap integral
-  if (!polishing) {
-    info->primdual_int += c_absval(*dual_gap);
-  }
-
   // Update timing
 #ifdef OSQP_ENABLE_PROFILING
   info->run_time_prev = *run_time;
@@ -1516,8 +1511,6 @@ OSQPInt check_termination(OSQPSolver* solver,
   }
 
   info->delta_solve_time = osqp_toc(work->timer) - info->run_time_prev;
-  // c_print("info->delta_solve_time for iter %d is %f in func check_termination\n", info->iter, info->delta_solve_time);
-  // delta_time = osqp_toc(work->timer) - current_solve_time;
   info->prim_integral = info->prim_integral * info->delta_solve_time;
   info->dual_integral = info->dual_integral * info->delta_solve_time;
   info->duality_gap_integral = info->duality_gap_integral * info->delta_solve_time;
