@@ -899,6 +899,7 @@ static OSQPFloat compute_duality_gap_tol(const OSQPSolver* solver,
   }
 
   // Update the duality_gap_integral
+  c_print("c_absval(solver->info->duality_gap): %f\n", c_absval(solver->info->duality_gap));
   solver->info->duality_gap_integral = c_absval(solver->info->duality_gap) / (1. + max_rel_eps);
 
   // eps_duality_gap
@@ -965,6 +966,7 @@ static OSQPFloat compute_prim_tol(const OSQPSolver* solver,
   }
 
   // Update the prim_integral
+  c_print("solver->info->prim_res: %f\n", solver->info->prim_res);
   solver->info->prim_integral = solver->info->prim_res / (1. + max_rel_eps);
 
   // eps_prim
@@ -1057,6 +1059,7 @@ static OSQPFloat compute_dual_tol(const OSQPSolver* solver,
   }
 
   // Update the dual_integral
+  c_print("solver->info->dual_res: %f\n", solver->info->dual_res);
   solver->info->dual_integral = solver->info->dual_res / (1. + max_rel_eps);
 
   // eps_dual
@@ -1503,6 +1506,7 @@ OSQPInt check_termination(OSQPSolver* solver,
   info->dual_integral = info->dual_integral * info->delta_solve_time;
   info->duality_gap_integral = info->duality_gap_integral * info->delta_solve_time;
   info->total_integral += (info->prim_integral + info->dual_integral + info->duality_gap_integral);
+  c_print("info->total_integral: %f\n", info->total_integral);
 
   // Compare checks to determine solver status
   if (prim_res_check && dual_res_check && duality_gap_check) {
