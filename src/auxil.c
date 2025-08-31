@@ -901,6 +901,7 @@ static OSQPFloat compute_duality_gap_tol(const OSQPSolver* solver,
   // Update the duality_gap_integral
   // c_print("c_absval(solver->info->duality_gap): %f\n", c_absval(solver->info->duality_gap));
   solver->info->duality_gap_integral = c_absval(solver->info->duality_gap) / (1. + max_rel_eps);
+  c_print("c_absval(solver->info->duality_gap): %e\n", c_absval(solver->info->duality_gap));
   // c_print("solver->info->duality_gap_integral: %f\n", solver->info->duality_gap_integral);
 
   // eps_duality_gap
@@ -970,6 +971,7 @@ static OSQPFloat compute_prim_tol(const OSQPSolver* solver,
   // c_print("solver->info->prim_res: %f\n", solver->info->prim_res);
   solver->info->prim_integral = solver->info->prim_res / (1. + max_rel_eps);
   // solver->info->prim_integral = solver->info->prim_res;
+  c_print("solver->info->prim_res: %e\n", solver->info->prim_res);
   // c_print("solver->info->prim_integral: %f\n", solver->info->prim_integral);
 
   // eps_prim
@@ -1065,6 +1067,7 @@ static OSQPFloat compute_dual_tol(const OSQPSolver* solver,
   // c_print("solver->info->dual_res: %f\n", solver->info->dual_res);
   solver->info->dual_integral = solver->info->dual_res / (1. + max_rel_eps);
   // solver->info->dual_integral = solver->info->dual_res;
+  c_print("solver->info->dual_res: %e\n", solver->info->dual_res);
   // c_print("solver->info->dual_integral: %f\n", solver->info->dual_integral);
 
   // eps_dual
