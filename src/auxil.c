@@ -1510,8 +1510,8 @@ OSQPInt check_termination(OSQPSolver* solver,
   info->prim_integral = info->prim_integral * info->delta_solve_time;
   info->dual_integral = info->dual_integral * info->delta_solve_time;
   info->duality_gap_integral = info->duality_gap_integral * info->delta_solve_time;
-  info->total_integral += (info->prim_integral + info->dual_integral + info->duality_gap_integral);
-  // info->total_integral += (info->prim_integral + info->dual_integral);
+  // info->total_integral += (info->prim_integral + info->dual_integral + info->duality_gap_integral);
+  info->total_integral += (info->prim_integral + info->dual_integral);
   info->run_time_prev = osqp_toc(work->timer);
   // c_print("info->delta_solve_time: %f\n", info->delta_solve_time);
   // c_print("info->total_integral: %f\n", info->total_integral);
