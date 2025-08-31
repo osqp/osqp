@@ -1503,7 +1503,7 @@ OSQPInt check_termination(OSQPSolver* solver,
     // Force to 1 to bypass the check
     duality_gap_check = 1;
   }
-
+  c_print("osqp_toc(work->timer): %f\n", osqp_toc(work->timer));
   info->delta_solve_time = osqp_toc(work->timer) - info->run_time_prev;
   info->prim_integral = info->prim_integral * info->delta_solve_time;
   info->dual_integral = info->dual_integral * info->delta_solve_time;
