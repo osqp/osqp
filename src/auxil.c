@@ -1505,6 +1505,10 @@ OSQPInt check_termination(OSQPSolver* solver,
     duality_gap_check = 1;
   }
   // c_print("osqp_toc(work->timer): %f\n", osqp_toc(work->timer));
+  c_print("iter: %d\n", info->iter);
+  c_print("info->prim_integral before mult by info->duality_gap_integral: %e\n", info->prim_integral);
+  c_print("info->dual_integral before mult by info->duality_gap_integral: %e\n", info->dual_integral);
+  c_print("info->duality_gap_integral before mult by info->duality_gap_integral: %e\n", info->duality_gap_integral);
   info->delta_solve_time = osqp_toc(work->timer) - info->run_time_prev;
   info->prim_integral = info->prim_integral * info->delta_solve_time;
   info->dual_integral = info->dual_integral * info->delta_solve_time;
@@ -1513,7 +1517,6 @@ OSQPInt check_termination(OSQPSolver* solver,
   // info->total_integral += (info->prim_integral + info->dual_integral);
   info->run_time_prev = osqp_toc(work->timer);
   // c_print("info->delta_solve_time: %f\n", info->delta_solve_time);
-  c_print("iter: %d\n", info->iter);
   c_print("info->prim_integral: %e\n", info->prim_integral);
   c_print("info->dual_integral: %e\n", info->dual_integral);
   c_print("info->duality_gap_integral: %e\n", info->duality_gap_integral);
