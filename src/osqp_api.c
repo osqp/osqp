@@ -937,6 +937,9 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
   //   exitflag = 1;
   // }
 
+  // Initiallizing the variable representing time between integral calculations
+  info->run_time_prev = osqp_toc(work->timer);
+
   max_iter = settings->max_iter;
   for (iter = 1; iter <= max_iter; iter++) {
     // c_print("iter: %d\n", iter);
