@@ -968,8 +968,8 @@ static OSQPFloat compute_prim_tol(const OSQPSolver* solver,
 
   // Update the prim_integral
   // c_print("solver->info->prim_res: %f\n", solver->info->prim_res);
-  // solver->info->prim_integral = solver->info->prim_res / (1. + max_rel_eps);
-  solver->info->prim_integral = solver->info->prim_res;
+  solver->info->prim_integral = solver->info->prim_res / (1. + max_rel_eps);
+  // solver->info->prim_integral = solver->info->prim_res;
   // c_print("solver->info->prim_integral: %f\n", solver->info->prim_integral);
 
   // eps_prim
@@ -1063,8 +1063,8 @@ static OSQPFloat compute_dual_tol(const OSQPSolver* solver,
 
   // Update the dual_integral
   // c_print("solver->info->dual_res: %f\n", solver->info->dual_res);
-  // solver->info->dual_integral = solver->info->dual_res / (1. + max_rel_eps);
-  solver->info->dual_integral = solver->info->dual_res;
+  solver->info->dual_integral = solver->info->dual_res / (1. + max_rel_eps);
+  // solver->info->dual_integral = solver->info->dual_res;
   // c_print("solver->info->dual_integral: %f\n", solver->info->dual_integral);
 
   // eps_dual
