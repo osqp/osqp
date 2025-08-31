@@ -49,6 +49,22 @@ extern "C" {
 #  define c_roundmultiple(x, N) ((x) + .5 * (N)-c_fmod((x) + .5 * (N), (N)))
 # endif /* ifndef c_roundmultiple */
 
+// Estimating exp(x) function
+# ifndef c_exp
+#  define c_exp(x) ({ \
+    OSQPFloat _x = (x); \
+    OSQPFloat _result = 1.0; \
+    OSQPFloat _term = 1.0; \
+    OSQPInt _max_iter = 30; \
+    OSQPInt _iter; \
+    for (_iter = 1; _iter <= _max_iter; _iter++) { \
+      _term *= _x / _iter; \
+      _result += _term; \
+    } \
+    (_x >= 0) ? _result : (1.0 / _result); \
+  })
+# endif
+
 
 /* Use customized functions -----------------------------------------------   */
 

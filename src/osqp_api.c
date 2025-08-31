@@ -804,9 +804,18 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   can_check_termination = 0;
   info->restart         = 0;
   info->inner_loop_iter = 0;
-  work->rho_sum         = 0;
-  work->rho_delta       = 0;
-  info->total_integral  = 0;
+  work->rho_error_sum   = 0.;
+  work->rho_error       = 0.;
+  info->total_integral  = 0.;
+  if (settings->pid_controller) {
+    // For e^0 prim_res / dual_res = 0
+    if ((settings->pid_controller_sqrt_mult_2) || (settings->pid_controller_log)) {
+      work->rho_ratio   = 0.;
+    }
+    else {
+      work->rho_ratio   = 1.;
+    }
+  }
 #ifdef OSQP_ENABLE_PRINTING
   can_print = settings->verbose;
 #endif /* ifdef OSQP_ENABLE_PRINTING */

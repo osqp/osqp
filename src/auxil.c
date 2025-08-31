@@ -43,47 +43,51 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
   // Return rho estimate
   if (settings->pid_controller) {
     if (settings->pid_controller_sqrt){
-      work->rho_ratio = sqrt((prim_res / dual_res) - 1.);
-      work->rho_delta += work->rho_ratio;
-      work->rho_sum += work->rho_ratio;
+      work->rho_error = -work->rho_ratio;
+      work->rho_ratio = sqrt(1. - (prim_res / dual_res));
+      work->rho_error += work->rho_ratio;
+      work->rho_error_sum += work->rho_ratio;
       rho_estimate = log(settings->rho) - (
-        settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
+        settings->KP * work->rho_ratio + settings->KI * work->rho_error_sum + settings->KD * (work->rho_error)
       );
       rho_estimate = exp(rho_estimate);
     }
     else if (settings->pid_controller_sqrt_mult) {
+      work->rho_error = -work->rho_ratio;
       work->rho_ratio = sqrt((prim_res / dual_res) - 1.);
-      work->rho_delta += work->rho_ratio;
-      work->rho_sum += work->rho_ratio;
+      work->rho_error += work->rho_ratio;
+      work->rho_error_sum += work->rho_ratio;
       rho_estimate = settings->rho * (
-        settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
+        settings->KP * work->rho_ratio + settings->KI * work->rho_error_sum + settings->KD * (work->rho_error)
       );
     }
     else if (settings->pid_controller_sqrt_mult_2) {
+      work->rho_error = -work->rho_ratio;
       work->rho_ratio = sqrt((prim_res / dual_res));
-      work->rho_delta += work->rho_ratio;
-      work->rho_sum += work->rho_ratio;
+      work->rho_error += work->rho_ratio;
+      work->rho_error_sum += work->rho_ratio;
       rho_estimate = settings->rho * (
-        settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
+        settings->KP * work->rho_ratio + settings->KI * work->rho_error_sum + settings->KD * (work->rho_error)
       );
     }
     else if (settings->pid_controller_log) {
-      work->rho_ratio = log((prim_res / dual_res) - 1.);
-      work->rho_delta += work->rho_ratio;
-      work->rho_sum += work->rho_ratio;
+      work->rho_error = -work->rho_ratio;
+      work->rho_ratio = log(1. - (prim_res / dual_res));
+      work->rho_error += work->rho_ratio;
+      work->rho_error_sum += work->rho_ratio;
       rho_estimate = log(settings->rho) - (
-        settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
+        settings->KP * work->rho_ratio + settings->KI * work->rho_error_sum + settings->KD * (work->rho_error)
       );
       rho_estimate = exp(rho_estimate);
     }
     else {
-      work->rho_ratio = (prim_res / dual_res) - 1.;
-      work->rho_delta += work->rho_ratio;
-      work->rho_sum += work->rho_ratio;
-      rho_estimate = log(settings->rho) - (
-        settings->KP * work->rho_ratio + settings->KI * work->rho_sum + settings->KD * (work->rho_delta)
+      work->rho_error = -work->rho_ratio;
+      work->rho_ratio = 1. - (prim_res / dual_res);
+      work->rho_error += work->rho_ratio;
+      work->rho_error_sum += work->rho_ratio;
+      rho_estimate = settings->rho * c_exp(
+        -(settings->KP * work->rho_ratio + settings->KI * work->rho_error_sum + settings->KD * (work->rho_error))
       );
-      rho_estimate = exp(rho_estimate);
     }
   }
   else {
@@ -132,14 +136,6 @@ OSQPInt adapt_rho(OSQPSolver* solver) {
       exitflag                 = osqp_update_rho(solver, rho_new);
       info->rho_updates += 1;
       solver->work->rho_updated = 1;
-
-      if (settings->pid_controller) {
-        work->rho_delta = -work->rho_ratio;
-      }
-    }
-    else if (settings->pid_controller) {
-      work->rho_sum -= work->rho_ratio;
-      work->rho_delta -= work->rho_ratio;
     }
   }
   if ((rho_new > settings->rho * settings->adaptive_rho_tolerance_greater) ||
@@ -147,14 +143,6 @@ OSQPInt adapt_rho(OSQPSolver* solver) {
     exitflag                 = osqp_update_rho(solver, rho_new);
     info->rho_updates += 1;
     solver->work->rho_updated = 1;
-
-    if (settings->pid_controller) {
-      work->rho_delta = -work->rho_ratio;
-    }
-  }
-  else if (settings->pid_controller) {
-    work->rho_sum -= work->rho_ratio;
-    work->rho_delta -= work->rho_ratio;
   }
 
   return exitflag;

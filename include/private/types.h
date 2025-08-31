@@ -259,9 +259,9 @@ struct OSQPWorkspace_ {
   OSQPFloat rho_inv;
 
   /// Rho ratio sum
-  OSQPFloat rho_sum;
+  OSQPFloat rho_error_sum;
   OSQPFloat rho_ratio;
-  OSQPFloat rho_delta;
+  OSQPFloat rho_error;
 
 # ifdef OSQP_ENABLE_PROFILING
   OSQPTimer* timer;       ///< timer object
