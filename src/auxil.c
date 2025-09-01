@@ -94,8 +94,6 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
       else if (rho_estimate > OSQP_MAX_RHO_ERROR) {
         rho_estimate = OSQP_MAX_RHO_ERROR;
       }
-      c_print("exp(OSQP_MAX_RHO_ERROR) - c_exp(OSQP_MAX_RHO_ERROR) %e\n", exp(OSQP_MAX_RHO_ERROR) - c_exp(OSQP_MAX_RHO_ERROR));
-      c_print("exp(OSQP_MIN_RHO_ERROR) - c_exp(OSQP_MIN_RHO_ERROR)%e\n", exp(OSQP_MIN_RHO_ERROR) - c_exp(OSQP_MIN_RHO_ERROR));
       rho_estimate = settings->rho * c_exp(rho_estimate);
       // rho_estimate = settings->rho * c_exp(
       //   -(settings->KP * work->rho_ratio + settings->KI * work->rho_error_sum + settings->KD * (work->rho_error))
@@ -107,6 +105,8 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
   }
   rho_estimate = c_min(c_max(rho_estimate, OSQP_RHO_MIN), OSQP_RHO_MAX);
 
+  c_print("exp(OSQP_MAX_RHO_ERROR) - c_exp(OSQP_MAX_RHO_ERROR) %e\n", exp(OSQP_MAX_RHO_ERROR) - c_exp(OSQP_MAX_RHO_ERROR));
+  c_print("exp(OSQP_MIN_RHO_ERROR) - c_exp(OSQP_MIN_RHO_ERROR)%e\n", exp(OSQP_MIN_RHO_ERROR) - c_exp(OSQP_MIN_RHO_ERROR));
   return rho_estimate;
 }
 
