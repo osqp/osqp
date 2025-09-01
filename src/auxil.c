@@ -106,7 +106,7 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
   rho_estimate = c_min(c_max(rho_estimate, OSQP_RHO_MIN), OSQP_RHO_MAX);
 
   c_print("exp(OSQP_MAX_RHO_ERROR) - c_exp(OSQP_MAX_RHO_ERROR) %e\n", exp(OSQP_MAX_RHO_ERROR) - c_exp(OSQP_MAX_RHO_ERROR));
-  c_print("exp(OSQP_MIN_RHO_ERROR) - c_exp(OSQP_MIN_RHO_ERROR)%e\n", exp(OSQP_MIN_RHO_ERROR) - c_exp(OSQP_MIN_RHO_ERROR));
+  c_print("exp(OSQP_MIN_RHO_ERROR) - c_exp(OSQP_MIN_RHO_ERROR) %e\n", exp(OSQP_MIN_RHO_ERROR) - c_exp(OSQP_MIN_RHO_ERROR));
   return rho_estimate;
 }
 

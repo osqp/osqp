@@ -55,7 +55,7 @@ extern "C" {
     OSQPFloat _x = (x); \
     OSQPFloat _result = 1.0; \
     OSQPFloat _term = 1.0; \
-    OSQPInt _max_iter = 55; \
+    OSQPInt _max_iter = 35; \
     OSQPInt _iter; \
     for (_iter = 1; _iter <= _max_iter; _iter++) { \
       _term *= _x / _iter; \
