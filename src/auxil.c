@@ -5,7 +5,7 @@
 #include "util.h"
 #include "printing.h"
 #include "timing.h"
-// #include <math.h>
+#include <math.h>
 
 /***********************************************************
 * Auxiliary functions needed to compute ADMM iterations * *
@@ -85,9 +85,21 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
       work->rho_ratio = 1. - (prim_res / dual_res);
       work->rho_error += work->rho_ratio;
       work->rho_error_sum += work->rho_ratio;
-      rho_estimate = settings->rho * c_exp(
-        -(settings->KP * work->rho_ratio + settings->KI * work->rho_error_sum + settings->KD * (work->rho_error))
-      );
+      rho_estimate = -(settings->KP * work->rho_ratio + settings->KI * work->rho_error_sum + settings->KD * (work->rho_error));
+
+      // The larger in magnitude the expression that goes into c_exp is the less accurate and more prone to numerical instability it is.
+      if (rho_estimate < OSQP_MIN_RHO_ERROR) {
+        rho_estimate = OSQP_MIN_RHO_ERROR;
+      }
+      else if (rho_estimate > OSQP_MAX_RHO_ERROR) {
+        rho_estimate = OSQP_MAX_RHO_ERROR;
+      }
+      c_print("exp(OSQP_MAX_RHO_ERROR) - c_exp(OSQP_MAX_RHO_ERROR) %e\n", exp(OSQP_MAX_RHO_ERROR) - c_exp(OSQP_MAX_RHO_ERROR));
+      c_print("exp(OSQP_MIN_RHO_ERROR) - c_exp(OSQP_MIN_RHO_ERROR)%e\n", exp(OSQP_MIN_RHO_ERROR) - c_exp(OSQP_MIN_RHO_ERROR));
+      rho_estimate = settings->rho * c_exp(rho_estimate);
+      // rho_estimate = settings->rho * c_exp(
+      //   -(settings->KP * work->rho_ratio + settings->KI * work->rho_error_sum + settings->KD * (work->rho_error))
+      // );
     }
   }
   else {

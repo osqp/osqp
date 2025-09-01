@@ -136,6 +136,8 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_RHO_MIN               (1e-06)
 # define OSQP_RHO_MAX               (1e06)
 # define OSQP_RHO_TOL               (1e-04) ///< tolerance for detecting if an inequality is set to equality
+# define OSQP_MIN_RHO_ERROR         (-28)   ///< floor(ln(OSQP_RHO_MIN) - ln(OSQP_RHO_MAX))
+# define OSQP_MAX_RHO_ERROR         (28)    ///< ceil(ln(OSQP_RHO_MAX) - ln(OSQP_RHO_MIN))
 # define OSQP_RHO_EQ_OVER_RHO_INEQ  (1e03)
 
 #ifdef OSQP_ALGEBRA_CUDA
