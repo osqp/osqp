@@ -305,13 +305,13 @@ void print_footer(OSQPInfo* info,
   }
 
   c_print("number of iterations: %i\n", (int)info->iter);
+  c_print("total integral: %.e\n", info->total_integral);
 
   if ((info->status_val == OSQP_SOLVED) ||
       (info->status_val == OSQP_SOLVED_INACCURATE)) {
     c_print("optimal objective:    %.4f\n", info->obj_val);
     c_print("dual objective:       %.4f\n", info->dual_obj_val);
     c_print("duality gap:          %.4e\n", info->duality_gap);
-    c_print("total integral: %.4e\n", info->total_integral);
   }
 
 # ifdef OSQP_ENABLE_PROFILING
