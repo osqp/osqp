@@ -110,14 +110,6 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
   c_exp(-23.);
   c_print("c_exp() time: %e\n", osqp_toc(work->timer) - start);
 
-  start = osqp_toc(work->timer);
-  c_exp_40(-23.);
-  c_print("c_exp_40() time: %e\n", osqp_toc(work->timer) - start);
-  
-  start = osqp_toc(work->timer);
-  c_exp_25(-23.);
-  c_print("c_exp_25() time: %e\n", osqp_toc(work->timer) - start);
-
   return rho_estimate;
 }
 
