@@ -56,55 +56,7 @@ extern "C" {
     OSQPFloat _x = c_absval(_x_orig); \
     OSQPFloat _result = 1.0; \
     OSQPFloat _term = 1.0; \
-    OSQPInt _max_iter = 45; \
-    OSQPInt _iter; \
-    for (_iter = 1; _iter <= _max_iter; _iter++) { \
-      _term *= _x / _iter; \
-      _result += _term; \
-    } \
-    (_x_orig >= 0) ? _result : (1.0 / _result); \
-  })
-# endif
-
-# ifndef c_exp_40
-#  define c_exp_40(x) ({ \
-    OSQPFloat _x_orig = (x); \
-    OSQPFloat _x = c_absval(_x_orig); \
-    OSQPFloat _result = 1.0; \
-    OSQPFloat _term = 1.0; \
     OSQPInt _max_iter = 40; \
-    OSQPInt _iter; \
-    for (_iter = 1; _iter <= _max_iter; _iter++) { \
-      _term *= _x / _iter; \
-      _result += _term; \
-    } \
-    (_x_orig >= 0) ? _result : (1.0 / _result); \
-  })
-# endif
-
-# ifndef c_exp_30
-#  define c_exp_30(x) ({ \
-    OSQPFloat _x_orig = (x); \
-    OSQPFloat _x = c_absval(_x_orig); \
-    OSQPFloat _result = 1.0; \
-    OSQPFloat _term = 1.0; \
-    OSQPInt _max_iter = 30; \
-    OSQPInt _iter; \
-    for (_iter = 1; _iter <= _max_iter; _iter++) { \
-      _term *= _x / _iter; \
-      _result += _term; \
-    } \
-    (_x_orig >= 0) ? _result : (1.0 / _result); \
-  })
-# endif
-
-# ifndef c_exp_35
-#  define c_exp_35(x) ({ \
-    OSQPFloat _x_orig = (x); \
-    OSQPFloat _x = c_absval(_x_orig); \
-    OSQPFloat _result = 1.0; \
-    OSQPFloat _term = 1.0; \
-    OSQPInt _max_iter = 35; \
     OSQPInt _iter; \
     for (_iter = 1; _iter <= _max_iter; _iter++) { \
       _term *= _x / _iter; \
