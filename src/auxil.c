@@ -106,10 +106,6 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
   }
   rho_estimate = c_min(c_max(rho_estimate, OSQP_RHO_MIN), OSQP_RHO_MAX);
 
-  OSQPFloat start = osqp_toc(work->timer); 
-  c_exp(-23.);
-  c_print("c_exp() time: %e\n", osqp_toc(work->timer) - start);
-
   return rho_estimate;
 }
 
