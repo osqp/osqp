@@ -21,7 +21,7 @@ jobs:
         OSQP_INSTALL_PREFIX: ${{ github.workspace }}/../install
 
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@v5
           with:
             lfs: false
             submodules: recursive
@@ -65,7 +65,7 @@ jobs:
         OSQP_INSTALL_PREFIX: ${{ github.workspace }}/../install
 
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@v5
           with:
             lfs: false
             submodules: recursive
@@ -98,7 +98,7 @@ jobs:
         OSQP_INSTALL_PREFIX: ${{ github.workspace }}/../install
 
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@v5
           with:
             lfs: false
             submodules: recursive
