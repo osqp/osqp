@@ -17,15 +17,18 @@
 
 #include "cuda_handler.h"
 #include "helper_cuda.h"
-
+#include "printing.h"
 
 CUDA_Handle_t* cuda_init_libs(int device) {
 
   int deviceCount = 0;
 
-  cudaGetDeviceCount(&deviceCount);
+  checkCudaErrors(cudaGetDeviceCount(&deviceCount));
   if (deviceCount == 0) {
     printf("No GPU detected.\n");
+    return NULL;
+  } else if (device > deviceCount) {
+    c_eprint("GPU %d is not valid, only %d GPU(s) available", device, deviceCount);
     return NULL;
   }
 

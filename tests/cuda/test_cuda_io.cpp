@@ -8,10 +8,10 @@
 #include "cuda_memory.h"
 #include "cuda_lin_alg.h"
 
-#include "basic_qp_data.h"
+#include "cuda_data.h"
 
 
-TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Solve using CUDA in/out data", "[solve][qp][cuda]")
+TEST_CASE_METHOD(cuda_test_fixture, "CUDA: Solve using CUDA in/out data", "[solve][qp][cuda]")
 {
   OSQPInt exitflag;
 

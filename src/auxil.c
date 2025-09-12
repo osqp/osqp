@@ -1052,6 +1052,12 @@ OSQPInt validate_settings(const OSQPSettings* settings,
   }
 
   if (from_setup &&
+      settings->device < 0) {
+    c_eprint("Device must be greater than 0");
+    return 1;
+  }
+
+  if (from_setup &&
       settings->allocate_solution != 0 &&
       settings->allocate_solution != 1) {
     c_eprint("allocate_solution must be either 0 or 1");
