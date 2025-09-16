@@ -1051,26 +1051,31 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
           }
         }
         else {
-          // Update work->norm_cur
-          fixed_point_norm(solver);
+          if (iter % settings->adaptive_rho_interval == 0) {
+            // Update work->norm_cur
+            fixed_point_norm(solver);
 
-          // Check if restart condition is satisfied
-          if (should_restart(solver)) {
-            // c_print("restarting\n");
-            if (settings->adapt_rho_on_restart)
-              can_adapt_rho = 1;
-            else 
-              can_adapt_rho = 0;
-            did_restart = 1;
-            info->restart += 1;
+            // Check if restart condition is satisfied
+            if (should_restart(solver)) {
+              // c_print("restarting\n");
+              if (settings->adapt_rho_on_restart)
+                can_adapt_rho = 1;
+              else 
+                can_adapt_rho = 0;
+              did_restart = 1;
+              info->restart += 1;
 
-            // Update x_outer, v_outer
-            // I temporarly use OSQPVectorf_copy() instead of swap_vectors(), to prevent errors
-            OSQPVectorf_copy(work->x_outer, work->x);
-            OSQPVectorf_copy(work->v_outer, work->v);
+              // Update x_outer, v_outer
+              // I temporarly use OSQPVectorf_copy() instead of swap_vectors(), to prevent errors
+              OSQPVectorf_copy(work->x_outer, work->x);
+              OSQPVectorf_copy(work->v_outer, work->v);
 
-            // Update last_rest_iter
-            info->inner_loop_iter = 0;
+              // Update last_rest_iter
+              info->inner_loop_iter = 0;
+            }
+            else {
+              update_halpern(solver);
+            }
           }
           else {
             update_halpern(solver);
@@ -1137,45 +1142,47 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
         // Add current iterate to average
         update_average(solver);
 
-        work->duality_gap_cur = smoothed_duality_gap(solver,
-                                                      work->avg_x,
-                                                      work->avg_z,
-                                                      work->avg_y,
-                                                      work->avg_w,
-                                                      work->avg_xz_tilde,
-                                                      work->avg_xtilde_view,
-                                                      work->avg_ztilde_view);
+        if (iter % settings->adaptive_rho_interval == 0) {
+          work->duality_gap_cur = smoothed_duality_gap(solver,
+                                                        work->avg_x,
+                                                        work->avg_z,
+                                                        work->avg_y,
+                                                        work->avg_w,
+                                                        work->avg_xz_tilde,
+                                                        work->avg_xtilde_view,
+                                                        work->avg_ztilde_view);
 
-        if (should_restart(solver)) {
-          if (settings->adapt_rho_on_restart)
-            can_adapt_rho = 1;
-          else 
-            can_adapt_rho = 0;
-          did_restart += 1;
-          info->restart += 1;
+          if (should_restart(solver)) {
+            if (settings->adapt_rho_on_restart)
+              can_adapt_rho = 1;
+            else 
+              can_adapt_rho = 0;
+            did_restart += 1;
+            info->restart += 1;
 
-          // Restart to the average iterates
-          restart_to_average(solver);
+            // Restart to the average iterates
+            restart_to_average(solver);
 
-          // Set all average iterates to 0.0
-          reset_avg(solver);
+            // Set all average iterates to 0.0
+            reset_avg(solver);
 
-          if (settings->custom_average_rest) {
-            // c_print("custom_average_rest %d\n", settings->custom_average_rest);
-            work->duality_gap_outer = smoothed_duality_gap(solver,
-                                                          work->x,
-                                                          work->z,
-                                                          work->y,
-                                                          work->w,
-                                                          work->xz_tilde,
-                                                          work->xtilde_view,
-                                                          work->ztilde_view);
+            if (settings->custom_average_rest) {
+              // c_print("custom_average_rest %d\n", settings->custom_average_rest);
+              work->duality_gap_outer = smoothed_duality_gap(solver,
+                                                            work->x,
+                                                            work->z,
+                                                            work->y,
+                                                            work->w,
+                                                            work->xz_tilde,
+                                                            work->xtilde_view,
+                                                            work->ztilde_view);
+            }
+            else {
+              work->duality_gap_outer = work->duality_gap_cur;
+            }
+
+            info->inner_loop_iter = 0;
           }
-          else {
-            work->duality_gap_outer = work->duality_gap_cur;
-          }
-
-          info->inner_loop_iter = 0;
         }
       }
       /* End of Averaged Restarts Step */
