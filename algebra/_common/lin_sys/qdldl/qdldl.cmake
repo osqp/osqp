@@ -3,11 +3,7 @@ include(FetchContent)
 message(STATUS "Fetching/configuring QDLDL solver")
 list(APPEND CMAKE_MESSAGE_INDENT "  ")
 
-FetchContent_Declare(
-  qdldl
-  GIT_REPOSITORY https://github.com/osqp/qdldl.git
-  GIT_TAG v0.1.8
-  )
+add_subdirectory(${OSQP_ALGEBRA_ROOT}/../ext/qdldl ${OSQP_ALGEBRA_ROOT}/../ext/qdldl/build EXCLUDE_FROM_ALL)
 
 # Make QDLDL use the same types as OSQP
 set(QDLDL_FLOAT ${OSQP_USE_FLOAT} CACHE BOOL "QDLDL Float type")
@@ -16,9 +12,6 @@ set(QDLDL_LONG ${OSQP_USE_LONG} CACHE BOOL "QDLDL Integer type")
 # We only want the object library, so turn off the other library products
 set(QDLDL_BUILD_STATIC_LIB OFF CACHE BOOL "Build QDLDL static library")
 set(QDLDL_BUILD_SHARED_LIB OFF CACHE BOOL "Build QDLDL shared library")
-
-FetchContent_MakeAvailable(qdldl)
-FetchContent_GetProperties(qdldl)
 
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
