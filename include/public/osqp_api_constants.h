@@ -60,6 +60,25 @@ enum osqp_linsys_solver_type {
     OSQP_INDIRECT_SOLVER,
 };
 
+/*************************
+* Restart Framework *
+*************************/
+enum osqp_restart_type {
+    OSQP_RESTART_NONE = 0,    /* No restarts */
+    OSQP_RESTART_AVERAGED = 1,
+    OSQP_RESTART_HALPERN = 2,
+    OSQP_RESTART_REFLECTED_HALPERN = 3,
+};
+
+/*************************
+* When to do adaptive halpern *
+*************************/
+enum osqp_halpern_adaptive_type {
+    OSQP_ADAPTIVE_HALPERN_NONE = 0,    /* No adaptation */
+    OSQP_ADAPTIVE_HALPERN = 1,
+    OSQP_ADAPTIVE_HALPERN_BEFORE_INI_REST_LEN = 2,
+};
+
 /*********************************
 * Preconditioners for CG method *
 *********************************/
@@ -128,8 +147,8 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_KI                                    (1)
 # define OSQP_KD                                    (0)
 # define OSQP_NEGATE_K                              (0)
-# define OSQP_RESTART_TYPE                          ("none")
-# define OSQP_HALPERN_SCHEME                        ("none")
+# define OSQP_RESTART_TYPE                          (OSQP_RESTART_NONE)
+# define OSQP_HALPERN_SCHEME                        (OSQP_ADAPTIVE_HALPERN_NONE)
 
 # define OSQP_PLOT  (0)
 

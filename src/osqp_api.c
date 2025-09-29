@@ -302,32 +302,36 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->sigma         = (OSQPFloat)OSQP_SIGMA;  /* ADMM step */
   settings->alpha         = (OSQPFloat)OSQP_ALPHA;  /* relaxation parameter */
 
-  settings->beta                                = (OSQPFloat)OSQP_BETA;                               /* restart parameter */
-  settings->lambd                               = (OSQPFloat)OSQP_LAMBDA;                             /* Reflected Halpern parameter */
-  settings->restart_necessary                   = (OSQPFloat)OSQP_NECESSARY;                          /* Adaptive necessary restarts parameter */
-  settings->restart_artificial                  = (OSQPFloat)OSQP_ARTIFICIAL;                         /* Adaptive artificial restarts parameter */
-  settings->xi                                  = (OSQPFloat)OSQP_XI;                                 /* Averaged restarts parameter */
-  settings->ini_rest_len                        = (OSQPInt)OSQP_INI_REST_LEN;                         /* Initial Restart length */
-  settings->adaptive_rest                       = (OSQPInt)OSQP_ADAPTIVE_REST;                        /* adaptive restarts boolean */
-  settings->alpha_adjustment_reflected_halpern  = (OSQPInt)OSQP_ALPHA_ADJUSTMENT_REFLECTED_HALPERN;   /* adjust alpha in reflected halpern iterates */
-  settings->rho_custom_condition                = (OSQPInt)OSQP_RHO_CUSTOM_CONDITION;                 /* additional rho adaptation conditions boolean */
-  settings->custom_average_rest                 = (OSQPInt)OSQP_CUSTOM_AVERAGE_REST;                  /* modification to the values to which you restart */
-  settings->vector_rho_in_averaged_KKT          = (OSQPInt)OSQP_VECT_RHO_IN_AVG_KKT;                  /* using a vectorized rho in the KKT system for smoothed duality gap computation */
-  settings->adapt_rho_on_restart                = (OSQPInt)OSQP_ADAPT_RHO_ON_REST;                    /* adapt rho with restarts or not */
-  settings->halpern_step_first_inner_iter       = (OSQPInt)OSQP_HALPERN_STEP_FIRST_INNER_ITER;        /* perform a halpern step for the first inner loop iter */
-  settings->pid_controller                      = (OSQPInt)OSQP_PID_CONTROLLER;                       /* use pid controller as the rho update scheme */
-  settings->pid_controller_sqrt                 = (OSQPInt)OSQP_PID_CONTROLLER_SQRT;                  /* use the sqrt of the prim and dual residual ratios */
-  settings->pid_controller_sqrt_mult            = (OSQPInt)OSQP_PID_CONTROLLER_SQRT_MULT;             /* use the sqrt of the prim and dual residual ratios as a multiple */
-  settings->pid_controller_sqrt_mult_2          = (OSQPInt)OSQP_PID_CONTROLLER_SQRT_MULT_2;           /* use the sqrt of the prim and dual residual ratios as a multiple */
-  settings->pid_controller_log                  = (OSQPInt)OSQP_PID_CONTROLLER_LOG;                   /* use the log of the prim and dual residual ratios */
-  settings->KP                                  = (OSQPFloat)OSQP_KP;                                 /* Coefficient for proportionality, used in pid controller */
-  settings->KI                                  = (OSQPFloat)OSQP_KI;                                 /* Coefficient for integrality, used in pid controller */
-  settings->KD                                  = (OSQPFloat)OSQP_KD;                                 /* Coefficient for derivative, used in pid controller */
-  settings->negate_K                            = (OSQPInt)OSQP_NEGATE_K;                             /* Negate all of the pid controller values */
-  strncpy(settings->restart_type, OSQP_RESTART_TYPE, OSQP_MAX_RESTART_TYPE_LEN - 1);
-  settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';                                       /* restart format */
-  strncpy(settings->halpern_scheme, OSQP_HALPERN_SCHEME, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
-  settings->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN - 1] = '\0';
+  if (settings->restart_type != OSQP_RESTART_NONE) {
+    settings->beta                                = (OSQPFloat)OSQP_BETA;                               /* restart parameter */
+    settings->lambd                               = (OSQPFloat)OSQP_LAMBDA;                             /* Reflected Halpern parameter */
+    settings->restart_necessary                   = (OSQPFloat)OSQP_NECESSARY;                          /* Adaptive necessary restarts parameter */
+    settings->restart_artificial                  = (OSQPFloat)OSQP_ARTIFICIAL;                         /* Adaptive artificial restarts parameter */
+    settings->xi                                  = (OSQPFloat)OSQP_XI;                                 /* Averaged restarts parameter */
+    settings->ini_rest_len                        = (OSQPInt)OSQP_INI_REST_LEN;                         /* Initial Restart length */
+    settings->adaptive_rest                       = (OSQPInt)OSQP_ADAPTIVE_REST;                        /* adaptive restarts boolean */
+    settings->alpha_adjustment_reflected_halpern  = (OSQPInt)OSQP_ALPHA_ADJUSTMENT_REFLECTED_HALPERN;   /* adjust alpha in reflected halpern iterates */
+    settings->rho_custom_condition                = (OSQPInt)OSQP_RHO_CUSTOM_CONDITION;                 /* additional rho adaptation conditions boolean */
+    settings->custom_average_rest                 = (OSQPInt)OSQP_CUSTOM_AVERAGE_REST;                  /* modification to the values to which you restart */
+    settings->vector_rho_in_averaged_KKT          = (OSQPInt)OSQP_VECT_RHO_IN_AVG_KKT;                  /* using a vectorized rho in the KKT system for smoothed duality gap computation */
+    settings->adapt_rho_on_restart                = (OSQPInt)OSQP_ADAPT_RHO_ON_REST;                    /* adapt rho with restarts or not */
+    settings->halpern_step_first_inner_iter       = (OSQPInt)OSQP_HALPERN_STEP_FIRST_INNER_ITER;        /* perform a halpern step for the first inner loop iter */
+    settings->pid_controller                      = (OSQPInt)OSQP_PID_CONTROLLER;                       /* use pid controller as the rho update scheme */
+    settings->pid_controller_sqrt                 = (OSQPInt)OSQP_PID_CONTROLLER_SQRT;                  /* use the sqrt of the prim and dual residual ratios */
+    settings->pid_controller_sqrt_mult            = (OSQPInt)OSQP_PID_CONTROLLER_SQRT_MULT;             /* use the sqrt of the prim and dual residual ratios as a multiple */
+    settings->pid_controller_sqrt_mult_2          = (OSQPInt)OSQP_PID_CONTROLLER_SQRT_MULT_2;           /* use the sqrt of the prim and dual residual ratios as a multiple */
+    settings->pid_controller_log                  = (OSQPInt)OSQP_PID_CONTROLLER_LOG;                   /* use the log of the prim and dual residual ratios */
+    settings->KP                                  = (OSQPFloat)OSQP_KP;                                 /* Coefficient for proportionality, used in pid controller */
+    settings->KI                                  = (OSQPFloat)OSQP_KI;                                 /* Coefficient for integrality, used in pid controller */
+    settings->KD                                  = (OSQPFloat)OSQP_KD;                                 /* Coefficient for derivative, used in pid controller */
+    settings->negate_K                            = (OSQPInt)OSQP_NEGATE_K;                             /* Negate all of the pid controller values */
+    // strncpy(settings->restart_type, OSQP_RESTART_TYPE, OSQP_MAX_RESTART_TYPE_LEN - 1);
+    // settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';                                       /* restart format */
+    settings->restart_type                        = (OSQPInt)OSQP_RESTART_TYPE;
+    // strncpy(settings->halpern_scheme, OSQP_HALPERN_SCHEME, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
+    // settings->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN - 1] = '\0';
+    settings->halpern_scheme                      = (OSQPInt)OSQP_HALPERN_SCHEME;
+  }
 
 
   settings->plot = (OSQPInt)OSQP_PLOT;  /* save each iterations metrics in a .csv file for ploting purposes*/
@@ -340,10 +344,13 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->adaptive_rho                    = OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT;
   settings->adaptive_rho_interval           = OSQP_ADAPTIVE_RHO_INTERVAL;
   settings->adaptive_rho_fraction           = (OSQPFloat)OSQP_ADAPTIVE_RHO_FRACTION;
-  // settings->adaptive_rho_tolerance          = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
-  settings->adaptive_rho_tolerance_greater  = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
-  settings->adaptive_rho_tolerance_less     = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
-  settings->rho_custom_tolerance            = (OSQPFloat)OSQP_RHO_CUSTOM_TOLERANCE;
+  
+  if (settings->rho_custom_condition) {
+    // settings->adaptive_rho_tolerance          = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
+    settings->adaptive_rho_tolerance_greater  = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
+    settings->adaptive_rho_tolerance_less     = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
+    settings->rho_custom_tolerance            = (OSQPFloat)OSQP_RHO_CUSTOM_TOLERANCE;
+  }
 
   settings->max_iter           = OSQP_MAX_ITER;                 /* maximum number of ADMM iterations */
   settings->eps_abs            = (OSQPFloat)OSQP_EPS_ABS;       /* absolute convergence tolerance */
@@ -454,104 +461,119 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   work->ztilde_view     = OSQPVectorf_view(work->xz_tilde,n,m);
   work->x_prev          = OSQPVectorf_calloc(n);
   work->z_prev          = OSQPVectorf_calloc(m);
-  work->v_prev          = OSQPVectorf_calloc(m);
-  work->x_outer         = OSQPVectorf_calloc(n);
-  work->v_outer         = OSQPVectorf_calloc(m);
   work->y               = OSQPVectorf_calloc(m);
-  work->v               = OSQPVectorf_calloc(m);
-  work->w               = OSQPVectorf_calloc(n);
-  work->y_pred          = OSQPVectorf_calloc(m);
-  work->w_pred          = OSQPVectorf_calloc(n);
-  work->sum_x           = OSQPVectorf_calloc(n);
-  work->sum_y           = OSQPVectorf_calloc(m);
-  work->sum_z           = OSQPVectorf_calloc(m);
-  work->sum_xz_tilde    = OSQPVectorf_calloc(n + m);
-  work->sum_xtilde_view = OSQPVectorf_view(work->sum_xz_tilde,0,n);
-  work->sum_ztilde_view = OSQPVectorf_view(work->sum_xz_tilde,n,m);
-  work->sum_y_pred      = OSQPVectorf_calloc(m);
-  work->sum_w_pred      = OSQPVectorf_calloc(n);
-  work->sum_w           = OSQPVectorf_calloc(n);
-  work->sum_v           = OSQPVectorf_calloc(m);
-  work->avg_x           = OSQPVectorf_calloc(n);
-  work->avg_y           = OSQPVectorf_calloc(m);
-  work->avg_z           = OSQPVectorf_calloc(m);
-  work->avg_xz_tilde    = OSQPVectorf_calloc(n + m);
-  work->avg_xtilde_view = OSQPVectorf_view(work->avg_xz_tilde,0,n);
-  work->avg_ztilde_view = OSQPVectorf_view(work->avg_xz_tilde,n,m);
-  work->avg_y_pred      = OSQPVectorf_calloc(m);
-  work->avg_w_pred      = OSQPVectorf_calloc(n);
-  work->avg_w           = OSQPVectorf_calloc(n);
-  work->avg_v           = OSQPVectorf_calloc(m);
+
   if (!(work->x) || !(work->z) || !(work->xz_tilde))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
   if (!(work->xtilde_view) || !(work->ztilde_view))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->x_prev) || !(work->z_prev) || !(work->v_prev))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->x_outer) || !(work->v_outer))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->y) || !(work->v) || !(work->w))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->y_pred) || !(work->w_pred))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->sum_x) || !(work->sum_z) || !(work->sum_xz_tilde))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->sum_xtilde_view) || !(work->sum_ztilde_view))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  // if (!(work->sum_xtilde_view) || !(work->sum_ztilde_view))
-  //   return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->sum_y) || !(work->sum_v) || !(work->sum_w))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->sum_y_pred) || !(work->sum_w_pred))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->avg_x) || !(work->avg_z) || !(work->avg_xz_tilde))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->avg_xtilde_view) || !(work->avg_ztilde_view))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  // if (!(work->avg_xtilde_view) || !(work->avg_ztilde_view))
-  //   return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->avg_y) || !(work->avg_v) || !(work->avg_w))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->avg_y_pred) || !(work->avg_w_pred))
+  if (!(work->x_prev) || !(work->z_prev) || !(work->y))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
+  if ((settings->restart_type != OSQP_RESTART_NONE) || settings->rho_custom_condition) {
+    work->v_prev          = OSQPVectorf_calloc(m);
+    work->v               = OSQPVectorf_calloc(m);
+    work->delta_v       = OSQPVectorf_calloc(m);
+  }
 
-  // Restart variables
-  work->delta_v       = OSQPVectorf_calloc(m);
-  work->delta_w       = OSQPVectorf_calloc(n);
-  work->delta_x_loop  = OSQPVectorf_calloc(n);
-  work->delta_v_loop  = OSQPVectorf_calloc(m);
+  if (settings->restart_type != OSQP_RESTART_NONE) {
+    // Allocate internal solver variables for restart
+    work->x_outer         = OSQPVectorf_calloc(n);
+    work->v_outer         = OSQPVectorf_calloc(m);
+    work->w               = OSQPVectorf_calloc(n);
+    work->y_pred          = OSQPVectorf_calloc(m);
+    work->w_pred          = OSQPVectorf_calloc(n);
+    work->sum_x           = OSQPVectorf_calloc(n);
+    work->sum_y           = OSQPVectorf_calloc(m);
+    work->sum_z           = OSQPVectorf_calloc(m);
+    work->sum_xz_tilde    = OSQPVectorf_calloc(n + m);
+    work->sum_xtilde_view = OSQPVectorf_view(work->sum_xz_tilde,0,n);
+    work->sum_ztilde_view = OSQPVectorf_view(work->sum_xz_tilde,n,m);
+    work->sum_y_pred      = OSQPVectorf_calloc(m);
+    work->sum_w_pred      = OSQPVectorf_calloc(n);
+    work->sum_w           = OSQPVectorf_calloc(n);
+    work->sum_v           = OSQPVectorf_calloc(m);
+    work->avg_x           = OSQPVectorf_calloc(n);
+    work->avg_y           = OSQPVectorf_calloc(m);
+    work->avg_z           = OSQPVectorf_calloc(m);
+    work->avg_xz_tilde    = OSQPVectorf_calloc(n + m);
+    work->avg_xtilde_view = OSQPVectorf_view(work->avg_xz_tilde,0,n);
+    work->avg_ztilde_view = OSQPVectorf_view(work->avg_xz_tilde,n,m);
+    work->avg_y_pred      = OSQPVectorf_calloc(m);
+    work->avg_w_pred      = OSQPVectorf_calloc(n);
+    work->avg_w           = OSQPVectorf_calloc(n);
+    work->avg_v           = OSQPVectorf_calloc(m);
 
-  if (!(work->delta_v) || !(work->delta_w))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->delta_x_loop) || !(work->delta_v_loop))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    // Restart variables
+    work->delta_w       = OSQPVectorf_calloc(n);
+    work->delta_x_loop  = OSQPVectorf_calloc(n);
+    work->delta_v_loop  = OSQPVectorf_calloc(m);
 
-  work->y_z = OSQPVectorf_calloc(m);
-  work->temp_1_m = OSQPVectorf_calloc(m);
-  // work->temp_2_m = OSQPVectorf_calloc(m);
-  // work->temp_3_m = OSQPVectorf_calloc(m);
-  work->temp_1_n = OSQPVectorf_calloc(n);
-  // work->temp_2_n = OSQPVectorf_calloc(n);
-  // work->temp_3_n = OSQPVectorf_calloc(n);
+    work->y_z = OSQPVectorf_calloc(m);
+    work->temp_1_m = OSQPVectorf_calloc(m);
+    // work->temp_2_m = OSQPVectorf_calloc(m);
+    // work->temp_3_m = OSQPVectorf_calloc(m);
+    work->temp_1_n = OSQPVectorf_calloc(n);
+    // work->temp_2_n = OSQPVectorf_calloc(n);
+    // work->temp_3_n = OSQPVectorf_calloc(n);
 
-  work->temp_xz_tilde         = OSQPVectorf_calloc(n + m);
-  work->temp_xtilde_view      = OSQPVectorf_view(work->temp_xz_tilde,0,n);
-  work->temp_ztilde_view      = OSQPVectorf_view(work->temp_xz_tilde,n,m);
+    work->temp_xz_tilde         = OSQPVectorf_calloc(n + m);
+    work->temp_xtilde_view      = OSQPVectorf_view(work->temp_xz_tilde,0,n);
+    work->temp_ztilde_view      = OSQPVectorf_view(work->temp_xz_tilde,n,m);
+  }
 
-  if (!(work->y_z))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  // if (!(work->temp_1_m) || !(work->temp_2_m) || !(work->temp_3_m))
-  if (!(work->temp_1_m))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  // if (!(work->temp_1_n) || !(work->temp_2_n) || !(work->temp_3_n))
-  if (!(work->temp_1_n))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if ((settings->restart_type != OSQP_RESTART_NONE) || settings->rho_custom_condition) {
+    if (!(work->v_prev) || !(work->delta_v) || !(work->v))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  }
 
-  if (!(work->temp_xz_tilde))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->temp_xtilde_view) || !(work->temp_ztilde_view))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if (settings->restart_type != OSQP_RESTART_NONE) {
+    if (!(work->x_outer) || !(work->v_outer))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->w))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->y_pred) || !(work->w_pred))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->sum_x) || !(work->sum_z) || !(work->sum_xz_tilde))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->sum_xtilde_view) || !(work->sum_ztilde_view))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    // if (!(work->sum_xtilde_view) || !(work->sum_ztilde_view))
+    //   return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->sum_y) || !(work->sum_v) || !(work->sum_w))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->sum_y_pred) || !(work->sum_w_pred))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->avg_x) || !(work->avg_z) || !(work->avg_xz_tilde))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->avg_xtilde_view) || !(work->avg_ztilde_view))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    // if (!(work->avg_xtilde_view) || !(work->avg_ztilde_view))
+    //   return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->avg_y) || !(work->avg_v) || !(work->avg_w))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->avg_y_pred) || !(work->avg_w_pred))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    
+    if (!(work->delta_w))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->delta_x_loop) || !(work->delta_v_loop))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+
+    if (!(work->y_z))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    // if (!(work->temp_1_m) || !(work->temp_2_m) || !(work->temp_3_m))
+    if (!(work->temp_1_m))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    // if (!(work->temp_1_n) || !(work->temp_2_n) || !(work->temp_3_n))
+    if (!(work->temp_1_n))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+
+    if (!(work->temp_xz_tilde))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->temp_xtilde_view) || !(work->temp_ztilde_view))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  }
 
   // Primal and dual residuals variables
   work->Ax  = OSQPVectorf_calloc(m);
@@ -762,18 +784,21 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 OSQPInt osqp_solve(OSQPSolver *solver) {
 
   OSQPInt exitflag;
-  OSQPInt iter, max_iter, restart_iter;
+  OSQPInt iter, max_iter;
+  if (solver->settings->restart_type != OSQP_RESTART_NONE) {
+    OSQPInt restart_iter;
+  }
 
   OSQPInt can_print = 0;             // boolean, whether to print or not
   OSQPInt can_adapt_rho = 0;         // boolean, adapt rho or not
   OSQPInt can_check_termination = 0; // boolean, check termination or not
   OSQPInt did_restart = 0;           // boolean, restart or not
-  OSQPInt restart_scheme = -1;       // (0) No restarts
-                                     // (1) Halpern
-                                     // (2) Reflected Halpern
-                                     // (3) Averaged restarts
-                                     // (4) Reflected Halpern & Adaptive
-  OSQPInt first_digit = -1;          // helps determine restart_scheme
+  // OSQPInt restart_scheme = -1;       // (0) No restarts
+  //                                    // (1) Halpern
+  //                                    // (2) Reflected Halpern
+  //                                    // (3) Averaged restarts
+  //                                    // (4) Reflected Halpern & Adaptive
+  // OSQPInt first_digit = -1;          // helps determine restart_scheme
   // OSQPInt adaptive_rest = 0;         // Whether to do adaptive restarts ontop of Reflected Helpern restarts or not
 
   OSQPWorkspace* work;
@@ -802,18 +827,21 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   // Initialize variables
   exitflag              = 0;
   can_check_termination = 0;
-  info->restart         = 0;
-  info->inner_loop_iter = 0;
-  work->rho_error_sum   = 0.;
-  work->rho_error       = 0.;
-  info->total_integral  = 0.;
-  if (settings->pid_controller) {
-    // For e^0 prim_res / dual_res = 0
-    if ((settings->pid_controller_sqrt_mult_2) || (settings->pid_controller_log)) {
-      work->rho_ratio   = 0.;
-    }
-    else {
-      work->rho_ratio   = 1.;
+  
+  if (settings->restart_type != OSQP_RESTART_NONE) {
+    info->restart         = 0;
+    info->inner_loop_iter = 0;
+    work->rho_error_sum   = 0.;
+    work->rho_error       = 0.;
+    info->total_integral  = 0.;
+    if (settings->pid_controller) {
+      // For e^0 prim_res / dual_res = 0
+      if ((settings->pid_controller_sqrt_mult_2) || (settings->pid_controller_log)) {
+        work->rho_ratio   = 0.;
+      }
+      else {
+        work->rho_ratio   = 1.;
+      }
     }
   }
 #ifdef OSQP_ENABLE_PRINTING
@@ -878,7 +906,8 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
 
   // if (settings->alpha == 1) {
-  if (strcmp(settings->restart_type, "none") == 0) {
+  // if (strcmp(settings->restart_type, "none") == 0) {
+  if (settings->restart_type == OSQP_RESTART_NONE) {
     // No restarts [alpha: 1]
     // restart_scheme = 0;
     settings->adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS;
@@ -937,8 +966,10 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
   //   exitflag = 1;
   // }
 
-  // Initiallizing the variable representing time between integral calculations
-  info->run_time_prev = osqp_toc(work->timer);
+  if (settings->restart_type != OSQP_RESTART_NONE) {
+    // Initiallizing the variable representing time between integral calculations
+    info->run_time_prev = osqp_toc(work->timer);
+  }
 
   max_iter = settings->max_iter;
   for (iter = 1; iter <= max_iter; iter++) {
@@ -954,18 +985,23 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     // c_print("Begining First element of z: %f\n", z_data[0]);
     // c_print("Begining First element of y: %f\n", y_data[0]);
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_ITER);
-    did_restart = 0;
-    if (settings->adaptive_rest) {
-      // c_print("adaptive_rest %d\n", settings->adaptive_rest);
-      work->norm_prev = work->norm_cur;
+
+    if (settings->restart_type != OSQP_RESTART_NONE) {
+      did_restart = 0;
+      if (settings->adaptive_rest) {
+        // c_print("adaptive_rest %d\n", settings->adaptive_rest);
+        work->norm_prev = work->norm_cur;
+      }
+      info->inner_loop_iter += 1;
     }
-    info->inner_loop_iter += 1;
 
 
     // Update x_prev, z_prev, v_prev (preallocated, no malloc)
     swap_vectors(&(work->x), &(work->x_prev));
     swap_vectors(&(work->z), &(work->z_prev));
-    swap_vectors(&(work->v), &(work->v_prev));
+    if ((settings->restart_type != OSQP_RESTART_NONE) || settings->rho_custom_condition) {
+      swap_vectors(&(work->v), &(work->v_prev));
+    }
 
     /* ADMM STEPS */
     /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
@@ -999,8 +1035,9 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     /* Restart Schemes */
 
     // if (restart_scheme == 1) {
-    if (strcmp(settings->restart_type, "halpern") == 0 ||
-        strcmp(settings->restart_type, "reflected halpern") == 0) {
+    // if (strcmp(settings->restart_type, "halpern") == 0 ||
+    //     strcmp(settings->restart_type, "reflected halpern") == 0) {
+    if (settings->restart_type == OSQP_RESTART_HALPERN || settings->restart_type == OSQP_RESTART_REFLECTED_HALPERN) {
       /* Halpern Step */
       // Pure Halpern prior to first restart
       // c_print("restart_type %s\n", settings->restart_type);
@@ -1028,10 +1065,12 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
         // Update last_rest_iter
         info->inner_loop_iter = 0;
 
-        if (strcmp(settings->halpern_scheme, "adaptive only before init_rest_len") == 0) {
+        // if (strcmp(settings->halpern_scheme, "adaptive only before init_rest_len") == 0) {
+        if (settings->halpern_scheme == OSQP_ADAPTIVE_HALPERN_BEFORE_INI_REST_LEN) {
           // c_print("halpern_scheme %s\n", settings->halpern_scheme);
-          strncpy(settings->halpern_scheme, OSQP_HALPERN_SCHEME, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
-          settings->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN - 1] = '\0';
+          // strncpy(settings->halpern_scheme, OSQP_HALPERN_SCHEME, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
+          // settings->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN - 1] = '\0';
+          settings->halpern_scheme = OSQP_HALPERN_SCHEME;
         }
       }
 
@@ -1085,7 +1124,8 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       /* End of Halpern Step*/
     }
 
-    else if (strcmp(settings->restart_type, "averaged") == 0) {
+    // else if (strcmp(settings->restart_type, "averaged") == 0) {
+    else if (settings->restart_type == OSQP_RESTART_AVERAGED) {
       /* Averaged Restarts Step */
 
       // Need to update these two variables here through calls to (in original python code it is done in should restart, but we will do it here now)
@@ -1246,7 +1286,9 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     case OSQP_ADAPTIVE_RHO_UPDATE_DISABLED:
       /* Don't do anything, it is disabled*/
       can_adapt_rho = 0;
-      did_restart = 0;
+      if (settings->restart_type != OSQP_RESTART_NONE) {
+        did_restart = 0;
+      }
       break;
 
     case OSQP_ADAPTIVE_RHO_UPDATE_TIME:
@@ -1284,7 +1326,9 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
         {
           /* Break out of the switch statement because we don't have an iteration value yet */
           can_adapt_rho = 0;
-          did_restart = 0;
+          if (settings->restart_type != OSQP_RESTART_NONE) {
+            did_restart = 0;
+          }
           break;
         }
       }
@@ -1306,11 +1350,15 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       /* Update rho when the appropriate number of iterations have passed */
       if(settings->adaptive_rho_interval && (iter % settings->adaptive_rho_interval == 0)) {
         can_adapt_rho = 1;
-        did_restart   = 1;
-        info->restart += 1;
+        if (settings->restart_type != OSQP_RESTART_NONE) {
+          did_restart   = 1;
+          info->restart += 1;
+        }
       } else {
         can_adapt_rho = 0;
-        did_restart   = 0;
+        if (settings->restart_type != OSQP_RESTART_NONE) {
+          did_restart = 0;
+        }
       }
       break;
     }
@@ -1355,12 +1403,16 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     if(can_adapt_rho && (settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR)) {
       if(solver->info->rel_kkt_error <= ( settings->adaptive_rho_fraction * work->last_rel_kkt) ) {
         can_adapt_rho = 1;
-        did_restart   = 1;
-        info->restart += 1;
+        if (settings->restart_type != OSQP_RESTART_NONE) {
+          did_restart   = 1;
+          info->restart += 1;
+        }
       }
       else {
         can_adapt_rho = 0;
-        did_restart   = 0;
+        if (settings->restart_type != OSQP_RESTART_NONE) {
+          did_restart   = 0;
+        }
       }
     }
 
@@ -1619,48 +1671,55 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
     OSQPVectorf_view_free(work->ztilde_view);
     OSQPVectorf_free(work->x_prev);
     OSQPVectorf_free(work->z_prev);
-    OSQPVectorf_free(work->v_prev);
-    OSQPVectorf_free(work->x_outer);
-    OSQPVectorf_free(work->v_outer);
     OSQPVectorf_free(work->y);
-    OSQPVectorf_free(work->v);
-    OSQPVectorf_free(work->w);
-    OSQPVectorf_free(work->y_pred);
-    OSQPVectorf_free(work->w_pred);
-    OSQPVectorf_free(work->sum_x);
-    OSQPVectorf_free(work->sum_y);
-    OSQPVectorf_free(work->sum_z);
-    OSQPVectorf_free(work->sum_xz_tilde);
-    OSQPVectorf_view_free(work->sum_xtilde_view);
-    OSQPVectorf_view_free(work->sum_ztilde_view);
-    OSQPVectorf_free(work->sum_y_pred);
-    OSQPVectorf_free(work->sum_w_pred);
-    OSQPVectorf_free(work->sum_w);
-    OSQPVectorf_free(work->sum_v);
-    OSQPVectorf_free(work->avg_x);
-    OSQPVectorf_free(work->avg_y);
-    OSQPVectorf_free(work->avg_z);
-    OSQPVectorf_free(work->avg_xz_tilde);
-    OSQPVectorf_view_free(work->avg_xtilde_view);
-    OSQPVectorf_view_free(work->avg_ztilde_view);
-    OSQPVectorf_free(work->avg_y_pred);
-    OSQPVectorf_free(work->avg_w_pred);
-    OSQPVectorf_free(work->avg_w);
-    OSQPVectorf_free(work->avg_v);
-    OSQPVectorf_free(work->delta_v);
-    OSQPVectorf_free(work->delta_w);
-    OSQPVectorf_free(work->delta_x_loop);
-    OSQPVectorf_free(work->delta_v_loop);
-    OSQPVectorf_free(work->temp_1_m);
-    // OSQPVectorf_free(work->temp_2_m);
-    // OSQPVectorf_free(work->temp_3_m);
-    OSQPVectorf_free(work->temp_1_n);
-    // OSQPVectorf_free(work->temp_2_n);
-    // OSQPVectorf_free(work->temp_3_n);
-    OSQPVectorf_free(work->temp_xz_tilde);
-    OSQPVectorf_view_free(work->temp_xtilde_view);
-    OSQPVectorf_view_free(work->temp_ztilde_view);
-    OSQPVectorf_free(work->y_z);
+
+    if ((solver->settings->restart_type != OSQP_RESTART_NONE) || solver->settings->rho_custom_condition) {
+      OSQPVectorf_free(work->v_prev);
+      OSQPVectorf_free(work->v);
+      OSQPVectorf_free(work->delta_v);
+    }
+    
+    if (solver->settings->restart_type != OSQP_RESTART_NONE) {
+      OSQPVectorf_free(work->x_outer);
+      OSQPVectorf_free(work->v_outer);
+      OSQPVectorf_free(work->w);
+      OSQPVectorf_free(work->y_pred);
+      OSQPVectorf_free(work->w_pred);
+      OSQPVectorf_free(work->sum_x);
+      OSQPVectorf_free(work->sum_y);
+      OSQPVectorf_free(work->sum_z);
+      OSQPVectorf_free(work->sum_xz_tilde);
+      OSQPVectorf_view_free(work->sum_xtilde_view);
+      OSQPVectorf_view_free(work->sum_ztilde_view);
+      OSQPVectorf_free(work->sum_y_pred);
+      OSQPVectorf_free(work->sum_w_pred);
+      OSQPVectorf_free(work->sum_w);
+      OSQPVectorf_free(work->sum_v);
+      OSQPVectorf_free(work->avg_x);
+      OSQPVectorf_free(work->avg_y);
+      OSQPVectorf_free(work->avg_z);
+      OSQPVectorf_free(work->avg_xz_tilde);
+      OSQPVectorf_view_free(work->avg_xtilde_view);
+      OSQPVectorf_view_free(work->avg_ztilde_view);
+      OSQPVectorf_free(work->avg_y_pred);
+      OSQPVectorf_free(work->avg_w_pred);
+      OSQPVectorf_free(work->avg_w);
+      OSQPVectorf_free(work->avg_v);
+      OSQPVectorf_free(work->delta_w);
+      OSQPVectorf_free(work->delta_x_loop);
+      OSQPVectorf_free(work->delta_v_loop);
+      OSQPVectorf_free(work->temp_1_m);
+      // OSQPVectorf_free(work->temp_2_m);
+      // OSQPVectorf_free(work->temp_3_m);
+      OSQPVectorf_free(work->temp_1_n);
+      // OSQPVectorf_free(work->temp_2_n);
+      // OSQPVectorf_free(work->temp_3_n);
+      OSQPVectorf_free(work->temp_xz_tilde);
+      OSQPVectorf_view_free(work->temp_xtilde_view);
+      OSQPVectorf_view_free(work->temp_ztilde_view);
+      OSQPVectorf_free(work->y_z);
+    }
+
     OSQPVectorf_free(work->Ax);
     OSQPVectorf_free(work->Px);
     OSQPVectorf_free(work->Aty);
@@ -2039,38 +2098,44 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   // sigma      ignored
   settings->alpha = new_settings->alpha;
 
-  settings->beta                                = new_settings->beta;
-  settings->lambd                               = new_settings->lambd;
-  settings->restart_necessary                   = new_settings->restart_necessary;
-  settings->restart_artificial                  = new_settings->restart_artificial;
-  settings->xi                                  = new_settings->xi;
-  settings->ini_rest_len                        = new_settings->ini_rest_len;
-  settings->adaptive_rest                       = new_settings->adaptive_rest;
-  settings->alpha_adjustment_reflected_halpern  = new_settings->alpha_adjustment_reflected_halpern;
-  settings->rho_custom_condition                = new_settings->rho_custom_condition;
-  settings->custom_average_rest                 = new_settings->custom_average_rest;
-  settings->vector_rho_in_averaged_KKT          = new_settings->vector_rho_in_averaged_KKT;
-  settings->adapt_rho_on_restart                = new_settings->adapt_rho_on_restart;
-  settings->halpern_step_first_inner_iter       = new_settings->halpern_step_first_inner_iter;
-  settings->pid_controller                      = new_settings->pid_controller;
-  settings->pid_controller_sqrt                 = new_settings->pid_controller_sqrt;
-  settings->pid_controller_sqrt_mult            = new_settings->pid_controller_sqrt_mult;
-  settings->pid_controller_sqrt_mult_2          = new_settings->pid_controller_sqrt_mult_2;
-  settings->pid_controller_log                  = new_settings->pid_controller_log;
-  settings->KP                                  = new_settings->KP;
-  settings->KI                                  = new_settings->KI;
-  settings->KD                                  = new_settings->KD;
-  settings->negate_K                            = new_settings->negate_K;
-  strncpy(settings->restart_type, new_settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN - 1);
-  settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';
-  strncpy(settings->halpern_scheme, new_settings->halpern_scheme, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
-  settings->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN - 1] = '\0';
-
+  if (settings->restart_type != OSQP_RESTART_NONE) {
+    settings->beta                                = new_settings->beta;
+    settings->lambd                               = new_settings->lambd;
+    settings->restart_necessary                   = new_settings->restart_necessary;
+    settings->restart_artificial                  = new_settings->restart_artificial;
+    settings->xi                                  = new_settings->xi;
+    settings->ini_rest_len                        = new_settings->ini_rest_len;
+    settings->adaptive_rest                       = new_settings->adaptive_rest;
+    settings->alpha_adjustment_reflected_halpern  = new_settings->alpha_adjustment_reflected_halpern;
+    settings->rho_custom_condition                = new_settings->rho_custom_condition;
+    settings->custom_average_rest                 = new_settings->custom_average_rest;
+    settings->vector_rho_in_averaged_KKT          = new_settings->vector_rho_in_averaged_KKT;
+    settings->adapt_rho_on_restart                = new_settings->adapt_rho_on_restart;
+    settings->halpern_step_first_inner_iter       = new_settings->halpern_step_first_inner_iter;
+    settings->pid_controller                      = new_settings->pid_controller;
+    settings->pid_controller_sqrt                 = new_settings->pid_controller_sqrt;
+    settings->pid_controller_sqrt_mult            = new_settings->pid_controller_sqrt_mult;
+    settings->pid_controller_sqrt_mult_2          = new_settings->pid_controller_sqrt_mult_2;
+    settings->pid_controller_log                  = new_settings->pid_controller_log;
+    settings->KP                                  = new_settings->KP;
+    settings->KI                                  = new_settings->KI;
+    settings->KD                                  = new_settings->KD;
+    settings->negate_K                            = new_settings->negate_K;
+    // strncpy(settings->restart_type, new_settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN - 1);
+    // settings->restart_type[OSQP_MAX_RESTART_TYPE_LEN - 1] = '\0';
+    settings->restart_type                        = new_settings->restart_type;
+    // strncpy(settings->halpern_scheme, new_settings->halpern_scheme, OSQP_MAX_HALPERN_SCHEME_LEN - 1);
+    // settings->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN - 1] = '\0';
+    settings->halpern_scheme                      = new_settings->halpern_scheme;
+  }
+  
   settings->plot = new_settings->plot;
 
-  settings->adaptive_rho_tolerance_greater = new_settings->adaptive_rho_tolerance_greater;
-  settings->adaptive_rho_tolerance_less    = new_settings->adaptive_rho_tolerance_less;
-  settings->rho_custom_tolerance           = new_settings->rho_custom_tolerance;
+  if (settings->rho_custom_condition) {
+    settings->adaptive_rho_tolerance_greater = new_settings->adaptive_rho_tolerance_greater;
+    settings->adaptive_rho_tolerance_less    = new_settings->adaptive_rho_tolerance_less;
+    settings->rho_custom_tolerance           = new_settings->rho_custom_tolerance;
+  }
 
   settings->cg_max_iter      = new_settings->cg_max_iter;
   settings->cg_tol_reduction = new_settings->cg_tol_reduction;

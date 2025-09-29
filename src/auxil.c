@@ -289,8 +289,10 @@ void update_z(OSQPSolver* solver) {
                             work->rho_inv, work->y);
   }
 
-  // Update v
-  OSQPVectorf_copy(work->v, work->z);
+  if ((settings->restart_type != OSQP_RESTART_NONE) || settings->rho_custom_condition) {
+    // Update v
+    OSQPVectorf_copy(work->v, work->z);
+  }
 
   // project z onto C = [l,u]
   OSQPVectorf_ew_bound_vec(work->z, work->z, work->data->l, work->data->u);
@@ -330,7 +332,7 @@ void update_y(OSQPSolver* solver) {
   //     c_print("  [%d]: %f\n", i, rho_vec_data[i]);
   // }
 
-  if (strcmp(settings->restart_type, "averaged") == 0) {
+  if (settings->restart_type == OSQP_RESTART_AVERAGED) {
     // y_pred^{k+1} = y^{k+1} + \rho (z^{k+1} - z^{k}) + \rho (1 - \alpha) (\tilde{z}^{k+1} - z^{k})
     // I don't know of a better way to do this other than the following three updates
     OSQPVectorf_add_scaled3(
@@ -367,8 +369,10 @@ void update_w(OSQPSolver* solver) {
     work->w_pred, 1., work->x, (settings->alpha - 2.), work->x_prev,
     (1. - settings->alpha), work->xtilde_view
   );
-  OSQPVectorf_mult_scalar(work->w_pred, settings->sigma);
-  OSQPVectorf_plus(work->w_pred, work->w_pred, work->w);
+  if (settings->restart_type == OSQP_RESTART_AVERAGED) {
+    OSQPVectorf_mult_scalar(work->w_pred, settings->sigma);
+    OSQPVectorf_plus(work->w_pred, work->w_pred, work->w);
+  }
 }
 
 void reset_sum(OSQPSolver* solver) {
@@ -514,8 +518,10 @@ void update_halpern(OSQPSolver* solver) {
 
 
 
-  if ((strcmp(settings->halpern_scheme, "adaptive") == 0) ||
-      (strcmp(settings->halpern_scheme, "adaptive only before init_rest_len") == 0)) {
+  // if ((strcmp(settings->halpern_scheme, "adaptive") == 0) ||
+  //     (strcmp(settings->halpern_scheme, "adaptive only before init_rest_len") == 0)) {
+  if ((settings->halpern_scheme == OSQP_ADAPTIVE_HALPERN ) ||
+      (settings->halpern_scheme == OSQP_ADAPTIVE_HALPERN_BEFORE_INI_REST_LEN)) {
     // c_print("halpern_scheme %s\n", settings->halpern_scheme);
     OSQPVectorf_minus(work->delta_x, work->x_prev, work->x);
     OSQPVectorf_minus(work->delta_x_loop, work->x_outer, work->x_prev);
@@ -553,7 +559,7 @@ void update_halpern(OSQPSolver* solver) {
   OSQPVectorf_mult_scalar(work->v, scalling);
   OSQPVectorf_mult_scalar(work->x, scalling);
 
-  if (strcmp(settings->restart_type, "reflected halpern") == 0) {
+  if (settings->restart_type == OSQP_RESTART_REFLECTED_HALPERN) {
     // (x^k, v^k) = (lambd + 1) (x^k, v^k) - [(k+1) / (k+2)] * (x^k, v^k)
     // or (x^k, v^k) = [(lambd + 1) / alpha] (x^k, v^k) - [(lambd + 1) / alpha] * [(k+1) / (k+2)] * (x^k, v^k)
     // c_print("restart_type %s\n", settings->restart_type);
@@ -786,8 +792,9 @@ OSQPInt should_restart(OSQPSolver* solver) {
   OSQPWorkspace* work     = solver->work;
   OSQPInfo*      info     = solver->info;
 
-  if (strcmp(settings->restart_type, "halpern") == 0 ||
-        strcmp(settings->restart_type, "reflected halpern") == 0) {
+  // if (strcmp(settings->restart_type, "halpern") == 0 ||
+  //       strcmp(settings->restart_type, "reflected halpern") == 0) {
+  if (settings->restart_type == OSQP_RESTART_HALPERN || settings->restart_type == OSQP_RESTART_REFLECTED_HALPERN) {
     // c_print("beta %f\n", settings->beta);
     if (work->norm_cur <= settings->beta * work->norm_outer)
       return 1;
@@ -810,7 +817,8 @@ OSQPInt should_restart(OSQPSolver* solver) {
     else
       return 0;
   }
-  else if (strcmp(settings->restart_type, "averaged") == 0) {
+  // else if (strcmp(settings->restart_type, "averaged") == 0) {
+  else if (settings->restart_type == OSQP_RESTART_AVERAGED) {
     if (work->duality_gap_cur <= settings->beta * settings->beta * work->duality_gap_outer)
       return 1;
     else if (settings->adaptive_rest) {
