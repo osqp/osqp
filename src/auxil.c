@@ -96,9 +96,6 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
       }
       
       rho_estimate = settings->rho * c_exp(rho_estimate);
-      // rho_estimate = settings->rho * c_exp(
-      //   -(settings->KP * work->rho_ratio + settings->KI * work->rho_error_sum + settings->KD * (work->rho_error))
-      // );
     }
   }
   else {
@@ -119,8 +116,6 @@ OSQPInt adapt_rho(OSQPSolver* solver) {
   OSQPInfo*      info     = solver->info;
 
   exitflag = 0;     // Initialize exitflag to 0
-  // c_print("adaptive_rho_tolerance_greater %f\n", settings->adaptive_rho_tolerance_greater);
-  // c_print("adaptive_rho_tolerance_less %f\n", settings->adaptive_rho_tolerance_less);
 
   // Compute new rho
   rho_new = compute_rho_estimate(solver);
@@ -130,8 +125,6 @@ OSQPInt adapt_rho(OSQPSolver* solver) {
 
   // Check if the new rho is large or small enough and update it in case
   if (settings->rho_custom_condition) {
-    // c_print("rho_custom_condition %d\n", settings->rho_custom_condition);
-    // c_print("rho_custom_tolerance %f\n", settings->rho_custom_tolerance);
     OSQPFloat first_part_norm = 0.0;
     OSQPFloat second_part_norm = 0.0;
 
@@ -303,9 +296,6 @@ void update_y(OSQPSolver* solver) {
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
-  // OSQPFloat* y_data = OSQPVectorf_data(work->y);
-  // c_print("Update_y First element of y: %f\n", y_data[0]);
-
   OSQPVectorf_add_scaled3(work->delta_y,
                           settings->alpha, work->ztilde_view,
                           (1.0 - settings->alpha), work->z_prev,
@@ -319,18 +309,6 @@ void update_y(OSQPSolver* solver) {
   }
 
   OSQPVectorf_plus(work->y, work->y, work->delta_y);
-
-  // y_data = OSQPVectorf_data(work->y);
-  // c_print("Update_y First element of y (2): %f\n", y_data[0]);
-  // c_print("settings->rho: %f\n", settings->rho);
-  // OSQPFloat* rho_vec_data = OSQPVectorf_data(work->rho_vec);
-  // c_print("First element of rho_vec: %f\n", rho_vec_data[0]); 
-  // OSQPFloat* rho_vec_data = OSQPVectorf_data(work->rho_vec);
-  // OSQPInt rho_vec_length = OSQPVectorf_length(work->rho_vec);
-  // c_print("rho_vec (length %d): ", rho_vec_length);
-  // for (OSQPInt i = 0; i < rho_vec_length; i++) {
-  //     c_print("  [%d]: %f\n", i, rho_vec_data[i]);
-  // }
 
   if (settings->restart_type == OSQP_RESTART_AVERAGED) {
     // y_pred^{k+1} = y^{k+1} + \rho (z^{k+1} - z^{k}) + \rho (1 - \alpha) (\tilde{z}^{k+1} - z^{k})
@@ -471,12 +449,8 @@ void reflected_halpern_step(OSQPSolver* solver, OSQPFloat scalling) {
 
   OSQPFloat lambd_plus_one  = 1. + settings->lambd;
 
-  // c_print("lambd %f\n", settings->lambd);
-
   if (settings->alpha_adjustment_reflected_halpern) {
-    // c_print("alpha_adjustment_reflected_halpern %d\n", settings->alpha_adjustment_reflected_halpern);
     // 2 / alpha
-    // OSQPFloat alpha_adjustment = 2. / settings->alpha;
     OSQPFloat alpha_adjustment = lambd_plus_one / settings->alpha;
     // ((2 / alpha) - 1) * [(k + 1) / (k + 2)]
     OSQPFloat alpha_minus_one_scalling  = (alpha_adjustment - 1.)  * scalling;
@@ -497,32 +471,8 @@ void update_halpern(OSQPSolver* solver) {
 
   OSQPFloat scalling;
 
-  // OSQPFloat* x_data = OSQPVectorf_data(work->x);
-  // OSQPFloat* z_data = OSQPVectorf_data(work->z);
-  // OSQPFloat* y_data = OSQPVectorf_data(work->y);
-  // OSQPFloat* v_data = OSQPVectorf_data(work->v);
-  // OSQPFloat* x_prev_data = OSQPVectorf_data(work->x_prev);
-  // OSQPFloat* v_prev_data = OSQPVectorf_data(work->v_prev);
-  // OSQPFloat* x_outer_data = OSQPVectorf_data(work->x_outer);
-  // OSQPFloat* v_outer_data = OSQPVectorf_data(work->v_outer);
-  // c_print("Sent into func First element of x: %f\n", x_data[0]);
-  // c_print("Sent into func First element of z: %f\n", z_data[0]);
-  // c_print("Sent into func First element of y: %f\n", y_data[0]);
-  // c_print("Sent into func First element of v: %f\n", v_data[0]);
-  // c_print("Sent into func First element of x_outer: %f\n", x_outer_data[0]);
-  // c_print("Sent into func First element of v_outer: %f\n", v_outer_data[0]);
-  // c_print("Sent into func First element of x_prev: %f\n", x_prev_data[0]);
-  // c_print("Sent into func First element of v_prev: %f\n", v_prev_data[0]);
-  // c_print("sigma = %f\n", settings->sigma);
-  // c_print("rho = %f\n", settings->rho);
-
-
-
-  // if ((strcmp(settings->halpern_scheme, "adaptive") == 0) ||
-  //     (strcmp(settings->halpern_scheme, "adaptive only before init_rest_len") == 0)) {
   if ((settings->halpern_scheme == OSQP_ADAPTIVE_HALPERN ) ||
       (settings->halpern_scheme == OSQP_ADAPTIVE_HALPERN_BEFORE_INI_REST_LEN)) {
-    // c_print("halpern_scheme %s\n", settings->halpern_scheme);
     OSQPVectorf_minus(work->delta_x, work->x_prev, work->x);
     OSQPVectorf_minus(work->delta_x_loop, work->x_outer, work->x_prev);
     OSQPVectorf_minus(work->delta_v, work->v_prev, work->v);
@@ -541,11 +491,6 @@ void update_halpern(OSQPSolver* solver) {
         settings->rho * delta_v_norm * delta_v_norm + 1e-10
       )
     ) + 1.;
-    // c_print("phi: %f\n", phi);
-    // c_print("np.dot(self.x_prev - self.x, self.last_restart_x - self.x_prev) %f\n",OSQPVectorf_dot_prod_signed(work->delta_x, work->delta_x_loop, 0));
-    // c_print("np.dot(self.v_prev - self.v, self.last_restart_v - self.v_prev) %f\n",OSQPVectorf_dot_prod_signed(work->delta_v, work->delta_v_loop, 0));
-    // c_print("la.norm(self.x_prev - self.x, 2) %f\n",delta_x_norm);
-    // c_print("la.norm(self.v_prev - self.v, 2) %f\n",delta_v_norm);
 
     scalling = (phi) / (phi + 1.);
   }
@@ -562,7 +507,6 @@ void update_halpern(OSQPSolver* solver) {
   if (settings->restart_type == OSQP_RESTART_REFLECTED_HALPERN) {
     // (x^k, v^k) = (lambd + 1) (x^k, v^k) - [(k+1) / (k+2)] * (x^k, v^k)
     // or (x^k, v^k) = [(lambd + 1) / alpha] (x^k, v^k) - [(lambd + 1) / alpha] * [(k+1) / (k+2)] * (x^k, v^k)
-    // c_print("restart_type %s\n", settings->restart_type);
     reflected_halpern_step(solver, scalling);
   }
 
@@ -581,46 +525,7 @@ void update_halpern(OSQPSolver* solver) {
   else {
     OSQPVectorf_mult_scalar(work->y, settings->rho);
   }
-
-  // x_data = OSQPVectorf_data(work->x);
-  // z_data = OSQPVectorf_data(work->z);
-  // y_data = OSQPVectorf_data(work->y);
-  // v_data = OSQPVectorf_data(work->v);
-  // x_prev_data = OSQPVectorf_data(work->x_prev);
-  // v_prev_data = OSQPVectorf_data(work->v_prev);
-  // x_outer_data = OSQPVectorf_data(work->x_outer);
-  // v_outer_data = OSQPVectorf_data(work->v_outer);
-  // c_print("New First element of x: %f\n", x_data[0]);
-  // c_print("New First element of z: %f\n", z_data[0]);
-  // c_print("New First element of y: %f\n", y_data[0]);
-  // c_print("New First element of v: %f\n", v_data[0]);
-  // c_print("New First element of x_outer: %f\n", x_outer_data[0]);
-  // c_print("New First element of v_outer: %f\n", v_outer_data[0]);
-  // c_print("New First element of x_prev: %f\n", x_prev_data[0]);
-  // c_print("New First element of v_prev: %f\n", v_prev_data[0]);
 }
-
-// void update_reflected_halpern(OSQPSolver* solver, OSQPInt k) {
-//   OSQPSettings*  settings = solver->settings;
-//   OSQPWorkspace* work     = solver->work;
-
-//   OSQPFloat scalling = (k + 1.) / (k + 2.);
-
-//   OSQPVectorf_add_scaled(work->v, 1. + settings->lambd, work->v, -settings->lambd, work->v_prev);
-//   OSQPVectorf_add_scaled(work->x, 1. + settings->lambd, work->x, -settings->lambd, work->x_prev);
-
-//   OSQPVectorf_mult_scalar(work->v, scalling);
-//   OSQPVectorf_mult_scalar(work->x, scalling);
-
-//   OSQPVectorf_add_scaled(work->v, 1., work->v, (1. - scalling), work->v_outer);
-//   OSQPVectorf_add_scaled(work->x, 1., work->x, (1. - scalling), work->x_outer);
-
-//   OSQPVectorf_ew_bound_vec(work->z, work->v, work->data->l, work->data->u);
-
-//   OSQPVectorf_minus(work->y, work->v, work->z);
-//   OSQPVectorf_ew_prod(work->y, work->y, work->rho_vec);
-
-// }
 
 OSQPFloat smoothed_duality_gap(OSQPSolver*  solver,
                                OSQPVectorf* x,
@@ -638,7 +543,6 @@ OSQPFloat smoothed_duality_gap(OSQPSolver*  solver,
   OSQPFloat smoothed_gap;
   OSQPFloat norm;
 
-  // c_print("xi %f\n", settings->xi);
   OSQPFloat xi_reciprocal     = 1. / settings->xi;
   OSQPFloat sigma_reciprocal  = 1. / settings->sigma;
   OSQPFloat rho_reciprocal    = 1. / settings->rho;
@@ -652,16 +556,6 @@ OSQPFloat smoothed_duality_gap(OSQPSolver*  solver,
 
   // y_z = (1 / xi) y + z
   OSQPVectorf_add_scaled(work->y_z, xi_reciprocal, work->y, 1., work->z);
-
-  // OSQPVectorf* temp_1_m;  
-  // OSQPVectorf* temp_2_m;  
-  // OSQPVectorf* temp_3_m;  
-  // OSQPVectorf* temp_1_n;  
-  // OSQPVectorf* temp_2_n; 
-  // OSQPVectorf* temp_3_n;  
-  
-  // self.J = (self.settings.sigma / self.settings.xi) * sparse.eye(self.data.n, format='csc')
-  // self.L = (self.settings.rho / self.settings.xi) * sparse.eye(self.data.m, format='csc')
 
 
   // 0.5 * x^T P x + q^T x
@@ -690,7 +584,6 @@ OSQPFloat smoothed_duality_gap(OSQPSolver*  solver,
                          -1., work->data->q, -1., w);
 
   if (settings->vector_rho_in_averaged_KKT) {
-    // c_print("vector_rho_in_averaged_KKT %d\n", settings->vector_rho_in_averaged_KKT);
     OSQPVectorf_ew_prod(work->temp_ztilde_view, work->rho_inv_vec, y);
     OSQPVectorf_add_scaled(work->temp_ztilde_view,
                           -1.0, work->temp_ztilde_view,
@@ -783,7 +676,6 @@ void fixed_point_norm(OSQPSolver* solver) {
 
   work->norm_cur = c_sqrt(
     settings->sigma * x_norm2 * x_norm2 + settings->rho * v_norm2 * v_norm2
-    // settings->sigma * x_norm2 + settings->rho * v_norm2
   );
 }
 
@@ -792,16 +684,11 @@ OSQPInt should_restart(OSQPSolver* solver) {
   OSQPWorkspace* work     = solver->work;
   OSQPInfo*      info     = solver->info;
 
-  // if (strcmp(settings->restart_type, "halpern") == 0 ||
-  //       strcmp(settings->restart_type, "reflected halpern") == 0) {
   if (settings->restart_type == OSQP_RESTART_HALPERN || settings->restart_type == OSQP_RESTART_REFLECTED_HALPERN) {
-    // c_print("beta %f\n", settings->beta);
+
     if (work->norm_cur <= settings->beta * work->norm_outer)
       return 1;
     else if (settings->adaptive_rest) {
-      // c_print("adaptive_rest %d\n", settings->adaptive_rest);
-      // c_print("restart_necessary %f\n", settings->restart_necessary);
-      // c_print("restart_artificial %f\n", settings->restart_artificial);
       if (
         work->norm_cur <= settings->restart_necessary * work->norm_outer &&
         work->norm_cur > work->norm_prev
@@ -817,14 +704,10 @@ OSQPInt should_restart(OSQPSolver* solver) {
     else
       return 0;
   }
-  // else if (strcmp(settings->restart_type, "averaged") == 0) {
   else if (settings->restart_type == OSQP_RESTART_AVERAGED) {
     if (work->duality_gap_cur <= settings->beta * settings->beta * work->duality_gap_outer)
       return 1;
     else if (settings->adaptive_rest) {
-      // c_print("adaptive_rest %d\n", settings->adaptive_rest);
-      // c_print("restart_necessary %f\n", settings->restart_necessary);
-      // c_print("restart_artificial %f\n", settings->restart_artificial);
       if (
         work->norm_cur <= settings->restart_necessary * work->norm_outer &&
         work->norm_cur > work->norm_prev
@@ -918,10 +801,7 @@ static OSQPFloat compute_duality_gap_tol(const OSQPSolver* solver,
   }
 
   // Update the duality_gap_integral
-  // c_print("c_absval(solver->info->duality_gap): %f\n", c_absval(solver->info->duality_gap));
   solver->info->duality_gap_normalized = c_absval(solver->info->duality_gap) / (1. + max_rel_eps);
-  // c_print("c_absval(solver->info->duality_gap): %e\n", c_absval(solver->info->duality_gap));
-  // c_print("solver->info->duality_gap_integral: %f\n", solver->info->duality_gap_integral);
 
   // eps_duality_gap
   return eps_abs + eps_rel * max_rel_eps;
@@ -987,11 +867,7 @@ static OSQPFloat compute_prim_tol(const OSQPSolver* solver,
   }
 
   // Update the prim_integral
-  // c_print("solver->info->prim_res: %f\n", solver->info->prim_res);
   solver->info->prim_normalized = solver->info->prim_res / (1. + max_rel_eps);
-  // solver->info->prim_integral = solver->info->prim_res;
-  // c_print("solver->info->prim_res: %e\n", solver->info->prim_res);
-  // c_print("solver->info->prim_integral: %f\n", solver->info->prim_integral);
 
   // eps_prim
   return eps_abs + eps_rel * max_rel_eps;
@@ -1083,11 +959,7 @@ static OSQPFloat compute_dual_tol(const OSQPSolver* solver,
   }
 
   // Update the dual_integral
-  // c_print("solver->info->dual_res: %f\n", solver->info->dual_res);
   solver->info->dual_normalized = solver->info->dual_res / (1. + max_rel_eps);
-  // solver->info->dual_integral = solver->info->dual_res;
-  // c_print("solver->info->dual_res: %e\n", solver->info->dual_res);
-  // c_print("solver->info->dual_integral: %f\n", solver->info->dual_integral);
 
   // eps_dual
   return eps_abs + eps_rel * max_rel_eps;
@@ -1526,25 +1398,13 @@ OSQPInt check_termination(OSQPSolver* solver,
     // Force to 1 to bypass the check
     duality_gap_check = 1;
   }
-  // c_print("osqp_toc(work->timer): %f\n", osqp_toc(work->timer));
-  // c_print("iter: %d\n", info->iter);
-  // c_print("info->prim_integral before mult by info->duality_gap_integral: %e\n", info->prim_integral);
-  // c_print("info->dual_integral before mult by info->duality_gap_integral: %e\n", info->dual_integral);
-  // c_print("info->duality_gap_integral before mult by info->duality_gap_integral: %e\n", info->duality_gap_integral);
   // Convert to milliseconds
   info->delta_solve_time = (osqp_toc(work->timer) - info->run_time_prev) * 1000.;
   info->prim_integral = info->prim_normalized * info->delta_solve_time;
   info->dual_integral = info->dual_normalized * info->delta_solve_time;
   info->duality_gap_integral = info->duality_gap_normalized * info->delta_solve_time;
   info->total_integral += (info->prim_integral + info->dual_integral + info->duality_gap_integral);
-  // info->total_integral += (info->prim_integral + info->dual_integral);
   info->run_time_prev = osqp_toc(work->timer);
-  // c_print("info->delta_solve_time: %f\n", info->delta_solve_time);
-  // c_print("info->prim_integral: %e\n", info->prim_integral);
-  // c_print("info->dual_integral: %e\n", info->dual_integral);
-  // c_print("info->duality_gap_integral: %e\n", info->duality_gap_integral);
-  // c_print("info->delta_solve_time: %e\n", info->delta_solve_time);
-  // c_print("info->total_integral: %e\n", info->total_integral);
 
   // Compare checks to determine solver status
   if (prim_res_check && dual_res_check && duality_gap_check) {

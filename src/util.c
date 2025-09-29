@@ -394,12 +394,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
     new->KI                                 = settings->KI;
     new->KD                                 = settings->KD;
     new->negate_K                           = settings->negate_K;
-    // new->restart_type       = settings->restart_type;
-    // strncpy(new->restart_type, settings->restart_type, OSQP_MAX_RESTART_TYPE_LEN-1);
-    // new->restart_type[OSQP_MAX_RESTART_TYPE_LEN-1] = '\0';
     new->restart_type                       = settings->restart_type;
-    // strncpy(new->halpern_scheme, settings->halpern_scheme, OSQP_MAX_HALPERN_SCHEME_LEN-1);
-    // new->halpern_scheme[OSQP_MAX_HALPERN_SCHEME_LEN-1] = '\0';
     new->halpern_scheme                     = settings->halpern_scheme;
   }
 
@@ -413,8 +408,8 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->adaptive_rho                   = settings->adaptive_rho;
   new->adaptive_rho_interval          = settings->adaptive_rho_interval;
   new->adaptive_rho_fraction          = settings->adaptive_rho_fraction;
+  
   if (settings->rho_custom_condition) {
-    // new->adaptive_rho_tolerance         = settings->adaptive_rho_tolerance;
     new->adaptive_rho_tolerance_greater = settings->adaptive_rho_tolerance_greater;
     new->adaptive_rho_tolerance_less    = settings->adaptive_rho_tolerance_less;
     new->rho_custom_tolerance           = settings->rho_custom_tolerance;
