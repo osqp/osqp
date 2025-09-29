@@ -1609,18 +1609,6 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     c_eprint("rho_is_vec must be either 0 or 1");
     return 1;
   }
-  
-  if ((settings->vector_rho_in_averaged_KKT != 0) &&
-      (settings->vector_rho_in_averaged_KKT != 1)) {
-    c_eprint("vector_rho_in_averaged_KKT must be either 0 or 1");
-    return 1;
-  }
-
-  if ((settings->rho_is_vec == 0) && 
-      (settings->vector_rho_in_averaged_KKT != 0)) {
-    c_eprint("To perform vector_rho_in_averaged_KKT, rho_is_vec must be 1");
-    return 1;
-  }
 
   if (from_setup && settings->sigma <= 0.0) {
     c_eprint("sigma must be positive");
@@ -1633,105 +1621,138 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     return 1;
   }
 
-  if (settings->beta <= 0.0 ||
-      settings->beta > 1.0) {
-    c_eprint("beta must be in (0,1]");
-    return 1;
-  }
+  if (settings->restart_type != OSQP_RESTART_NONE) {
 
-  if (settings->lambd < 0.0 ||
-      settings->lambd > 1.0) {
-    c_eprint("lambda must be in [0,1]");
-    return 1;
-  }
+    if (settings->beta <= 0.0 ||
+        settings->beta > 1.0) {
+      c_eprint("beta must be in (0,1]");
+      return 1;
+    }
 
-  if (settings->restart_necessary <= 0.0 ||
-      settings->restart_necessary > 1.0) {
-    c_eprint("restart_necessary must be in (0,1]");
-    return 1;
-  }
+    if (settings->lambd < 0.0 ||
+        settings->lambd > 1.0) {
+      c_eprint("lambda must be in [0,1]");
+      return 1;
+    }
 
-  if (settings->restart_artificial <= 0.0 ||
-      settings->restart_artificial > 1.0) {
-    c_eprint("restart_artificial must be in (0,1]");
-    return 1;
-  }
+    if (settings->restart_necessary <= 0.0 ||
+        settings->restart_necessary > 1.0) {
+      c_eprint("restart_necessary must be in (0,1]");
+      return 1;
+    }
 
-  if (settings->adaptive_rest != 0 &&
-      settings->adaptive_rest != 1) {
-    c_eprint("adaptive_rest must be either 0 or 1");
-    return 1;
-  }
+    if (settings->restart_artificial <= 0.0 ||
+        settings->restart_artificial > 1.0) {
+      c_eprint("restart_artificial must be in (0,1]");
+      return 1;
+    }
 
-  if (settings->alpha_adjustment_reflected_halpern != 0 &&
-      settings->alpha_adjustment_reflected_halpern != 1) {
-    c_eprint("alpha_adjustment_reflected_halpern must be either 0 or 1");
-    return 1;
-  }
+    if (settings->xi <= 0.0) {
+      c_eprint("xi must be greater than 0");
+      return 1;
+    }
 
-  if ((settings->alpha_adjustment_reflected_halpern != 0) &&
-      (settings->lambd > (2. / settings->alpha) - 1.)) {
-    c_eprint("lambda must be <= [(2 / alpha) - 1] if we use alpha_adjustment_reflected_halpern");
-    return 1;
-  }
+    if (settings->ini_rest_len <= 0.0) {
+      c_eprint("Initial restart period must be larger than 0");
+      return 1;
+    }
 
-  if (settings->rho_custom_condition != 0 &&
-      settings->rho_custom_condition != 1) {
-    c_eprint("rho_custom_condition must be either 0 or 1");
-    return 1;
-  }
+    if (settings->adaptive_rest != 0 &&
+        settings->adaptive_rest != 1) {
+      c_eprint("adaptive_rest must be either 0 or 1");
+      return 1;
+    }
 
-  if (settings->custom_average_rest != 0 &&
-      settings->custom_average_rest != 1) {
-    c_eprint("custom_average_rest must be either 0 or 1");
-    return 1;
-  }
+    if (settings->alpha_adjustment_reflected_halpern != 0 &&
+        settings->alpha_adjustment_reflected_halpern != 1) {
+      c_eprint("alpha_adjustment_reflected_halpern must be either 0 or 1");
+      return 1;
+    }
 
-  if (settings->adapt_rho_on_restart != 0 &&
-      settings->adapt_rho_on_restart != 1) {
-    c_eprint("adapt_rho_on_restart must be either 0 or 1");
-    return 1;
-  }
+    if ((settings->alpha_adjustment_reflected_halpern != 0) &&
+        (settings->lambd > (2. / settings->alpha) - 1.)) {
+      c_eprint("lambda must be <= [(2 / alpha) - 1] if we use alpha_adjustment_reflected_halpern");
+      return 1;
+    }
 
-  if (settings->pid_controller != 0 &&
-      settings->pid_controller != 1) {
-    c_eprint("pid_controller must be either 0 or 1");
-    return 1;
-  }
+    if (settings->rho_custom_condition != 0 &&
+        settings->rho_custom_condition != 1) {
+      c_eprint("rho_custom_condition must be either 0 or 1");
+      return 1;
+    }
 
-  if (settings->pid_controller_sqrt != 0 &&
-      settings->pid_controller_sqrt != 1) {
-    c_eprint("pid_controller_sqrt must be either 0 or 1");
-    return 1;
-  }
+    if (settings->custom_average_rest != 0 &&
+        settings->custom_average_rest != 1) {
+      c_eprint("custom_average_rest must be either 0 or 1");
+      return 1;
+    }
 
-  if (settings->pid_controller_sqrt_mult != 0 &&
-      settings->pid_controller_sqrt_mult != 1) {
-    c_eprint("pid_controller_sqrt_mult must be either 0 or 1");
-    return 1;
-  }
+    if ((settings->vector_rho_in_averaged_KKT != 0) &&
+        (settings->vector_rho_in_averaged_KKT != 1)) {
+      c_eprint("vector_rho_in_averaged_KKT must be either 0 or 1");
+      return 1;
+    }
 
-  if (settings->pid_controller_sqrt_mult_2 != 0 &&
-      settings->pid_controller_sqrt_mult_2 != 1) {
-    c_eprint("pid_controller_sqrt_mult_2 must be either 0 or 1");
-    return 1;
-  }
+    if ((settings->rho_is_vec == 0) && 
+        (settings->vector_rho_in_averaged_KKT != 0)) {
+      c_eprint("To perform vector_rho_in_averaged_KKT, rho_is_vec must be 1");
+      return 1;
+    }
 
-  if (settings->pid_controller_log != 0 &&
-      settings->pid_controller_log != 1) {
-    c_eprint("pid_controller_log must be either 0 or 1");
-    return 1;
-  }
+    if (settings->adapt_rho_on_restart != 0 &&
+        settings->adapt_rho_on_restart != 1) {
+      c_eprint("adapt_rho_on_restart must be either 0 or 1");
+      return 1;
+    }
 
-  if (settings->rho_custom_tolerance <= 0) {
-    c_eprint("rho_custom_tolerance must be greater than 0");
-    return 1;
-  }
+    if (settings->halpern_step_first_inner_iter != 0 &&
+        settings->halpern_step_first_inner_iter != 1) {
+      c_eprint("halpern_step_first_inner_iter must be either 0 or 1")
+      return 1;
+    }
 
-  if (settings->ini_rest_len <= 0.0) {
-    c_eprint("Initial restart period must be larger than 0");
-    return 1;
-  }
+    if (settings->pid_controller != 0 &&
+        settings->pid_controller != 1) {
+      c_eprint("pid_controller must be either 0 or 1");
+      return 1;
+    }
+
+    if (settings->pid_controller_sqrt != 0 &&
+        settings->pid_controller_sqrt != 1) {
+      c_eprint("pid_controller_sqrt must be either 0 or 1");
+      return 1;
+    }
+
+    if (settings->pid_controller_sqrt_mult != 0 &&
+        settings->pid_controller_sqrt_mult != 1) {
+      c_eprint("pid_controller_sqrt_mult must be either 0 or 1");
+      return 1;
+    }
+
+    if (settings->pid_controller_sqrt_mult_2 != 0 &&
+        settings->pid_controller_sqrt_mult_2 != 1) {
+      c_eprint("pid_controller_sqrt_mult_2 must be either 0 or 1");
+      return 1;
+    }
+
+    if (settings->pid_controller_log != 0 &&
+        settings->pid_controller_log != 1) {
+      c_eprint("pid_controller_log must be either 0 or 1");
+      return 1;
+    }
+
+    if (settings->negate_K != 0 &&
+        settings->negate_K != 1) {
+      c_eprint("negate_K must be either 0 or 1");
+      return 1;
+    }
+}
+
+
+
+  
+
+  
 
   if (settings->cg_max_iter <= 0) {
     c_eprint("cg_max_iter must be positive");
@@ -1773,14 +1794,21 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     return 1;
   }
 
-  if (from_setup && settings->adaptive_rho_tolerance_greater < 0.0) {
-    c_eprint("adaptive_rho_tolerance_greater must be >= 0");
-    return 1;
-  }
+  if (settings->rho_custom_condition) {
+    if (from_setup && settings->adaptive_rho_tolerance_greater < 0.0) {
+      c_eprint("adaptive_rho_tolerance_greater must be >= 0");
+      return 1;
+    }
 
-  if (from_setup && settings->adaptive_rho_tolerance_less < 0.0) {
-    c_eprint("adaptive_rho_tolerance_less must be >= 0");
-    return 1;
+    if (from_setup && settings->adaptive_rho_tolerance_less < 0.0) {
+      c_eprint("adaptive_rho_tolerance_less must be >= 0");
+      return 1;
+    }
+
+    if (settings->rho_custom_tolerance <= 0) {
+      c_eprint("rho_custom_tolerance must be greater than 0");
+      return 1;
+    }
   }
 
   if (settings->max_iter <= 0) {
