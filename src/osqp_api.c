@@ -302,6 +302,16 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->sigma         = (OSQPFloat)OSQP_SIGMA;  /* ADMM step */
   settings->alpha         = (OSQPFloat)OSQP_ALPHA;  /* relaxation parameter */
 
+  settings->pid_controller                      = (OSQPInt)OSQP_PID_CONTROLLER;                       /* use pid controller as the rho update scheme */
+  settings->pid_controller_sqrt                 = (OSQPInt)OSQP_PID_CONTROLLER_SQRT;                  /* use the sqrt of the prim and dual residual ratios */
+  settings->pid_controller_sqrt_mult            = (OSQPInt)OSQP_PID_CONTROLLER_SQRT_MULT;             /* use the sqrt of the prim and dual residual ratios as a multiple */
+  settings->pid_controller_sqrt_mult_2          = (OSQPInt)OSQP_PID_CONTROLLER_SQRT_MULT_2;           /* use the sqrt of the prim and dual residual ratios as a multiple */
+  settings->pid_controller_log                  = (OSQPInt)OSQP_PID_CONTROLLER_LOG;                   /* use the log of the prim and dual residual ratios */
+  settings->KP                                  = (OSQPFloat)OSQP_KP;                                 /* Coefficient for proportionality, used in pid controller */
+  settings->KI                                  = (OSQPFloat)OSQP_KI;                                 /* Coefficient for integrality, used in pid controller */
+  settings->KD                                  = (OSQPFloat)OSQP_KD;                                 /* Coefficient for derivative, used in pid controller */
+  settings->negate_K                            = (OSQPInt)OSQP_NEGATE_K;                             /* Negate all of the pid controller values */
+
   if (settings->restart_type != OSQP_RESTART_NONE) {
     settings->beta                                = (OSQPFloat)OSQP_BETA;                               /* restart parameter */
     settings->lambd                               = (OSQPFloat)OSQP_LAMBDA;                             /* Reflected Halpern parameter */
@@ -316,15 +326,6 @@ void osqp_set_default_settings(OSQPSettings* settings) {
     settings->vector_rho_in_averaged_KKT          = (OSQPInt)OSQP_VECT_RHO_IN_AVG_KKT;                  /* using a vectorized rho in the KKT system for smoothed duality gap computation */
     settings->adapt_rho_on_restart                = (OSQPInt)OSQP_ADAPT_RHO_ON_REST;                    /* adapt rho with restarts or not */
     settings->halpern_step_first_inner_iter       = (OSQPInt)OSQP_HALPERN_STEP_FIRST_INNER_ITER;        /* perform a halpern step for the first inner loop iter */
-    settings->pid_controller                      = (OSQPInt)OSQP_PID_CONTROLLER;                       /* use pid controller as the rho update scheme */
-    settings->pid_controller_sqrt                 = (OSQPInt)OSQP_PID_CONTROLLER_SQRT;                  /* use the sqrt of the prim and dual residual ratios */
-    settings->pid_controller_sqrt_mult            = (OSQPInt)OSQP_PID_CONTROLLER_SQRT_MULT;             /* use the sqrt of the prim and dual residual ratios as a multiple */
-    settings->pid_controller_sqrt_mult_2          = (OSQPInt)OSQP_PID_CONTROLLER_SQRT_MULT_2;           /* use the sqrt of the prim and dual residual ratios as a multiple */
-    settings->pid_controller_log                  = (OSQPInt)OSQP_PID_CONTROLLER_LOG;                   /* use the log of the prim and dual residual ratios */
-    settings->KP                                  = (OSQPFloat)OSQP_KP;                                 /* Coefficient for proportionality, used in pid controller */
-    settings->KI                                  = (OSQPFloat)OSQP_KI;                                 /* Coefficient for integrality, used in pid controller */
-    settings->KD                                  = (OSQPFloat)OSQP_KD;                                 /* Coefficient for derivative, used in pid controller */
-    settings->negate_K                            = (OSQPInt)OSQP_NEGATE_K;                             /* Negate all of the pid controller values */
     settings->restart_type                        = (OSQPInt)OSQP_RESTART_TYPE;                         /* restart format */
     settings->halpern_scheme                      = (OSQPInt)OSQP_HALPERN_SCHEME;
   }
@@ -813,14 +814,15 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
     work->rho_error_sum   = 0.;
     work->rho_error       = 0.;
     info->total_integral  = 0.;
-    if (settings->pid_controller) {
-      // For e^0 prim_res / dual_res = 0
-      if ((settings->pid_controller_sqrt_mult_2) || (settings->pid_controller_log)) {
-        work->rho_ratio   = 0.;
-      }
-      else {
-        work->rho_ratio   = 1.;
-      }
+  }
+
+  if (settings->pid_controller) {
+    // For e^0 prim_res / dual_res = 0
+    if ((settings->pid_controller_sqrt_mult_2) || (settings->pid_controller_log)) {
+      work->rho_ratio   = 0.;
+    }
+    else {
+      work->rho_ratio   = 1.;
     }
   }
 #ifdef OSQP_ENABLE_PRINTING
@@ -1948,6 +1950,18 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   // sigma      ignored
   settings->alpha = new_settings->alpha;
 
+  if (new_settings->pid_controller) {
+    settings->pid_controller                      = new_settings->pid_controller;
+    settings->pid_controller_sqrt                 = new_settings->pid_controller_sqrt;
+    settings->pid_controller_sqrt_mult            = new_settings->pid_controller_sqrt_mult;
+    settings->pid_controller_sqrt_mult_2          = new_settings->pid_controller_sqrt_mult_2;
+    settings->pid_controller_log                  = new_settings->pid_controller_log;
+    settings->KP                                  = new_settings->KP;
+    settings->KI                                  = new_settings->KI;
+    settings->KD                                  = new_settings->KD;
+    settings->negate_K                            = new_settings->negate_K;
+  }
+
   if (settings->restart_type != OSQP_RESTART_NONE) {
     settings->beta                                = new_settings->beta;
     settings->lambd                               = new_settings->lambd;
@@ -1962,15 +1976,6 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
     settings->vector_rho_in_averaged_KKT          = new_settings->vector_rho_in_averaged_KKT;
     settings->adapt_rho_on_restart                = new_settings->adapt_rho_on_restart;
     settings->halpern_step_first_inner_iter       = new_settings->halpern_step_first_inner_iter;
-    settings->pid_controller                      = new_settings->pid_controller;
-    settings->pid_controller_sqrt                 = new_settings->pid_controller_sqrt;
-    settings->pid_controller_sqrt_mult            = new_settings->pid_controller_sqrt_mult;
-    settings->pid_controller_sqrt_mult_2          = new_settings->pid_controller_sqrt_mult_2;
-    settings->pid_controller_log                  = new_settings->pid_controller_log;
-    settings->KP                                  = new_settings->KP;
-    settings->KI                                  = new_settings->KI;
-    settings->KD                                  = new_settings->KD;
-    settings->negate_K                            = new_settings->negate_K;
     settings->restart_type                        = new_settings->restart_type;
     settings->halpern_scheme                      = new_settings->halpern_scheme;
   }

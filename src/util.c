@@ -165,6 +165,9 @@ void print_setup_header(const OSQPSolver* solver) {
     c_print("          adapt_rho_on_restart = %i, ", settings->adapt_rho_on_restart);
     c_print("rho_custom_tolerance = %2.e,\n", settings->rho_custom_tolerance);
     c_print("halpern_step_first_inner_iter = %d, ", settings->halpern_step_first_inner_iter);
+  }
+
+  if (settings->pid_controller) {
     c_print("pid_controller = %d, ", settings->pid_controller);
     c_print("pid_controller_sqrt = %d, ", settings->pid_controller_sqrt);
     c_print("pid_controller_sqrt_mult = %d, ", settings->pid_controller_sqrt_mult);
@@ -371,6 +374,18 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->sigma      = settings->sigma;
   new->alpha      = settings->alpha;
 
+  if (settings->pid_controller) {
+    new->pid_controller                     = settings->pid_controller;
+    new->pid_controller_sqrt                = settings->pid_controller_sqrt;
+    new->pid_controller_sqrt_mult           = settings->pid_controller_sqrt_mult;
+    new->pid_controller_sqrt_mult_2         = settings->pid_controller_sqrt_mult_2;
+    new->pid_controller_log                 = settings->pid_controller_log;
+    new->KP                                 = settings->KP;
+    new->KI                                 = settings->KI;
+    new->KD                                 = settings->KD;
+    new->negate_K                           = settings->negate_K;
+  }
+
   if (settings->restart_type != OSQP_RESTART_NONE) {
     new->beta                               = settings->beta;
     new->lambd                              = settings->lambd;
@@ -385,15 +400,6 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
     new->vector_rho_in_averaged_KKT         = settings->vector_rho_in_averaged_KKT;
     new->adapt_rho_on_restart               = settings->adapt_rho_on_restart;
     new->halpern_step_first_inner_iter      = settings->halpern_step_first_inner_iter;
-    new->pid_controller                     = settings->pid_controller;
-    new->pid_controller_sqrt                = settings->pid_controller_sqrt;
-    new->pid_controller_sqrt_mult           = settings->pid_controller_sqrt_mult;
-    new->pid_controller_sqrt_mult_2         = settings->pid_controller_sqrt_mult_2;
-    new->pid_controller_log                 = settings->pid_controller_log;
-    new->KP                                 = settings->KP;
-    new->KI                                 = settings->KI;
-    new->KD                                 = settings->KD;
-    new->negate_K                           = settings->negate_K;
     new->restart_type                       = settings->restart_type;
     new->halpern_scheme                     = settings->halpern_scheme;
   }

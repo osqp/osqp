@@ -1627,34 +1627,36 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     return 1;
   }
 
-  if (settings->pid_controller_sqrt != 0 &&
-      settings->pid_controller_sqrt != 1) {
-    c_eprint("pid_controller_sqrt must be either 0 or 1");
-    return 1;
-  }
+  if (settings->pid_controller) {
+    if (settings->pid_controller_sqrt != 0 &&
+        settings->pid_controller_sqrt != 1) {
+      c_eprint("pid_controller_sqrt must be either 0 or 1");
+      return 1;
+    }
 
-  if (settings->pid_controller_sqrt_mult != 0 &&
-      settings->pid_controller_sqrt_mult != 1) {
-    c_eprint("pid_controller_sqrt_mult must be either 0 or 1");
-    return 1;
-  }
+    if (settings->pid_controller_sqrt_mult != 0 &&
+        settings->pid_controller_sqrt_mult != 1) {
+      c_eprint("pid_controller_sqrt_mult must be either 0 or 1");
+      return 1;
+    }
 
-  if (settings->pid_controller_sqrt_mult_2 != 0 &&
-      settings->pid_controller_sqrt_mult_2 != 1) {
-    c_eprint("pid_controller_sqrt_mult_2 must be either 0 or 1");
-    return 1;
-  }
+    if (settings->pid_controller_sqrt_mult_2 != 0 &&
+        settings->pid_controller_sqrt_mult_2 != 1) {
+      c_eprint("pid_controller_sqrt_mult_2 must be either 0 or 1");
+      return 1;
+    }
 
-  if (settings->pid_controller_log != 0 &&
-      settings->pid_controller_log != 1) {
-    c_eprint("pid_controller_log must be either 0 or 1");
-    return 1;
-  }
+    if (settings->pid_controller_log != 0 &&
+        settings->pid_controller_log != 1) {
+      c_eprint("pid_controller_log must be either 0 or 1");
+      return 1;
+    }
 
-  if (settings->negate_K != 0 &&
-      settings->negate_K != 1) {
-    c_eprint("negate_K must be either 0 or 1");
-    return 1;
+    if (settings->negate_K != 0 &&
+        settings->negate_K != 1) {
+      c_eprint("negate_K must be either 0 or 1");
+      return 1;
+    }
   }
 
   if (settings->restart_type != OSQP_RESTART_NONE) {
