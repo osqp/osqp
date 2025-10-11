@@ -8,18 +8,28 @@ extern "C" {
 #endif
 
 /*********************************************
+ *   Internal definition of algebra context.
+ *********************************************/
+struct OSQPAlgebraContext_ {
+  // Nothing is needed in the built-in implementation
+};
+
+
+/*********************************************
 *   Internal definition of OSQPVector types
 *   and supporting definitions
 *********************************************/
 
 struct OSQPVectori_ {
-  OSQPInt* values;
-  OSQPInt  length;
+  const OSQPAlgebraContext* context;  /* Not owned by the vector - owned by the solver */
+  OSQPInt*                  values;
+  OSQPInt                   length;
 };
 
 struct OSQPVectorf_ {
-  OSQPFloat* values;
-  OSQPInt    length;
+  const OSQPAlgebraContext* context;  /* Not owned by the vector - owned by the solver */
+  OSQPFloat*                values;
+  OSQPInt                   length;
 };
 
 
@@ -36,8 +46,9 @@ struct OSQPVectorf_ {
 typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 
 struct OSQPMatrix_ {
-  OSQPCscMatrix*           csc;
-  OSQPMatrix_symmetry_type symmetry;
+  const OSQPAlgebraContext* context;  /* Not owned by the matrix - owned by the solver */
+  OSQPCscMatrix*            csc;
+  OSQPMatrix_symmetry_type  symmetry;
 };
 
 #ifdef __cplusplus

@@ -31,8 +31,9 @@ OSQPInt OSQPMatrix_is_eq(const OSQPMatrix* A,
 
 
 //Make a copy from a csc matrix.  Returns OSQP_NULL on failure
-OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* A,
-                                          OSQPInt        is_triu);
+OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPAlgebraContext* context,
+                                    const OSQPCscMatrix*      A,
+                                          OSQPInt             is_triu);
 
 /* Return a copy of the matrix in CSC format */
 OSQPCscMatrix* OSQPMatrix_get_csc(const OSQPMatrix* M);

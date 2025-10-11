@@ -23,7 +23,8 @@ OSQPInt OSQPVectorf_is_eq(const OSQPVectorf* A,
     return 1;
 }
 
-OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
+OSQPVectorf* OSQPVectorf_new(const OSQPAlgebraContext* context,
+                             const OSQPFloat* a,
                                    OSQPInt    length) {
 
   OSQPVectorf* out = OSQPVectorf_malloc(length);
@@ -35,7 +36,8 @@ OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
   return out;
 }
 
-OSQPVectori* OSQPVectori_new(const OSQPInt* a,
+OSQPVectori* OSQPVectori_new(const OSQPAlgebraContext* context,
+                             const OSQPInt* a,
                                    OSQPInt  length) {
 
   OSQPVectori* out = OSQPVectori_malloc(length);
@@ -47,12 +49,15 @@ OSQPVectori* OSQPVectori_new(const OSQPInt* a,
   return out;
 }
 
-OSQPVectorf* OSQPVectorf_malloc(OSQPInt length) {
+OSQPVectorf* OSQPVectorf_malloc(const OSQPAlgebraContext* context,
+                                      OSQPInt length) {
 
   OSQPVectorf* b = c_malloc(sizeof(OSQPVectorf));
 
   if (b) {
-    b->length = length;
+    b->length  = length;
+    b->context = context;
+
     if (length) {
       b->values = blas_malloc(length * sizeof(OSQPFloat));
       if (!(b->values)) {
@@ -67,12 +72,15 @@ OSQPVectorf* OSQPVectorf_malloc(OSQPInt length) {
   return b;
 }
 
-OSQPVectori* OSQPVectori_malloc(OSQPInt length) {
+OSQPVectori* OSQPVectori_malloc(const OSQPAlgebraContext* context,
+                                      OSQPInt length) {
 
   OSQPVectori *b = c_malloc(sizeof(OSQPVectori));
 
   if (b) {
-    b->length = length;
+    b->length  = length;
+    b->context = context;
+
     if (length) {
       b->values = blas_malloc(length * sizeof(OSQPInt));
       if (!(b->values)) {
@@ -87,12 +95,15 @@ OSQPVectori* OSQPVectori_malloc(OSQPInt length) {
   return b;
 }
 
-OSQPVectorf* OSQPVectorf_calloc(OSQPInt length) {
+OSQPVectorf* OSQPVectorf_calloc(const OSQPAlgebraContext* context,
+                                      OSQPInt length) {
 
   OSQPVectorf *b = c_malloc(sizeof(OSQPVectorf));
 
   if (b) {
-    b->length = length;
+    b->length  = length;
+    b->context = context;
+
     if (length) {
       b->values = blas_calloc(length, sizeof(OSQPFloat));
       if (!(b->values)) {
@@ -107,12 +118,15 @@ OSQPVectorf* OSQPVectorf_calloc(OSQPInt length) {
   return b;
 }
 
-OSQPVectori* OSQPVectori_calloc(OSQPInt length) {
+OSQPVectori* OSQPVectori_calloc(const OSQPAlgebraContext* context,
+                                      OSQPInt length) {
 
   OSQPVectori *b = c_malloc(sizeof(OSQPVectori));
 
   if (b) {
-    b->length = length;
+    b->length  = length;
+    b->context = context;
+
     if (length) {
       b->values = blas_calloc(length, sizeof(OSQPInt));
       if (!(b->values)) {

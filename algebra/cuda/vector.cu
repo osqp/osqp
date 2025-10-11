@@ -40,10 +40,11 @@ OSQPInt OSQPVectorf_is_eq(const OSQPVectorf* a,
   return res;
 }
 
-OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
-                                   OSQPInt    length) {
+OSQPVectorf* OSQPVectorf_new(const OSQPAlgebraContext* context,
+                             const OSQPFloat*          a,
+                                   OSQPInt             length) {
 
-  OSQPVectorf* out = OSQPVectorf_malloc(length);
+  OSQPVectorf* out = OSQPVectorf_malloc(context, length);
   if (!out) return OSQP_NULL;
 
   if (length > 0) OSQPVectorf_from_raw(out, a);
@@ -51,12 +52,15 @@ OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
   return out;
 }
 
-OSQPVectorf* OSQPVectorf_malloc(OSQPInt length) {
+OSQPVectorf* OSQPVectorf_malloc(const OSQPAlgebraContext* context,
+                                      OSQPInt             length) {
 
   OSQPVectorf* b = (OSQPVectorf*) c_malloc(sizeof(OSQPVectorf));
   if (!b) return OSQP_NULL;
 
-  b->length = length;
+  b->length  = length;
+  b->context = context;
+
   if (length) {
     cuda_malloc((void **) &b->d_val, length * sizeof(OSQPFloat));
     if (!(b->d_val)) {
@@ -72,12 +76,15 @@ OSQPVectorf* OSQPVectorf_malloc(OSQPInt length) {
   return b;
 }
 
-OSQPVectorf* OSQPVectorf_calloc(OSQPInt length) {
+OSQPVectorf* OSQPVectorf_calloc(const OSQPAlgebraContext* context,
+                                      OSQPInt             length) {
 
   OSQPVectorf* b = (OSQPVectorf*) c_malloc(sizeof(OSQPVectorf));
   if (!b) return OSQP_NULL;
 
-  b->length = length;
+  b->length  = length;
+  b->context = context;
+
   if (length) {
     cuda_calloc((void **) &b->d_val, length * sizeof(OSQPFloat));
     if (!(b->d_val)) {
@@ -93,10 +100,11 @@ OSQPVectorf* OSQPVectorf_calloc(OSQPInt length) {
   return b;
 }
 
-OSQPVectori* OSQPVectori_new(const OSQPInt* a,
-                                   OSQPInt  length) {
+OSQPVectori* OSQPVectori_new(const OSQPAlgebraContext* context,
+                             const OSQPInt*            a,
+                                   OSQPInt             length) {
 
-  OSQPVectori* out = OSQPVectori_malloc(length);
+  OSQPVectori* out = OSQPVectori_malloc(context, length);
   if (!out) return OSQP_NULL;
 
   if (length > 0) OSQPVectori_from_raw(out, a);
@@ -104,12 +112,15 @@ OSQPVectori* OSQPVectori_new(const OSQPInt* a,
   return out;
 }
 
-OSQPVectori* OSQPVectori_malloc(OSQPInt length) {
+OSQPVectori* OSQPVectori_malloc(const OSQPAlgebraContext* context,
+                                      OSQPInt             length) {
 
   OSQPVectori* b = (OSQPVectori*) c_malloc(sizeof(OSQPVectori));
   if (!b) return OSQP_NULL;
 
-  b->length = length;
+  b->length  = length;
+  b->context = context;
+
   if (length) {
     cuda_malloc((void **) &b->d_val, length * sizeof(OSQPInt));
     if (!(b->d_val)) {
@@ -123,12 +134,15 @@ OSQPVectori* OSQPVectori_malloc(OSQPInt length) {
   return b;
 }
 
-OSQPVectori* OSQPVectori_calloc(OSQPInt length) {
+OSQPVectori* OSQPVectori_calloc(const OSQPAlgebraContext* context,
+                                      OSQPInt             length) {
 
   OSQPVectori* b = (OSQPVectori*) c_malloc(sizeof(OSQPVectori));
   if (!b) return OSQP_NULL;
 
-  b->length = length;
+  b->length  = length;
+  b->context = context;
+
   if (length) {
     cuda_calloc((void **) &b->d_val, length * sizeof(OSQPInt));
     if (!(b->d_val)) {
@@ -144,7 +158,7 @@ OSQPVectori* OSQPVectori_calloc(OSQPInt length) {
 
 OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf* a) {
 
-  OSQPVectorf* b = OSQPVectorf_malloc(a->length);
+  OSQPVectorf* b = OSQPVectorf_malloc(a->context, a->length);
 
   if (b) cuda_vec_copy_d2d(b->d_val, a->d_val, a->length);
 
@@ -172,8 +186,9 @@ OSQPVectorf* OSQPVectorf_view(const OSQPVectorf* a,
 
   OSQPVectorf* view = (OSQPVectorf*) c_malloc(sizeof(OSQPVectorf));
   if (view) {
-    view->length = length;
-    view->d_val  = a->d_val  + head;
+    view->length  = length;
+    view->context = a->context;
+    view->d_val   = a->d_val  + head;
     cuda_vec_create(&view->vec, view->d_val, length);
   }
   return view;

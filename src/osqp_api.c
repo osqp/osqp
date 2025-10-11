@@ -375,7 +375,7 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 # endif /* ifdef OSQP_ENABLE_PROFILING */
 
   // Initialize algebra libraries
-  exitflag = osqp_algebra_init_libs(settings->device);
+  exitflag = osqp_algebra_init_ctx(&(work->alg_context), settings->device);
   if (exitflag) return osqp_error(OSQP_ALGEBRA_LOAD_ERROR);
 
   // Copy problem data into workspace
@@ -385,27 +385,27 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   work->data->n = n;
 
   // objective function
-  work->data->P = OSQPMatrix_new_from_csc(P,1);   //copy assuming triu form
-  work->data->q = OSQPVectorf_new(q,n);
+  work->data->P = OSQPMatrix_new_from_csc(work->alg_context, P,1);   //copy assuming triu form
+  work->data->q = OSQPVectorf_new(work->alg_context, q,n);
   if (!(work->data->P) || !(work->data->q)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Constraints
-  work->data->A = OSQPMatrix_new_from_csc(A,0); //assumes non-triu form (i.e. full)
+  work->data->A = OSQPMatrix_new_from_csc(work->alg_context, A,0); //assumes non-triu form (i.e. full)
   if (!(work->data->A)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->data->l = OSQPVectorf_new(l,m);
-  work->data->u = OSQPVectorf_new(u,m);
+  work->data->l = OSQPVectorf_new(work->alg_context, l,m);
+  work->data->u = OSQPVectorf_new(work->alg_context, u,m);
   if (!(work->data->l) || !(work->data->u))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   if (settings->rho_is_vec) {
     // Vectorized rho parameter
-    work->rho_vec     = OSQPVectorf_malloc(m);
-    work->rho_inv_vec = OSQPVectorf_malloc(m);
+    work->rho_vec     = OSQPVectorf_malloc(work->alg_context, m);
+    work->rho_inv_vec = OSQPVectorf_malloc(work->alg_context, m);
     if (!(work->rho_vec) || !(work->rho_inv_vec))
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
     // Type of constraints
-    work->constr_type = OSQPVectori_calloc(m);
+    work->constr_type = OSQPVectori_calloc(work->alg_context, m);
     if (!(work->constr_type)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   }
   else {
@@ -414,14 +414,14 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   }
 
   // Allocate internal solver variables (ADMM steps)
-  work->x           = OSQPVectorf_calloc(n);
-  work->z           = OSQPVectorf_calloc(m);
-  work->xz_tilde    = OSQPVectorf_calloc(n + m);
+  work->x           = OSQPVectorf_calloc(work->alg_context, n);
+  work->z           = OSQPVectorf_calloc(work->alg_context, m);
+  work->xz_tilde    = OSQPVectorf_calloc(work->alg_context, n + m);
   work->xtilde_view = OSQPVectorf_view(work->xz_tilde,0,n);
   work->ztilde_view = OSQPVectorf_view(work->xz_tilde,n,m);
-  work->x_prev      = OSQPVectorf_calloc(n);
-  work->z_prev      = OSQPVectorf_calloc(m);
-  work->y           = OSQPVectorf_calloc(m);
+  work->x_prev      = OSQPVectorf_calloc(work->alg_context, n);
+  work->z_prev      = OSQPVectorf_calloc(work->alg_context, m);
+  work->y           = OSQPVectorf_calloc(work->alg_context, m);
   if (!(work->x) || !(work->z) || !(work->xz_tilde))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
   if (!(work->xtilde_view) || !(work->ztilde_view))
@@ -430,18 +430,18 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Primal and dual residuals variables
-  work->Ax  = OSQPVectorf_calloc(m);
-  work->Px  = OSQPVectorf_calloc(n);
-  work->Aty = OSQPVectorf_calloc(n);
+  work->Ax  = OSQPVectorf_calloc(work->alg_context, m);
+  work->Px  = OSQPVectorf_calloc(work->alg_context, n);
+  work->Aty = OSQPVectorf_calloc(work->alg_context, n);
 
   // Primal infeasibility variables
-  work->delta_y   = OSQPVectorf_calloc(m);
-  work->Atdelta_y = OSQPVectorf_calloc(n);
+  work->delta_y   = OSQPVectorf_calloc(work->alg_context, m);
+  work->Atdelta_y = OSQPVectorf_calloc(work->alg_context, n);
 
   // Dual infeasibility variables
-  work->delta_x  = OSQPVectorf_calloc(n);
-  work->Pdelta_x = OSQPVectorf_calloc(n);
-  work->Adelta_x = OSQPVectorf_calloc(m);
+  work->delta_x  = OSQPVectorf_calloc(work->alg_context, n);
+  work->Pdelta_x = OSQPVectorf_calloc(work->alg_context, n);
+  work->Adelta_x = OSQPVectorf_calloc(work->alg_context, m);
 
   if (!(work->Ax) || !(work->Px) || !(work->Aty))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -459,19 +459,19 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     // Allocate scaling structure
     work->scaling = c_malloc(sizeof(OSQPScaling));
     if (!(work->scaling)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-    work->scaling->D    = OSQPVectorf_calloc(n);
-    work->scaling->Dinv = OSQPVectorf_calloc(n);
-    work->scaling->E    = OSQPVectorf_calloc(m);
-    work->scaling->Einv = OSQPVectorf_calloc(m);
+    work->scaling->D    = OSQPVectorf_calloc(work->alg_context, n);
+    work->scaling->Dinv = OSQPVectorf_calloc(work->alg_context, n);
+    work->scaling->E    = OSQPVectorf_calloc(work->alg_context, m);
+    work->scaling->Einv = OSQPVectorf_calloc(work->alg_context, m);
     if (!(work->scaling->D) || !(work->scaling->Dinv) ||
         !(work->scaling->E) || !(work->scaling->Einv))
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
 
     // Allocate workspace variables used in scaling
-    work->D_temp   = OSQPVectorf_calloc(n);
-    work->D_temp_A = OSQPVectorf_calloc(n);
-    work->E_temp   = OSQPVectorf_calloc(m);
+    work->D_temp   = OSQPVectorf_calloc(work->alg_context, n);
+    work->D_temp_A = OSQPVectorf_calloc(work->alg_context, n);
+    work->E_temp   = OSQPVectorf_calloc(work->alg_context, m);
     if (!(work->D_temp) || !(work->D_temp_A) || !(work->E_temp))
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
@@ -515,10 +515,10 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   // Initialize active constraints structure
   work->pol = c_malloc(sizeof(OSQPPolish));
   if (!(work->pol)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->pol->active_flags = OSQPVectori_malloc(m);
-  work->pol->x            = OSQPVectorf_malloc(n);
-  work->pol->z            = OSQPVectorf_malloc(m);
-  work->pol->y            = OSQPVectorf_malloc(m);
+  work->pol->active_flags = OSQPVectori_malloc(work->alg_context, m);
+  work->pol->x            = OSQPVectorf_malloc(work->alg_context, n);
+  work->pol->z            = OSQPVectorf_malloc(work->alg_context, m);
+  work->pol->y            = OSQPVectorf_malloc(work->alg_context, m);
   if (!(work->pol->x)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   if (!(work->pol->active_flags) ||
       !(work->pol->z) || !(work->pol->y))
@@ -608,11 +608,11 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 # ifdef OSQP_ENABLE_DERIVATIVES
   work->derivative_data = c_calloc(1, sizeof(OSQPDerivativeData));
   if (!(work->derivative_data)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->derivative_data->y_u = OSQPVectorf_malloc(m);
-  work->derivative_data->y_l = OSQPVectorf_malloc(m);
-  work->derivative_data->ryl = OSQPVectorf_malloc(m);
-  work->derivative_data->ryu = OSQPVectorf_malloc(m);
-  work->derivative_data->rhs = OSQPVectorf_malloc(2 * (n + 2*m));
+  work->derivative_data->y_u = OSQPVectorf_malloc(work->alg_context, m);
+  work->derivative_data->y_l = OSQPVectorf_malloc(work->alg_context, m);
+  work->derivative_data->ryl = OSQPVectorf_malloc(work->alg_context, m);
+  work->derivative_data->ryu = OSQPVectorf_malloc(work->alg_context, m);
+  work->derivative_data->rhs = OSQPVectorf_malloc(work->alg_context, 2 * (n + 2*m));
   if (!(work->derivative_data->y_u) || !(work->derivative_data->y_l) ||
     !(work->derivative_data->ryl) || !(work->derivative_data->ryu))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -1064,9 +1064,6 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
   work = solver->work;
 
   if (work) { // If workspace has been allocated
-    // Free algebra library handlers
-    osqp_algebra_free_libs();
-
     // Free Data
     if (work->data) {
       OSQPMatrix_free(work->data->P);
@@ -1162,6 +1159,9 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
           c_free(work->derivative_data);
       }
 #endif /* ifdef OSQP_ENABLE_SCALING */
+
+    // Free algebra library context
+    osqp_algebra_free_ctx(&(work->alg_context));
 
     // Free work
     c_free(work);

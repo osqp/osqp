@@ -14,7 +14,7 @@ TEST_CASE_METHOD(cuda_test_fixture, "CUDA: Device number", "[cuda][settings]")
   osqp_set_default_settings(settings.get());
 
   SECTION( "CUDA: Device number: Negative device" ) {
-    // Try a very large device number
+    // Try a negative device number - this is never valid
     settings->device = -1;
 
     // Setup solver

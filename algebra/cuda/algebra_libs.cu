@@ -38,21 +38,23 @@ enum osqp_linsys_solver_type osqp_algebra_default_linsys(void) {
   return OSQP_INDIRECT_SOLVER;
 }
 
-OSQPInt osqp_algebra_init_libs(OSQPInt device) {
-  /* This is to prevent a memory leak when multiple OSQP objects are created */
-  if (CUDA_handle) return 0;
+OSQPInt osqp_algebra_init_ctx(OSQPAlgebraContext** alg_context,
+                              OSQPInt device) {
+  alg_context = c_malloc(sizeof(OSQPAlgebraContext));
 
-  CUDA_handle = cuda_init_libs((int)device);
-  if (!CUDA_handle) return 1;
+  alg_context->device = device;
+  alg_context->CUDA_handles = cuda_init_libs((int)device);
+  if (!alg_context->CUDA_handle) return 1;
   return 0;
 }
 
-void osqp_algebra_free_libs(void) {
-  /* This is to prevent a double free error when multiple OSQP objects are created */
-  if (!CUDA_handle) return;
+void osqp_algebra_free_ctx(OSQPAlgebraContext* alg_context) {
+  if (!alg_context) return;
 
-  cuda_free_libs(CUDA_handle);
-  CUDA_handle = OSQP_NULL;
+  // Free CUDA library handles
+  cuda_free_libs(alg_context->CUDA_Handles);
+
+  c_free(alg_context);
 }
 
 OSQPInt osqp_algebra_name(char* name, OSQPInt nameLen) {

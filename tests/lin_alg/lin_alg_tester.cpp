@@ -42,7 +42,7 @@ int main( int argc, char* argv[] ) {
      */
 
     // Setup the algebra
-    result = osqp_algebra_init_libs(deviceNum);
+    result = osqp_algebra_init_ctx(deviceNum);
 
     if( result != 0) {
         std::cout << "Error configuring linear algebra library" << std::endl;
@@ -52,18 +52,18 @@ int main( int argc, char* argv[] ) {
     result = session.run( argc, argv );
 
     // Cleanup the algebra
-    osqp_algebra_free_libs();
+    osqp_algebra_free_ctx();
 
     return result;
 }
 
 /*
 TEST_CASE( "test_solve_linsys", "[multi-file:2]" ) {
-    osqp_algebra_init_libs(0);
+    osqp_algebra_init_ctx(0);
     SECTION( "test_solveKKT" ) {
         test_solveKKT();
     }
-    osqp_algebra_free_libs();
+    osqp_algebra_free_ctx();
 }
 */
 

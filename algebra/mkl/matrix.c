@@ -53,8 +53,9 @@ static void mkl_csc_spfree(OSQPCscMatrix* M) {
 }
 
 //Make a copy from a csc matrix.  Returns OSQP_NULL on failure
-OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* A,
-                                          OSQPInt        is_triu) {
+OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPAlgebraContext* context,
+                                    const OSQPCscMatrix*      A,
+                                          OSQPInt             is_triu) {
 
   OSQPInt i       = 0;
   OSQPInt n       = A->n;   /* Number of columns */
@@ -68,6 +69,8 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* A,
 
   if (!out)
    return OSQP_NULL;
+
+  out->context = context;
 
   if (is_triu)
     out->symmetry = TRIU;
@@ -383,6 +386,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix*  A,
     return OSQP_NULL;
   }
 
+  out->context  = A->context;
   out->symmetry = NONE;
   out->csc      = M;
 

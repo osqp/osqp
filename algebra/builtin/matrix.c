@@ -22,7 +22,8 @@ OSQPInt OSQPMatrix_is_eq(const OSQPMatrix* A,
 /*  Non-embeddable functions (using malloc) ----------------------------------*/
 
 //Make a copy from a csc matrix.  Returns OSQP_NULL on failure
-OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* A,
+OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPAlgebraContext* context,
+                                    const OSQPCscMatrix* A,
                                           OSQPInt        is_triu) {
 
   OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
@@ -31,6 +32,7 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* A,
   if(is_triu) out->symmetry = TRIU;
   else        out->symmetry = NONE;
 
+  out->context = context;
   out->csc = csc_copy(A);
 
   if(!out->csc){
@@ -235,6 +237,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix*  A,
     return OSQP_NULL;
   }
 
+  out->context  = A->context;
   out->symmetry = NONE;
   out->csc      = M;
 
