@@ -339,15 +339,18 @@ void update_w(OSQPSolver* solver) {
 
   OSQPVectorf_mult_scalar(work->delta_w, settings->sigma);
 
-  OSQPVectorf_plus(work->w, work->w, work->delta_w);
+  if (solver->settings->restart_type != OSQP_RESTART_NONE) {
+    OSQPVectorf_plus(work->w, work->w, work->delta_w);
+  }
 
-  // w_pred^{k+1} = w^{k+1} + \sigma (x^{k+1} - x^{k}) + \sigma (1 - \alpha) (\tilde{x}^{k+1} - x^{k})
-  // I don't know of a better way to do this other than the following three updates
-  OSQPVectorf_add_scaled3(
-    work->w_pred, 1., work->x, (settings->alpha - 2.), work->x_prev,
-    (1. - settings->alpha), work->xtilde_view
-  );
   if (settings->restart_type == OSQP_RESTART_AVERAGED) {
+    // w_pred^{k+1} = w^{k+1} + \sigma (x^{k+1} - x^{k}) + \sigma (1 - \alpha) (\tilde{x}^{k+1} - x^{k})
+    // I don't know of a better way to do this other than the following three updates
+    OSQPVectorf_add_scaled3(
+      work->w_pred, 1., work->x, (settings->alpha - 2.), work->x_prev,
+      (1. - settings->alpha), work->xtilde_view
+    );
+  
     OSQPVectorf_mult_scalar(work->w_pred, settings->sigma);
     OSQPVectorf_plus(work->w_pred, work->w_pred, work->w);
   }
@@ -1657,6 +1660,14 @@ OSQPInt validate_settings(const OSQPSettings* settings,
       c_eprint("negate_K must be either 0 or 1");
       return 1;
     }
+  }
+
+  if (settings->restart_type != OSQP_RESTART_NONE &&
+      settings->restart_type != OSQP_RESTART_AVERAGED &&
+      settings->restart_type != OSQP_RESTART_HALPERN &&
+      settings->restart_type != OSQP_RESTART_REFLECTED_HALPERN) {
+    c_eprint("settings->restart_type needs to be one of {OSQP_RESTART_NONE, OSQP_RESTART_AVERAGED, OSQP_RESTART_HALPERN, OSQP_RESTART_REFLECTED_HALPERN}");
+    return 1;
   }
 
   if (settings->restart_type != OSQP_RESTART_NONE) {

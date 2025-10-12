@@ -364,6 +364,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
 
   new->allocate_solution = settings->allocate_solution;
   new->profiler_level    = settings->profiler_level;
+
   new->verbose           = settings->verbose;
   new->warm_starting     = settings->warm_starting;
   new->scaling           = settings->scaling;
@@ -374,35 +375,35 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->sigma      = settings->sigma;
   new->alpha      = settings->alpha;
 
-  if (settings->pid_controller) {
-    new->pid_controller                     = settings->pid_controller;
-    new->pid_controller_sqrt                = settings->pid_controller_sqrt;
-    new->pid_controller_sqrt_mult           = settings->pid_controller_sqrt_mult;
-    new->pid_controller_sqrt_mult_2         = settings->pid_controller_sqrt_mult_2;
-    new->pid_controller_log                 = settings->pid_controller_log;
-    new->KP                                 = settings->KP;
-    new->KI                                 = settings->KI;
-    new->KD                                 = settings->KD;
-    new->negate_K                           = settings->negate_K;
-  }
+  // if (settings->pid_controller) {
+  new->pid_controller                     = settings->pid_controller;
+  new->pid_controller_sqrt                = settings->pid_controller_sqrt;
+  new->pid_controller_sqrt_mult           = settings->pid_controller_sqrt_mult;
+  new->pid_controller_sqrt_mult_2         = settings->pid_controller_sqrt_mult_2;
+  new->pid_controller_log                 = settings->pid_controller_log;
+  new->KP                                 = settings->KP;
+  new->KI                                 = settings->KI;
+  new->KD                                 = settings->KD;
+  new->negate_K                           = settings->negate_K;
+  // }
 
-  if (settings->restart_type != OSQP_RESTART_NONE) {
-    new->beta                               = settings->beta;
-    new->lambd                              = settings->lambd;
-    new->restart_necessary                  = settings->restart_necessary;
-    new->restart_artificial                 = settings->restart_artificial;
-    new->xi                                 = settings->xi;
-    new->ini_rest_len                       = settings->ini_rest_len;
-    new->adaptive_rest                      = settings->adaptive_rest;
-    new->alpha_adjustment_reflected_halpern = settings->alpha_adjustment_reflected_halpern;
-    new->rho_custom_condition               = settings->rho_custom_condition;
-    new->custom_average_rest                = settings->custom_average_rest;
-    new->vector_rho_in_averaged_KKT         = settings->vector_rho_in_averaged_KKT;
-    new->adapt_rho_on_restart               = settings->adapt_rho_on_restart;
-    new->halpern_step_first_inner_iter      = settings->halpern_step_first_inner_iter;
-    new->restart_type                       = settings->restart_type;
-    new->halpern_scheme                     = settings->halpern_scheme;
-  }
+  // if (settings->restart_type != OSQP_RESTART_NONE) {
+  new->beta                               = settings->beta;
+  new->lambd                              = settings->lambd;
+  new->restart_necessary                  = settings->restart_necessary;
+  new->restart_artificial                 = settings->restart_artificial;
+  new->xi                                 = settings->xi;
+  new->ini_rest_len                       = settings->ini_rest_len;
+  new->adaptive_rest                      = settings->adaptive_rest;
+  new->alpha_adjustment_reflected_halpern = settings->alpha_adjustment_reflected_halpern;
+  new->rho_custom_condition               = settings->rho_custom_condition;
+  new->custom_average_rest                = settings->custom_average_rest;
+  new->vector_rho_in_averaged_KKT         = settings->vector_rho_in_averaged_KKT;
+  new->adapt_rho_on_restart               = settings->adapt_rho_on_restart;
+  new->halpern_step_first_inner_iter      = settings->halpern_step_first_inner_iter;
+  new->restart_type                       = settings->restart_type;
+  new->halpern_scheme                     = settings->halpern_scheme;
+  // }
 
   new->plot = settings->plot;
 
@@ -415,11 +416,11 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->adaptive_rho_interval          = settings->adaptive_rho_interval;
   new->adaptive_rho_fraction          = settings->adaptive_rho_fraction;
   
-  if (settings->rho_custom_condition) {
-    new->adaptive_rho_tolerance_greater = settings->adaptive_rho_tolerance_greater;
-    new->adaptive_rho_tolerance_less    = settings->adaptive_rho_tolerance_less;
-    new->rho_custom_tolerance           = settings->rho_custom_tolerance;
-  }
+  // if (settings->rho_custom_condition) {
+  new->adaptive_rho_tolerance_greater = settings->adaptive_rho_tolerance_greater;
+  new->adaptive_rho_tolerance_less    = settings->adaptive_rho_tolerance_less;
+  new->rho_custom_tolerance           = settings->rho_custom_tolerance;
+  // }
 
 
   new->max_iter           = settings->max_iter;

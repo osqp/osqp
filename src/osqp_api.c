@@ -312,23 +312,23 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->KD                                  = (OSQPFloat)OSQP_KD;                                 /* Coefficient for derivative, used in pid controller */
   settings->negate_K                            = (OSQPInt)OSQP_NEGATE_K;                             /* Negate all of the pid controller values */
 
-  if (settings->restart_type != OSQP_RESTART_NONE) {
-    settings->beta                                = (OSQPFloat)OSQP_BETA;                               /* restart parameter */
-    settings->lambd                               = (OSQPFloat)OSQP_LAMBDA;                             /* Reflected Halpern parameter */
-    settings->restart_necessary                   = (OSQPFloat)OSQP_NECESSARY;                          /* Adaptive necessary restarts parameter */
-    settings->restart_artificial                  = (OSQPFloat)OSQP_ARTIFICIAL;                         /* Adaptive artificial restarts parameter */
-    settings->xi                                  = (OSQPFloat)OSQP_XI;                                 /* Averaged restarts parameter */
-    settings->ini_rest_len                        = (OSQPInt)OSQP_INI_REST_LEN;                         /* Initial Restart length */
-    settings->adaptive_rest                       = (OSQPInt)OSQP_ADAPTIVE_REST;                        /* adaptive restarts boolean */
-    settings->alpha_adjustment_reflected_halpern  = (OSQPInt)OSQP_ALPHA_ADJUSTMENT_REFLECTED_HALPERN;   /* adjust alpha in reflected halpern iterates */
-    settings->rho_custom_condition                = (OSQPInt)OSQP_RHO_CUSTOM_CONDITION;                 /* additional rho adaptation conditions boolean */
-    settings->custom_average_rest                 = (OSQPInt)OSQP_CUSTOM_AVERAGE_REST;                  /* modification to the values to which you restart */
-    settings->vector_rho_in_averaged_KKT          = (OSQPInt)OSQP_VECT_RHO_IN_AVG_KKT;                  /* using a vectorized rho in the KKT system for smoothed duality gap computation */
-    settings->adapt_rho_on_restart                = (OSQPInt)OSQP_ADAPT_RHO_ON_REST;                    /* adapt rho with restarts or not */
-    settings->halpern_step_first_inner_iter       = (OSQPInt)OSQP_HALPERN_STEP_FIRST_INNER_ITER;        /* perform a halpern step for the first inner loop iter */
-    settings->restart_type                        = (OSQPInt)OSQP_RESTART_TYPE;                         /* restart format */
-    settings->halpern_scheme                      = (OSQPInt)OSQP_HALPERN_SCHEME;
-  }
+  // if (settings->restart_type != OSQP_RESTART_NONE) {
+  settings->beta                                = (OSQPFloat)OSQP_BETA;                               /* restart parameter */
+  settings->lambd                               = (OSQPFloat)OSQP_LAMBDA;                             /* Reflected Halpern parameter */
+  settings->restart_necessary                   = (OSQPFloat)OSQP_NECESSARY;                          /* Adaptive necessary restarts parameter */
+  settings->restart_artificial                  = (OSQPFloat)OSQP_ARTIFICIAL;                         /* Adaptive artificial restarts parameter */
+  settings->xi                                  = (OSQPFloat)OSQP_XI;                                 /* Averaged restarts parameter */
+  settings->ini_rest_len                        = (OSQPInt)OSQP_INI_REST_LEN;                         /* Initial Restart length */
+  settings->adaptive_rest                       = (OSQPInt)OSQP_ADAPTIVE_REST;                        /* adaptive restarts boolean */
+  settings->alpha_adjustment_reflected_halpern  = (OSQPInt)OSQP_ALPHA_ADJUSTMENT_REFLECTED_HALPERN;   /* adjust alpha in reflected halpern iterates */
+  settings->rho_custom_condition                = (OSQPInt)OSQP_RHO_CUSTOM_CONDITION;                 /* additional rho adaptation conditions boolean */
+  settings->custom_average_rest                 = (OSQPInt)OSQP_CUSTOM_AVERAGE_REST;                  /* modification to the values to which you restart */
+  settings->vector_rho_in_averaged_KKT          = (OSQPInt)OSQP_VECT_RHO_IN_AVG_KKT;                  /* using a vectorized rho in the KKT system for smoothed duality gap computation */
+  settings->adapt_rho_on_restart                = (OSQPInt)OSQP_ADAPT_RHO_ON_REST;                    /* adapt rho with restarts or not */
+  settings->halpern_step_first_inner_iter       = (OSQPInt)OSQP_HALPERN_STEP_FIRST_INNER_ITER;        /* perform a halpern step for the first inner loop iter */
+  settings->restart_type                        = (OSQPInt)OSQP_RESTART_TYPE;                         /* restart format */
+  settings->halpern_scheme                      = (OSQPInt)OSQP_HALPERN_SCHEME;
+  // }
 
 
   settings->plot = (OSQPInt)OSQP_PLOT;  /* save each iterations metrics in a .csv file for ploting purposes*/
@@ -342,12 +342,12 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->adaptive_rho_interval           = OSQP_ADAPTIVE_RHO_INTERVAL;
   settings->adaptive_rho_fraction           = (OSQPFloat)OSQP_ADAPTIVE_RHO_FRACTION;
   
-  if (settings->rho_custom_condition) {
-    // settings->adaptive_rho_tolerance          = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
-    settings->adaptive_rho_tolerance_greater  = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
-    settings->adaptive_rho_tolerance_less     = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
-    settings->rho_custom_tolerance            = (OSQPFloat)OSQP_RHO_CUSTOM_TOLERANCE;
-  }
+  // if (settings->rho_custom_condition) {
+  // settings->adaptive_rho_tolerance          = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
+  settings->adaptive_rho_tolerance_greater  = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
+  settings->adaptive_rho_tolerance_less     = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
+  settings->rho_custom_tolerance            = (OSQPFloat)OSQP_RHO_CUSTOM_TOLERANCE;
+  // }
 
   settings->max_iter           = OSQP_MAX_ITER;                 /* maximum number of ADMM iterations */
   settings->eps_abs            = (OSQPFloat)OSQP_EPS_ABS;       /* absolute convergence tolerance */
@@ -470,7 +470,7 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   if ((settings->restart_type != OSQP_RESTART_NONE) || settings->rho_custom_condition) {
     work->v_prev          = OSQPVectorf_calloc(m);
     work->v               = OSQPVectorf_calloc(m);
-    work->delta_v       = OSQPVectorf_calloc(m);
+    work->delta_v         = OSQPVectorf_calloc(m);
   }
 
   if (settings->restart_type != OSQP_RESTART_NONE) {
@@ -772,9 +772,9 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
   OSQPInt exitflag;
   OSQPInt iter, max_iter;
-  if (solver->settings->restart_type != OSQP_RESTART_NONE) {
-    OSQPInt restart_iter;
-  }
+  // if (solver->settings->restart_type != OSQP_RESTART_NONE) {
+  //   OSQPInt restart_iter;
+  // }
 
   OSQPInt can_print = 0;             // boolean, whether to print or not
   OSQPInt can_adapt_rho = 0;         // boolean, adapt rho or not
@@ -1747,7 +1747,11 @@ void osqp_cold_start(OSQPSolver *solver) {
   OSQPVectorf_set_scalar(work->x, 0.);
   OSQPVectorf_set_scalar(work->z, 0.);
   OSQPVectorf_set_scalar(work->y, 0.);
-  // OSQPVectorf_set_scalar(work->v, 0.);
+
+  if ((solver->settings->restart_type != OSQP_RESTART_NONE) ||
+      (solver->settings->rho_custom_condition)) {
+    OSQPVectorf_set_scalar(work->v, 0.);
+  }
 
   /* Cold start the linear system solver */
   work->linsys_solver->warm_start(work->linsys_solver, work->x);
