@@ -83,9 +83,10 @@ enum osqp_halpern_adaptive_type {
 * When to set the anchor point for halpern *
 *************************/
 enum osqp_halpern_anchor_point {
-    OSQP_HALPERN_ANCHOR_INITIAL_POINT = 0,
-    OSQP_HALPERN_ANCHOR_FIRST_ITER = 1,
-    OSQP_HALPERN_ANCHOR_TAU_NOT = 2,
+    OSQP_HALPERN_ANCHOR_INITIAL_POINT = 0,  // Anchor is x_0
+    OSQP_HALPERN_ANCHOR_FIRST_ITER = 1,     // Anchor is x_1
+    OSQP_HALPERN_ANCHOR_TAU_NOT = 2,        // Anchor is x_init_rest with the tau_not now being the iterations after init_rest
+    OSQP_HALPERN_ANCHOR_INIT_REST = 3,      // Anchor is x_init_rest
 };
 
 /*********************************

@@ -1679,8 +1679,9 @@ OSQPInt validate_settings(const OSQPSettings* settings,
 
   if (settings->halpern_anchor != OSQP_HALPERN_ANCHOR_INITIAL_POINT &&
       settings->halpern_anchor != OSQP_HALPERN_ANCHOR_FIRST_ITER &&
-      settings->halpern_anchor != OSQP_HALPERN_ANCHOR_TAU_NOT) {
-    c_eprint("settings->halpern_anchor needs to be on of {OSQP_HALPERN_ANCHOR_INITIAL_POINT, OSQP_HALPERN_ANCHOR_FIRST_ITER, OSQP_HALPERN_ANCHOR_TAU_NOT}");
+      settings->halpern_anchor != OSQP_HALPERN_ANCHOR_TAU_NOT &&
+      settings->halpern_anchor != OSQP_HALPERN_ANCHOR_INIT_REST) {
+    c_eprint("settings->halpern_anchor needs to be on of {OSQP_HALPERN_ANCHOR_INITIAL_POINT, OSQP_HALPERN_ANCHOR_FIRST_ITER, OSQP_HALPERN_ANCHOR_TAU_NOT, OSQP_HALPERN_ANCHOR_INIT_REST}");
     return 1;
   }
 

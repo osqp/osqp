@@ -939,8 +939,10 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
           update_halpern(solver);
         }
       }
-
       else if (iter < settings->ini_rest_len) {
+        if (settings->halpern_anchor == OSQP_HALPERN_ANCHOR_INIT_REST) {
+          // Will only perform the ADMM steps for the first settings->ini_rest_len steps, so this statement is empty
+        }
         if (settings->halpern_anchor == OSQP_HALPERN_ANCHOR_FIRST_ITER) {
           if (iter == 1) {
             // Setting the new anchor point
