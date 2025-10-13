@@ -1,0 +1,1 @@
+import{t as a}from"./Logger-BkkOJyg0.js";async function t(o){await navigator.clipboard.writeText(o).catch(async()=>{a.warn("Failed to copy to clipboard using navigator.clipboard"),window.prompt("Copy to clipboard: Ctrl+C, Enter",o)})}export{t};

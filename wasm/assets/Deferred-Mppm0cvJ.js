@@ -1,0 +1,1 @@
+var i=Object.defineProperty;var o=(e,s,t)=>s in e?i(e,s,{enumerable:!0,configurable:!0,writable:!0,value:t}):e[s]=t;var r=(e,s,t)=>o(e,typeof s!="symbol"?s+"":s,t);var a=class{constructor(){r(this,"status","pending");this.promise=new Promise((e,s)=>{this.reject=t=>{this.status="rejected",s(t)},this.resolve=t=>{this.status="resolved",e(t)}})}};export{a as t};

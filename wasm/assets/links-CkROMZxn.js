@@ -1,0 +1,1 @@
+import{s as n}from"./chunk-DZLz74EQ.js";import{n as o,t as i}from"./jsx-runtime-DvsdsEjx.js";var l=n(o()),c=n(i());const h=s=>{let r=(0,l.c)(3),{href:t,children:a}=s,e;return r[0]!==a||r[1]!==t?(e=(0,c.jsx)("a",{href:t,target:"_blank",className:"text-link hover:underline",children:a}),r[0]=a,r[1]=t,r[2]=e):e=r[2],e};export{h as t};
