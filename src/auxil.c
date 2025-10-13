@@ -1670,6 +1670,20 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     return 1;
   }
 
+  if (settings->halpern_scheme != OSQP_ADAPTIVE_HALPERN_NONE &&
+      settings->halpern_scheme != OSQP_ADAPTIVE_HALPERN &&
+      settings->halpern_scheme != OSQP_ADAPTIVE_HALPERN_BEFORE_INI_REST_LEN) {
+    c_eprint("settings->halpern_scheme needs to be one of {OSQP_ADAPTIVE_HALPERN_NONE, OSQP_ADAPTIVE_HALPERN, OSQP_ADAPTIVE_HALPERN_BEFORE_INI_REST_LEN}");
+    return 1;
+  }
+
+  if (settings->halpern_anchor != OSQP_HALPERN_ANCHOR_INITIAL_POINT &&
+      settings->halpern_anchor != OSQP_HALPERN_ANCHOR_FIRST_ITER &&
+      settings->halpern_anchor != OSQP_HALPERN_ANCHOR_TAU_NOT) {
+    c_eprint("settings->halpern_anchor needs to be on of {OSQP_HALPERN_ANCHOR_INITIAL_POINT, OSQP_HALPERN_ANCHOR_FIRST_ITER, OSQP_HALPERN_ANCHOR_TAU_NOT}");
+    return 1;
+  }
+
   if (settings->restart_type != OSQP_RESTART_NONE) {
 
     if (settings->beta <= 0.0 ||

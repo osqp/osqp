@@ -151,6 +151,7 @@ void print_setup_header(const OSQPSolver* solver) {
     c_print("ini_rest_len = %i,\n", settings->ini_rest_len);
     c_print("          restart_type = %i, ", settings->restart_type);
     c_print("halpern_scheme = %i,\n", settings->halpern_scheme);
+    c_print("halpern_anchor = %i,\n", settings->halpern_anchor);
   }
   if (settings->rho_custom_condition) {
     c_print("          adaptive_rho_tolerance_greater = %2f,\n", settings->adaptive_rho_tolerance_greater);
@@ -403,6 +404,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->halpern_step_first_inner_iter      = settings->halpern_step_first_inner_iter;
   new->restart_type                       = settings->restart_type;
   new->halpern_scheme                     = settings->halpern_scheme;
+  new->halpern_anchor                     = settings->halpern_anchor;
   // }
 
   new->plot = settings->plot;

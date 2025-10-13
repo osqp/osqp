@@ -327,7 +327,8 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->adapt_rho_on_restart                = (OSQPInt)OSQP_ADAPT_RHO_ON_REST;                    /* adapt rho with restarts or not */
   settings->halpern_step_first_inner_iter       = (OSQPInt)OSQP_HALPERN_STEP_FIRST_INNER_ITER;        /* perform a halpern step for the first inner loop iter */
   settings->restart_type                        = (OSQPInt)OSQP_RESTART_TYPE;                         /* restart format */
-  settings->halpern_scheme                      = (OSQPInt)OSQP_HALPERN_SCHEME;
+  settings->halpern_scheme                      = (OSQPInt)OSQP_HALPERN_SCHEME;                       /* When to do adaptive halpern */
+  settings->halpern_anchor                      = (OSQPInt)OSQP_HALPERN_ANCHOR;                       /* What is the anchor point, x_0, x_1, or x_25 */
   // }
 
 
@@ -877,6 +878,12 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     info->run_time_prev = osqp_toc(work->timer);
   }
 
+  if (settings->halpern_anchor == OSQP_HALPERN_ANCHOR_TAU_NOT) {
+    // The first settings->ini_rest_len are used to set the anchor point.
+    // The next settings->ini_rest_len correspond to the first tau_not iterations
+    settings->ini_rest_len = 2.0 * settings->ini_rest_len;
+  }
+
   max_iter = settings->max_iter;
   for (iter = 1; iter <= max_iter; iter++) {
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_ITER);
@@ -922,9 +929,33 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
     if (settings->restart_type == OSQP_RESTART_HALPERN || settings->restart_type == OSQP_RESTART_REFLECTED_HALPERN) {
       /* Halpern Step */
-      // Pure Halpern prior to first restart
-      if (iter < settings->ini_rest_len) {
-        update_halpern(solver);
+
+      if (settings->halpern_anchor == OSQP_HALPERN_ANCHOR_TAU_NOT) {
+        if (iter < settings->ini_rest_len / 2.0) {
+          // Will only perform the ADMM steps for the first settings->ini_rest_len steps, so this statement is empty
+        }
+        else if (iter < settings->ini_rest_len) {
+          // Performing pure halpern for the next few iterations
+          update_halpern(solver);
+        }
+      }
+
+      else if (iter < settings->ini_rest_len) {
+        if (settings->halpern_anchor == OSQP_HALPERN_ANCHOR_FIRST_ITER) {
+          if (iter == 1) {
+            // Setting the new anchor point
+            OSQPVectorf_copy(work->x_outer, work->x);
+            OSQPVectorf_copy(work->v_outer, work->v);
+          }
+          else {
+            // Performing pure halpern for the next few iterations
+            update_halpern(solver);
+          }
+        }
+        else {
+          // Performing pure halpern for the next few iterations
+          update_halpern(solver); 
+        }
       }
 
       // First restart
@@ -1982,6 +2013,7 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
     settings->halpern_step_first_inner_iter       = new_settings->halpern_step_first_inner_iter;
     settings->restart_type                        = new_settings->restart_type;
     settings->halpern_scheme                      = new_settings->halpern_scheme;
+    settings->halpern_anchor                      = new_settings->halpern_anchor;
   }
   
   settings->plot = new_settings->plot;

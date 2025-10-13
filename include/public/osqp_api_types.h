@@ -93,6 +93,7 @@ typedef struct OSQP_ATTR_PACK {
   OSQPInt negate_K;                                 ///< boolean; negate all of pid controller values or not
   enum osqp_restart_type restart_type;              ///< Determines if we do no restarts, Averaged, or Halpern restarts: {0, 1, 2}
   enum osqp_halpern_adaptive_type halpern_scheme;   ///< Determines if we adapt the Halpern smoothing parameter [(k + 1) / (k + 2)]: {"none", "adaptive"} 
+  enum osqp_halpern_anchor_point halpern_anchor;    ///< Determine what the anchor point should be: {x_0, x_1, x_25}
 
   OSQPInt plot;   ///< boolean; save each iteration for ploting purposes
 

@@ -79,6 +79,15 @@ enum osqp_halpern_adaptive_type {
     OSQP_ADAPTIVE_HALPERN_BEFORE_INI_REST_LEN = 2,
 };
 
+/*************************
+* When to set the anchor point for halpern *
+*************************/
+enum osqp_halpern_anchor_point {
+    OSQP_HALPERN_ANCHOR_INITIAL_POINT = 0,
+    OSQP_HALPERN_ANCHOR_FIRST_ITER = 1,
+    OSQP_HALPERN_ANCHOR_TAU_NOT = 2,
+};
+
 /*********************************
 * Preconditioners for CG method *
 *********************************/
@@ -149,6 +158,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_NEGATE_K                              (0)
 # define OSQP_RESTART_TYPE                          (OSQP_RESTART_NONE)
 # define OSQP_HALPERN_SCHEME                        (OSQP_ADAPTIVE_HALPERN_NONE)
+# define OSQP_HALPERN_ANCHOR                        (OSQP_HALPERN_ANCHOR_INITIAL_POINT)
 
 # define OSQP_PLOT  (0)
 
