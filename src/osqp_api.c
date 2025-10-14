@@ -930,7 +930,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     if (settings->restart_type == OSQP_RESTART_HALPERN || settings->restart_type == OSQP_RESTART_REFLECTED_HALPERN) {
       /* Halpern Step */
 
-      if (settings->halpern_anchor == OSQP_HALPERN_ANCHOR_TAU_NOT) {
+      if (settings->halpern_anchor == OSQP_HALPERN_ANCHOR_TAU_NOT && iter < settings->ini_rest_len) {
         if (iter < settings->ini_rest_len / 2.0) {
           // Will only perform the ADMM steps for the first settings->ini_rest_len steps, so this statement is empty
         }

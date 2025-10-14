@@ -451,12 +451,18 @@ void reflected_halpern_step(OSQPSolver* solver, OSQPFloat scalling) {
   OSQPWorkspace* work     = solver->work;
 
   OSQPFloat lambd_plus_one  = 1. + settings->lambd;
+  OSQPFloat alpha_over_2    = settings->alpha / 2.0;
 
   if (settings->alpha_adjustment_reflected_halpern) {
-    // 2 / alpha
+    // (1 + lambda) / alpha
     OSQPFloat alpha_adjustment = lambd_plus_one / settings->alpha;
-    // ((2 / alpha) - 1) * [(k + 1) / (k + 2)]
+    // // (1 + lambda) * (alpha / 2.0)
+    // OSQPFloat alpha_adjustment = lambd_plus_one * alpha_over_2;
+
+    // (((1 + lambda) / alpha) - 1) * [(k + 1) / (k + 2)]
     OSQPFloat alpha_minus_one_scalling  = (alpha_adjustment - 1.)  * scalling;
+    // // (1.0 - (1 + lambda) * (alpha / 2.0)) * [(k + 1) / (k + 2)]
+    // OSQPFloat alpha_minus_one_scalling =
     OSQPVectorf_add_scaled(work->v, alpha_adjustment, work->v, -alpha_minus_one_scalling, work->v_prev);
     OSQPVectorf_add_scaled(work->x, alpha_adjustment, work->x, -alpha_minus_one_scalling, work->x_prev);
   }
