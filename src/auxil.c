@@ -157,16 +157,19 @@ static void compute_rhs(OSQPSolver* solver) {
   }
 }
 
-void update_xz_tilde(OSQPSolver* solver,
-                     OSQPInt     admm_iter) {
+OSQPInt update_xz_tilde(OSQPSolver* solver,
+                        OSQPInt     admm_iter) {
 
   OSQPWorkspace* work = solver->work;
+  OSQPInt linsysRetval = OSQP_NO_ERROR;
 
   // Compute right-hand side
   compute_rhs(solver);
 
   // Solve linear system
-  work->linsys_solver->solve(work->linsys_solver, work->xz_tilde, admm_iter);
+  linsysRetval = work->linsys_solver->solve(work->linsys_solver, work->xz_tilde, admm_iter);
+
+  return linsysRetval;
 }
 
 void update_x(OSQPSolver* solver) {

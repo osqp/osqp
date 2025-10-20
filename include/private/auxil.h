@@ -58,8 +58,10 @@ void swap_vectors(OSQPVectorf** a,
  * Update x_tilde and z_tilde variable (first ADMM step)
  * @param solver    Solver
  * @param admm_iter Current ADMM iteration
+ *
+ * @return non-zero when an error occurs in the linsys solver
  */
-void update_xz_tilde(OSQPSolver* solver,
+OSQPInt update_xz_tilde(OSQPSolver* solver,
                      OSQPInt     admm_iter);
 
 

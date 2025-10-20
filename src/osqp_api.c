@@ -705,7 +705,11 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     /* ADMM STEPS */
     /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_KKT_SOLVE);
-    update_xz_tilde(solver, iter);
+    if (update_xz_tilde(solver, iter)) {
+      c_eprint("Failed linsys solve");
+      exitflag = 1;
+      goto exit;
+    }
     osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_KKT_SOLVE);
 
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_UPDATE);
