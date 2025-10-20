@@ -190,4 +190,4 @@ OSQPInt update_linsys_solver_rho_vec_cudapcg(cudapcg_solver*    s,
                                              OSQPFloat          rho_sc);
 
 
-#endif /* ifndef OSQP_API_TYPES_H */
+#endif /* ifndef CUDA_PCG_INTERFACE_H */

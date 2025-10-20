@@ -56,6 +56,9 @@ struct OSQPMatrix_ {
   OSQPInt*   d_P_triu_to_full_ind;
   OSQPInt*   d_P_diag_ind;
   OSQPInt    P_triu_nnz;
+
+  // Host CSC matrix (only valid during setup phase)
+  OSQPCscMatrix* h_csc;
 };
 
 

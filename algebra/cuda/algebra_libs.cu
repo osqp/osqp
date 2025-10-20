@@ -21,21 +21,35 @@
 #include "cuda_handler.h"
 #include "cuda_pcg_interface.h"
 
+#ifdef CUDSS_AVAILABLE
+  #include "cuda_cudss.h"
+#endif
+
+
 #include "profilers.h"
 
- #include <stdio.h>
+#include <stdio.h>
 
 
 CUDA_Handle_t *CUDA_handle = OSQP_NULL;
 
 OSQPInt osqp_algebra_linsys_supported(void) {
-  /* Only has a PCG (indirect) solver */
-  return OSQP_CAPABILITY_INDIRECT_SOLVER;
+  OSQPInt retval = OSQP_CAPABILITY_INDIRECT_SOLVER;
+
+#ifdef CUDSS_AVAILABLE
+  retval |= OSQP_CAPABILITY_DIRECT_SOLVER;
+#endif
+
+  return retval;
 }
 
 enum osqp_linsys_solver_type osqp_algebra_default_linsys(void) {
-  /* Prefer the PCG solver (it is also the only one available) */
+  /* Prefer the cuDSS direct solver if it is available */
+#ifdef CUDSS_AVAILABLE
+  return OSQP_DIRECT_SOLVER;
+#else
   return OSQP_INDIRECT_SOLVER;
+#endif
 }
 
 OSQPInt osqp_algebra_init_libs(OSQPInt device) {
@@ -90,8 +104,13 @@ OSQPInt osqp_algebra_init_linsys_solver(LinSysSolver**      s,
 
   switch (settings->linsys_solver) {
   default:
-  case OSQP_INDIRECT_SOLVER:
-    retval = init_linsys_solver_cudapcg((cudapcg_solver **)s, P, A, rho_vec, settings, scaled_prim_res, scaled_dual_res, polishing);
+#ifdef CUDSS_AVAILABLE
+  case OSQP_DIRECT_SOLVER:
+    retval = init_linsys_solver_cudss((cudss_solver **) s, P, A, rho_vec, settings, scaled_prim_res, scaled_dual_res, polishing);
+    break;
+#endif
+    case OSQP_INDIRECT_SOLVER:
+    retval = init_linsys_solver_cudapcg((cudapcg_solver **) s, P, A, rho_vec, settings, scaled_prim_res, scaled_dual_res, polishing);
   }
 
   osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_INIT);

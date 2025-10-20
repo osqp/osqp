@@ -25,6 +25,12 @@
 #define CUDA_FLOAT CUDA_R_64F
 #endif
 
+#ifdef OSQP_USE_LONG
+#define CUDA_INT CUDA_R_64I
+#else
+#define CUDA_INT CUDA_R_32I
+#endif
+
 #define ELEMENTS_PER_THREAD (8)
 #define THREADS_PER_BLOCK   (1024)
 #define NUMBER_OF_BLOCKS    (2)
