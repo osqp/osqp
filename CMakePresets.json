@@ -103,13 +103,26 @@
       }
     },
     {
-      "name": "cuda-debug",
+      "name": "cuda-float-debug",
       "displayName": "CUDA linear algebra (Debug + ASAN)",
       "description": "CUDA linear algebra backend",
-      "binaryDir": "${sourceDir}/build.debug.cuda",
+      "binaryDir": "${sourceDir}/build.debug.cuda-float",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "OSQP_ALGEBRA_BACKEND": "cuda",
+        "OSQP_USE_FLOAT": "ON",
+        "OSQP_BUILD_UNITTESTS": "ON"
+      }
+    },
+    {
+      "name": "cuda-double-debug",
+      "displayName": "CUDA linear algebra (Debug + ASAN)",
+      "description": "CUDA linear algebra backend",
+      "binaryDir": "${sourceDir}/build.debug.cuda-double",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "OSQP_ALGEBRA_BACKEND": "cuda",
+        "OSQP_USE_FLOAT": "OFF",
         "OSQP_BUILD_UNITTESTS": "ON"
       }
     }
