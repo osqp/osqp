@@ -424,10 +424,10 @@ OSQPInt solve_linsys_cudss(cudss_solver* s,
 
     OSQPInt retval = OSQP_NO_ERROR;
 
-    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SOLVE);
-
-    // Update the RHS
+    // Update the RHS (the cuDSS matrix for b is a thin wrapper, so this is enough to update b)
     cuda_vec_copy_d2d(s->d_b, b->d_val, b->length);
+
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SOLVE);
 
     // Actually do the solve
     s->solveStatus = cudssExecute(
@@ -456,6 +456,9 @@ OSQPInt solve_linsys_cudss(cudss_solver* s,
     }
 
     osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SOLVE);
+
+    // Return the solution through the RHS vector (the cuDSS matrix is a thin wrapper)
+    cuda_vec_copy_d2d(b->d_val, s->d_x, b->length);
 
     return retval;
 }
