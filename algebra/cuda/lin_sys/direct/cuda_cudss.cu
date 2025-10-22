@@ -138,6 +138,9 @@ OSQPInt init_linsys_solver_cudss(      cudss_solver** sp,
     checkCudssErrorsAndTerminate(cudssCreate(&(s->lib_handle)));
     checkCudssErrorsAndTerminate(cudssConfigCreate(&(s->config_handle)));
     checkCudssErrorsAndTerminate(cudssDataCreate(s->lib_handle, &(s->data_handle)));
+    checkCudaErrors(cudaStreamCreate(&s->cudss_stream));
+
+    checkCudssErrorsAndTerminate(cudssSetStream(s->lib_handle, s->cudss_stream));
 
     /* Assign type and the number of threads */
     s->type = OSQP_DIRECT_SOLVER;
@@ -322,6 +325,8 @@ OSQPInt init_linsys_solver_cudss(      cudss_solver** sp,
         s->d_cudss_b                // b (RHS) vector
         );
 
+    checkCudaErrors(cudaStreamSynchronize(s->cudss_stream));
+
     if (checkCudssErrors(s->solveStatus)) {
         free_linsys_solver_cudss(s);
         return OSQP_LINSYS_SOLVER_INIT_ERROR;
@@ -345,6 +350,8 @@ OSQPInt init_linsys_solver_cudss(      cudss_solver** sp,
         s->d_cudss_x,               // x (unknown) vector
         s->d_cudss_b                // b (RHS) vector
         );
+
+    checkCudaErrors(cudaStreamSynchronize(s->cudss_stream));
 
     if (checkCudssErrors(s->solveStatus)) {
         free_linsys_solver_cudss(s);
@@ -433,6 +440,8 @@ OSQPInt solve_linsys_cudss(cudss_solver* s,
         s->d_cudss_b                // b (RHS) vector
         );
 
+    checkCudaErrors(cudaStreamSynchronize(s->cudss_stream));
+
     if (checkCudssErrors(s->solveStatus)) {
         retval = OSQP_RUNTIME_ERROR;
     }
@@ -497,6 +506,7 @@ void free_linsys_solver_cudss(cudss_solver* s) {
         cudssDataDestroy(s->lib_handle, s->data_handle);
         cudssConfigDestroy(s->config_handle);
         cudssDestroy(s->lib_handle);
+        checkCudaErrors(cudaStreamDestroy(s->cudss_stream));
 
         c_free(s);
     }
@@ -540,6 +550,8 @@ OSQPInt update_linsys_solver_matrices_cudss(      cudss_solver* s,
         s->d_cudss_x,                   // x (unknown) vector
         s->d_cudss_b                    // b (RHS) vector
         );
+
+    checkCudaErrors(cudaStreamSynchronize(s->cudss_stream));
 
     if (checkCudssErrors(s->solveStatus)) {
         return OSQP_LINSYS_SOLVER_INIT_ERROR;
@@ -601,6 +613,8 @@ OSQPInt update_linsys_solver_rho_vec_cudss(      cudss_solver* s,
         s->d_cudss_x,                   // x (unknown) vector
         s->d_cudss_b                    // b (RHS) vector
         );
+
+    checkCudaErrors(cudaStreamSynchronize(s->cudss_stream));
 
     if (checkCudssErrors(s->solveStatus)) {
         return OSQP_LINSYS_SOLVER_INIT_ERROR;

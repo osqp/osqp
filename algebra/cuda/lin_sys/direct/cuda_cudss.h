@@ -70,6 +70,7 @@ typedef struct cudss_solver_ {
   cudssHandle_t lib_handle;        ///< Handle to the cuDSS library
   cudssConfig_t config_handle;     ///< Handle to cuDSS config
   cudssData_t   data_handle;       ///< cuDSS solver data
+  cudaStream_t  cudss_stream;      ///< Stream for the cuDSS solver to use
 
   /* Dimensions */
   OSQPInt n;                       ///<  dimension of the linear system
