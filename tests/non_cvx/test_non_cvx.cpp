@@ -52,6 +52,7 @@ TEST_CASE_METHOD(non_cvx_test_fixture, "Nonconvex: Solve", "[nonconvex],[solve]"
   OSQPInt exitflag;
 
   // Test-specific solver settings
+  settings->max_iter = 5000;
   settings->adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_DISABLED;
   settings->sigma = sols_data->sigma_new;
 
