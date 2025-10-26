@@ -44,6 +44,7 @@ extern const char * OSQP_STATUS_MESSAGE[];
 * Polish Status  *
 ******************/
 enum osqp_polish_status_type {
+    OSQP_POLISH_MEM_ALLOC_ERROR = -3,
     OSQP_POLISH_LINSYS_ERROR = -2,
     OSQP_POLISH_FAILED = -1,
     OSQP_POLISH_NOT_PERFORMED = 0,

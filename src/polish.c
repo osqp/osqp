@@ -95,7 +95,7 @@ static OSQPInt form_Ared(OSQPWorkspace* work){
   c_free(u);
 
   if (!work->pol->Ared)
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);;
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   return OSQP_NO_ERROR;
 }
@@ -337,8 +337,8 @@ OSQPInt polish(OSQPSolver* solver) {
   exitflag = form_Ared(work);
 
   if (exitflag) {
-    /* Failure finding active constraints */
-    info->status_polish = OSQP_POLISH_FAILED;
+    /* Failure building active set - only memory allocation errors */
+    info->status_polish = OSQP_POLISH_MEM_ALLOC_ERROR;
     return exitflag;
   } else if (work->pol->n_active == 0) {
     /* No active constraints, so skip polishing */
@@ -370,7 +370,7 @@ OSQPInt polish(OSQPSolver* solver) {
 
   if (!rhs_red) {
     /* Failure to allocate memory */
-    info->status_polish = OSQP_POLISH_FAILED;
+    info->status_polish = OSQP_POLISH_MEM_ALLOC_ERROR;
 
     /* Memory clean-up */
     OSQPMatrix_free(work->pol->Ared);
@@ -382,7 +382,7 @@ OSQPInt polish(OSQPSolver* solver) {
 
   if (exitflag) {
     /* Failure to form reduced right hand side */
-    info->status_polish = OSQP_POLISH_FAILED;
+    info->status_polish = OSQP_POLISH_MEM_ALLOC_ERROR;
 
     /* Memory clean-up */
     OSQPMatrix_free(work->pol->Ared);
@@ -394,7 +394,7 @@ OSQPInt polish(OSQPSolver* solver) {
 
   if (!pol_sol) {
     /* Failure to allocate vector */
-    info->status_polish = OSQP_POLISH_FAILED;
+    info->status_polish = OSQP_POLISH_MEM_ALLOC_ERROR;
 
     /* Memory clean-up */
     OSQPMatrix_free(work->pol->Ared);
@@ -407,9 +407,8 @@ OSQPInt polish(OSQPSolver* solver) {
   pol_sol_yview = OSQPVectorf_view(pol_sol,work->data->n, work->pol->n_active);
 
   if (!pol_sol_xview || !pol_sol_yview) {
-
     // Polishing failed
-    info->status_polish = OSQP_POLISH_FAILED;
+    info->status_polish = OSQP_POLISH_MEM_ALLOC_ERROR;
 
     // Memory clean-up
     OSQPMatrix_free(work->pol->Ared);
