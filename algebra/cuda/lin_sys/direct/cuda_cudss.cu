@@ -526,13 +526,13 @@ OSQPInt solve_linsys_cudss(cudss_solver* s,
     // Update the RHS (the cuDSS matrix for b is a thin wrapper, so this is enough to update b)
     cuda_vec_copy_d2d(s->d_b, b->d_val, b->length);
 
-    if (s->polishing) {
+/*    if (s->polishing) {
         OSQPFloat* tmp_vec = (OSQPFloat*) c_malloc(b->length*sizeof(OSQPFloat));
 
         cuda_vec_copy_d2h(tmp_vec, b->d_val, b->length);
         print_vec(tmp_vec, b->length, "b");
     }
-
+*/
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SOLVE);
 
     // Actually do the solve
@@ -566,10 +566,10 @@ OSQPInt solve_linsys_cudss(cudss_solver* s,
         // Polishing uses the entire x vector for the solution
         cuda_vec_copy_d2d(b->d_val, s->d_x, b->length);
 
-        OSQPFloat* tmp_vec = (OSQPFloat*) c_malloc(b->length*sizeof(OSQPFloat));
+        //OSQPFloat* tmp_vec = (OSQPFloat*) c_malloc(b->length*sizeof(OSQPFloat));
 
-        cuda_vec_copy_d2h(tmp_vec, s->d_x, b->length);
-        print_vec(tmp_vec, b->length, "x");
+//        cuda_vec_copy_d2h(tmp_vec, s->d_x, b->length);
+//        print_vec(tmp_vec, b->length, "x");
     } else {
         OSQPInt number_of_blocks = (m / THREADS_PER_BLOCK) + 1;
 
