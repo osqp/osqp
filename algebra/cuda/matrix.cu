@@ -42,7 +42,7 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* M,
   OSQPMatrix* out = (OSQPMatrix *) c_calloc(1, sizeof(OSQPMatrix));
   if (!out) return OSQP_NULL;
 
-  // Temporarily store the CSC matrix for the setup phase only
+  // CSC matrix storage for the cuDSS solver's use
   // TODO: Figure out a better way than this
   out->h_csc = (OSQPCscMatrix*) M;    // Cast the const away for ease of use now
 

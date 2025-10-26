@@ -1,10 +1,16 @@
 #include "cuda_configure.h"
 #include "cuda_cudss.h"
+#include "cuda_wrapper.h"       // For BLAS functions
 #include "helper_cuda.h"
 
 #include "csr_type.h"
+#include "cuda_csr.h"
 #include "cuda_lin_alg.h"
 #include "cuda_memory.h"
+
+// CUDA library handles
+#include "cuda_handler.h"
+extern CUDA_Handle_t *CUDA_handle;
 
 #include "kkt.h"
 
@@ -109,10 +115,43 @@ __global__ void kkt_add_sigma(OSQPFloat*     csrVal,
     OSQPInt grid_size = blockDim.x * gridDim.x;
 
     for (OSQPInt i = idx; i < n; i+= grid_size) {
-        csrVal[csrRowInd[i+1]-1] += sigma;
+        csrVal[csrRowInd[i]] += sigma;
     }
 }
 
+// TODO: This kernel is probably not very performant, because it will be trying to
+// write to the same piece of memory multiple times
+__global__ void triu_update_kernel(const OSQPFloat* fullCsrVal,
+                                   OSQPFloat*       triuCsrVal,
+                                   const OSQPInt*   triuToFullMap,
+                                   OSQPInt          full_nnz) {
+    OSQPInt idx = threadIdx.x + blockDim.x * blockIdx.x;
+    OSQPInt grid_size = blockDim.x * gridDim.x;
+
+    for (OSQPInt i = idx; i < full_nnz; i+= grid_size) {
+        triuCsrVal[triuToFullMap[i]] = fullCsrVal[i];
+    }
+}
+
+/*******************************************************************************
+ * CUDA kernels for solve phase                                                *
+ *******************************************************************************/
+__global__ void vec_ew_fma_kernel(OSQPFloat*       c,
+                                  const OSQPFloat* a,
+                                  const OSQPFloat* b,
+                                  OSQPInt          n) {
+
+  OSQPInt idx = threadIdx.x + blockDim.x * blockIdx.x;
+  OSQPInt grid_size = blockDim.x * gridDim.x;
+
+  for(OSQPInt i = idx; i < n; i += grid_size) {
+#ifdef OSQP_USE_FLOAT
+    c[i] = __fmaf_rn(a[i], b[i], c[i]);
+#else
+    c[i] = __fma_rn(a[i], b[i], c[i]);
+#endif
+  }
+}
 
 /*******************************************************************************
  *                              API Functions                                  *
@@ -128,7 +167,6 @@ OSQPInt init_linsys_solver_cudss(      cudss_solver** sp,
                                        OSQPInt        polishing) {
     OSQPInt    n, m;
     OSQPInt    n_plus_m;  // Define n_plus_m dimension
-    OSQPFloat  sigma = settings->sigma;
 
     /* Allocate linsys solver structure */
     cudss_solver *s = (cudss_solver *)c_calloc(1, sizeof(cudss_solver));
@@ -154,16 +192,18 @@ OSQPInt init_linsys_solver_cudss(      cudss_solver** sp,
     n_plus_m = n+m;
 
     /* States */
+    s->rho_is_vec = settings->rho_is_vec;
     s->polishing = polishing;
 
     /* Parameters*/
-    s->sigma = sigma;
-    s->rho_inv = 1. / settings->rho;
-
-    if (rho_vec)
-        s->rho_inv_vec = (OSQPFloat *)c_malloc(sizeof(OSQPFloat) * m);
-    else
-        s->rho_inv_vec = OSQP_NULL;
+    if (polishing) {
+        s->sigma = settings->delta;
+        s->rho_inv = 1. / settings->delta;
+    } else {
+        s->sigma = settings->sigma;
+        s->rho_inv = 1. / settings->rho;
+    }
+    s->d_rho_inv_vec = OSQP_NULL;       // Null here - will be created when actually needed
 
     // Symmetric full matrix with zero-based indexing
     cudssMatrixType_t     mtype = CUDSS_MTYPE_SYMMETRIC;
@@ -172,31 +212,47 @@ OSQPInt init_linsys_solver_cudss(      cudss_solver** sp,
 
     // Form and permute KKT matrix
     if (polishing) { // Called from polish()
+        int nnzP = P->h_csc->p[n];
+
+        csr* d_A = OSQP_NULL;
+        csr_to_csc(&(d_A), A->S);
+
         // Create a temporary set of matrices to form the KKT
-        OSQPCscMatrix* h_P = csc_spalloc(P->S->m, P->S->n, P->S->nnz, 1, 0);
-        OSQPCscMatrix* h_A = csc_spalloc(A->S->m, A->S->n, A->S->nnz, 1, 0);
+        OSQPCscMatrix* h_A = csc_spalloc(d_A->m, d_A->n, d_A->nnz, 1, 0);
 
-        cuda_vec_copy_d2h(h_P->x, P->S->val, P->S->nnz);
-        cuda_vec_int_copy_d2h(h_P->i, P->S->row_ind, P->S->nnz);
-        cuda_vec_int_copy_d2h(h_P->p, P->S->row_ptr, P->S->n+1);
+        // Need the output mapping to scatter the scaled P matrix values into this KKT
+        OSQPInt* PtoKKT = (OSQPInt*) c_malloc(nnzP * sizeof(OSQPInt));
 
-        cuda_vec_copy_d2h(h_A->x, A->S->val, A->S->nnz);
-        cuda_vec_int_copy_d2h(h_A->i, A->S->row_ind, A->S->nnz);
-        cuda_vec_int_copy_d2h(h_A->p, A->S->row_ptr, A->S->n+1);
+        OSQPFloat* h_rho_inv_vec = OSQP_NULL;
 
-        s->h_kkt_csr = form_KKT(h_P,            // P CSC matrix
+//        if (rho_vec)
+//            h_rho_inv_vec = (OSQPFloat*) c_calloc(m, sizeof(OSQPFloat));
+
+        cuda_vec_copy_d2h(h_A->x, d_A->val, d_A->nnz);
+        cuda_vec_int_copy_d2h(h_A->i, d_A->col_ind, d_A->nnz);
+        cuda_vec_int_copy_d2h(h_A->p, d_A->row_ptr, d_A->n+1);
+
+        //print_csc_matrix(h_A, "Polish Ared");
+
+        s->h_kkt_csr = form_KKT(P->h_csc,       // P CSC matrix
                                 h_A,            // A CSC matrix
                                 1,              // CSR output format
-                                sigma,          // Sigma offset for upper-left block (P) matrix
-                                s->rho_inv_vec, // Vector rho for lower right block
-                                sigma,          // Scalar rho for lower right block
-                                OSQP_NULL,      // Don't need the output mapping for P indices to KKT indices
+                                s->sigma,       // Sigma offset for upper-left block (P) matrix
+                                h_rho_inv_vec,  // Vector rho for lower right block
+                                s->sigma,       // Scalar rho for lower right block
+                                PtoKKT,         // Output mapping for P matrix to indices
                                 OSQP_NULL,      // Don't need the output mapping for A indices to KKT indices
                                 OSQP_NULL);     // Don't need the output mapping for rho indices to KKT indices
 
-        // Free the temporary matrices
+        //print_csr_matrix(s->h_kkt_csr, "Polish KKT");
+
+        // Copy the update indices to the GPU
+        cuda_malloc((void**) &s->d_PtoKKT, nnzP * sizeof(OSQPInt));
+        cuda_vec_int_copy_h2d(s->d_PtoKKT, PtoKKT, nnzP);
+
+        // Free the temporary parts
+//        c_free(h_rho_inv_vec);
         csc_spfree(h_A);
-        csc_spfree(h_P);
     }
     else { // Called from ADMM algorithm
         int nnzP = P->h_csc->p[n];
@@ -209,27 +265,27 @@ OSQPInt init_linsys_solver_cudss(      cudss_solver** sp,
         OSQPInt* rhotoKKT = (OSQPInt*) c_malloc(m * sizeof(OSQPInt));
 
         // Temporary vector just for KKT matrix formation
-        OSQPFloat* rho_inv_vec = OSQP_NULL;
+        OSQPFloat* h_rho_inv_vec = OSQP_NULL;
 
         // Compute the inverse rho values for the KKT matrix
         if (rho_vec) {
-            rho_inv_vec = (OSQPFloat*) c_malloc(m * sizeof(OSQPFloat));
-            cuda_vec_copy_d2h(rho_inv_vec, rho_vec->d_val, m);
+            OSQPInt number_of_blocks = (m / THREADS_PER_BLOCK) + 1;
 
-            for (OSQPInt i = 0; i < m; i++){
-                rho_inv_vec[i] = 1. / rho_inv_vec[i];
-            }
-        }
-        else {
-          s->rho_inv = 1. / settings->rho;
+            // Temporary host vector (only for KKT formation)
+            h_rho_inv_vec = (OSQPFloat*) c_malloc(m * sizeof(OSQPFloat));
+
+            // GPU vector - invert on GPU before copying it to host for KKT formation
+            cuda_malloc((void**) &s->d_rho_inv_vec, m * sizeof(OSQPFloat));
+            vec_reciprocal_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_rho_inv_vec, rho_vec->d_val, m);
+            cuda_vec_copy_d2h(h_rho_inv_vec, s->d_rho_inv_vec, m);
         }
 
         // Form the KKT matrix
         s->h_kkt_csr = form_KKT(P->h_csc,       // P CSC matrix
                                 A->h_csc,       // A CSC matrix
                                 1,              // CSR format output
-                                sigma,          // Sigma offset for upper-left block (P) matrix
-                                rho_inv_vec,    // Vector rho for lower right block
+                                s->sigma,       // Sigma offset for upper-left block (P) matrix
+                                h_rho_inv_vec,  // Vector rho for lower right block
                                 s->rho_inv,     // Scalar rho for lower right block
                                 PtoKKT,         // Output mapping P indices to KKT indices
                                 AtoKKT,         // Output mapping A indices to KKT indices
@@ -245,8 +301,8 @@ OSQPInt init_linsys_solver_cudss(      cudss_solver** sp,
         cuda_vec_int_copy_h2d(s->d_rhotoKKT, rhotoKKT, m);
 
         // Free the temporary rho vector
-        if (rho_inv_vec)
-            c_free(rho_inv_vec);
+        if (h_rho_inv_vec)
+            c_free(h_rho_inv_vec);
     }
 
     // Create the device KKT matrix and move the data to it
@@ -277,6 +333,37 @@ OSQPInt init_linsys_solver_cudss(      cudss_solver** sp,
     if (checkCudssErrors(s->solveStatus)) {
         free_linsys_solver_cudss(s);
         return OSQP_LINSYS_SOLVER_INIT_ERROR;
+    }
+
+    // If we are using scaling, then we need to update the KKT matrix values with the values after scaling
+    // because the KKT formation done above was done using unscaled values.
+    if (settings->scaling) {
+        OSQPInt m = s->m;
+        OSQPInt number_of_blocks = (m / THREADS_PER_BLOCK) + 1;
+
+        /* Ensure the upper-triangular part of P is updated with the scaled values before we use it */
+        triu_update_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(P->S->val,                  // Copy from the full values of P
+                                                                    P->d_P_triu_val,            // Store in the triu part
+                                                                    P->d_P_triu_to_full_ind,    // Mapping from triangular to full
+                                                                    P->S->nnz);                 // Number of non-zeros in the triangular portion
+
+        // Scatter the scaled values from the P matrix into the KKT matrix
+        // Only scatter the upper triangular portion though
+        scatter_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, P->d_P_triu_val, s->d_PtoKKT, P->P_triu_nnz);
+
+        // Add sigma to the P diagonal entries
+        kkt_add_sigma<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, s->d_kkt_p, s->sigma, s->n);
+
+        if (!s->polishing) {
+            // Scatter the scaled values from the A matrix into the KKT matrix.
+            scatter_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, A->At->val, s->d_AtoKKT, A->At->nnz);
+
+            if (s->rho_is_vec) {
+                kkt_update_rho_vec<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, rho_vec->d_val, s->d_rhotoKKT, m);
+            } else {
+                kkt_update_rho_sca<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, settings->rho, s->d_rhotoKKT, m);
+            }
+        }
     }
 
     /* Allocate device RHS and b vectors */
@@ -390,9 +477,16 @@ OSQPInt init_linsys_solver_cudss(      cudss_solver** sp,
     s->update_rho_vec  = &update_linsys_solver_rho_vec_cudss;
     s->update_settings = &update_settings_linsys_solver_cudss;
 
-    // Setup phase is over, clear the CSC from the matrix memory
+    // Setup phase is over, clear the A CSC from the matrix memory, but keep P if polishing is enabled
     // TODO: Do this cleaner, so we don't have to cast away the const
-    ((OSQPMatrix*)P)->h_csc = OSQP_NULL;
+    if (settings->polishing) {
+        // We need to keep the copy of P ourselves and not rely on the user keeping it alive
+        OSQPCscMatrix* Ptmp = csc_copy(P->h_csc);
+        ((OSQPMatrix*)P)->h_csc = Ptmp;
+    } else {
+        ((OSQPMatrix*)P)->h_csc = OSQP_NULL;
+    }
+
     ((OSQPMatrix*)A)->h_csc = OSQP_NULL;
 
     /* No error */
@@ -423,9 +517,21 @@ OSQPInt solve_linsys_cudss(cudss_solver* s,
                            OSQPInt       admm_iter) {
 
     OSQPInt retval = OSQP_NO_ERROR;
+    OSQPInt n = s->n;
+    OSQPInt m = s->m;
+
+    // Direct solver doesn't care about the ADMM iteration
+    OSQP_UnusedVar(admm_iter);
 
     // Update the RHS (the cuDSS matrix for b is a thin wrapper, so this is enough to update b)
     cuda_vec_copy_d2d(s->d_b, b->d_val, b->length);
+
+    if (s->polishing) {
+        OSQPFloat* tmp_vec = (OSQPFloat*) c_malloc(b->length*sizeof(OSQPFloat));
+
+        cuda_vec_copy_d2h(tmp_vec, b->d_val, b->length);
+        print_vec(tmp_vec, b->length, "b");
+    }
 
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SOLVE);
 
@@ -455,10 +561,39 @@ OSQPInt solve_linsys_cudss(cudss_solver* s,
         retval = OSQP_RUNTIME_ERROR;
     }
 
-    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SOLVE);
-
     // Return the solution through the RHS vector (the cuDSS matrix is a thin wrapper)
-    cuda_vec_copy_d2d(b->d_val, s->d_x, b->length);
+    if (s->polishing) {
+        // Polishing uses the entire x vector for the solution
+        cuda_vec_copy_d2d(b->d_val, s->d_x, b->length);
+
+        OSQPFloat* tmp_vec = (OSQPFloat*) c_malloc(b->length*sizeof(OSQPFloat));
+
+        cuda_vec_copy_d2h(tmp_vec, s->d_x, b->length);
+        print_vec(tmp_vec, b->length, "x");
+    } else {
+        OSQPInt number_of_blocks = (m / THREADS_PER_BLOCK) + 1;
+
+        // Copy x_tilde into the first n variables in the output
+        cuda_vec_copy_d2d(b->d_val, s->d_x, n);
+
+        // Compute z_tilde in-place in b
+        if (s->rho_is_vec) {
+            /* b->d_val[j+n] += rho_inv_vec[j] * s->d_x[j+n] */
+            vec_ew_fma_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(&(b->d_val[n]),      // Accumulate starting at the nth element
+                                                                       s->d_rho_inv_vec,    // This runs 0-m
+                                                                       &(s->d_x[n]),        // Start at the nth element
+                                                                       m);                  // Only operate on the last m elements
+        } else {
+            /* b->d_val[j+n] += rho_inv * s->d_x[j+n] */
+            checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle,
+                                        m,                      // Only operate on the m last elements
+                                        &(s->rho_inv),          // Scalar we multiply d_x by
+                                        &(s->d_x[n]), 1,        // Start at the nth element
+                                        &(b->d_val[n]), 1));    // Accumulate starting at the nth element
+        }
+    }
+
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SOLVE);
 
     return retval;
 }
@@ -484,8 +619,7 @@ void warm_start_linsys_solver_cudss(      cudss_solver* s,
 
 void free_linsys_solver_cudss(cudss_solver* s) {
     if (s) {
-        c_free(s->rho_inv_vec);
-
+        cuda_free((void**) &s->d_rho_inv_vec);
         cuda_free((void**) &s->d_PtoKKT);
         cuda_free((void**) &s->d_AtoKKT);
         cuda_free((void**) &s->d_rhotoKKT);
@@ -533,11 +667,17 @@ OSQPInt update_linsys_solver_matrices_cudss(      cudss_solver* s,
     OSQPInt m = s->m;
     OSQPInt number_of_blocks = (m / THREADS_PER_BLOCK) + 1;
 
+    /* Ensure the upper-triangular part of P is updated before we use it */
+    triu_update_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(P->S->val,                  // Copy from the full values of P
+                                                                P->d_P_triu_val,            // Store in the triu part
+                                                                P->d_P_triu_to_full_ind,    // Mapping from triangular to full
+                                                                P->S->nnz);                 // Number of non-zeros in the triangular portion
+
     // Scatter the new values from the P matrix into the KKT matrix
-    scatter_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, P->S->val, s->d_PtoKKT, P->S->nnz);
+    scatter_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, P->d_P_triu_val, s->d_PtoKKT, P->P_triu_nnz);
 
     // Scatter the new values from the A matrix into the KKT matrix.
-    scatter_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, A->S->val, s->d_AtoKKT, A->S->nnz);
+    scatter_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, A->At->val, s->d_AtoKKT, A->At->nnz);
 
     // Add sigma to the P diagonal entries
     kkt_add_sigma<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, s->d_kkt_p, s->sigma, s->n);
@@ -600,8 +740,10 @@ OSQPInt update_linsys_solver_rho_vec_cudss(      cudss_solver* s,
     OSQPInt number_of_blocks = (m / THREADS_PER_BLOCK) + 1;
 
     if (s->rho_is_vec) {
+        vec_reciprocal_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_rho_inv_vec, rho_vec->d_val, m);
         kkt_update_rho_vec<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, rho_vec->d_val, s->d_rhotoKKT, m);
     } else {
+        s->rho_inv = 1. / rho_sc;
         kkt_update_rho_sca<<<number_of_blocks, THREADS_PER_BLOCK>>>(s->d_kkt_x, rho_sc, s->d_rhotoKKT, m);
     }
 

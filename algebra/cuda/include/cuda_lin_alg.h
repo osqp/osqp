@@ -30,6 +30,10 @@ __global__ void scatter_kernel(OSQPFloat*       out,
                                const OSQPInt*   ind,
                                OSQPInt          n);
 
+__global__ void vec_reciprocal_kernel(OSQPFloat*       b,
+                                      const OSQPFloat* a,
+                                      OSQPInt          n);
+
 /*******************************************************************************
  *                           Vector Functions                                  *
  *******************************************************************************/

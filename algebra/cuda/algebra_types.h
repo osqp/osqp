@@ -52,9 +52,26 @@ struct OSQPMatrix_ {
   csr*       S;   /* P or A */
   csr*       At;  /* NULL if symmetric */
   OSQPInt*   d_A_to_At_ind;
+
+  /**
+   * Array of size P_triu_nnz.
+   *
+   * Contains the values for the upper triangular part of the matrix in CSR order.
+   */
   OSQPFloat* d_P_triu_val;
+
+  /**
+   * Array of size nnz+1.
+   *
+   * Each element in the array is the index in the upper triangular
+   * matrix data that the corresponding full matrix comes from.
+   */
   OSQPInt*   d_P_triu_to_full_ind;
   OSQPInt*   d_P_diag_ind;
+
+  /**
+   * Number of non-zero entries in the upper triangular part of the matrix.
+   */
   OSQPInt    P_triu_nnz;
 
   // Host CSC matrix (only valid during setup phase)

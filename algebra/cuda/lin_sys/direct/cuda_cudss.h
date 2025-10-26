@@ -80,14 +80,14 @@ typedef struct cudss_solver_ {
   OSQPFloat  sigma;                ///< Signal parameter
   OSQPInt    rho_is_vec;           ///< Rho is a vector?
   OSQPFloat  rho_inv;              ///< Scalar rho inverse value (used when rho_inv_vec is null)
-  OSQPFloat* rho_inv_vec;          ///< Vector rho inverse
+  OSQPFloat* d_rho_inv_vec;        ///< Vector rho inverse (stored on device)
 
   /* States */
   OSQPInt       polishing;         ///< Are we in polishing mode?
   cudssStatus_t solveStatus;       ///< Status of last cuDSS operation
 
   /* Various matrices */
-  OSQPCscMatrix* h_kkt_csr;        ///< Host KKT matrix in CSR form
+  OSQPCscMatrix* h_kkt_csr;        ///< Host KKT matrix in CSC form
   cudssMatrix_t  d_cudss_kkt;      ///< Device KKT matrix for cuDSS
   cudssMatrix_t  d_cudss_x;        ///< Device x vector
   cudssMatrix_t  d_cudss_b;        ///< Device RNS (b) vector

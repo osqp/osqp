@@ -27,7 +27,7 @@ void cuda_mat_init_P(const OSQPCscMatrix* mat,
                            OSQPFloat**    d_P_triu_val,
                            OSQPInt**      d_P_triu_to_full_ind,
                            OSQPInt**      d_P_diag_ind);
-                     
+
 void cuda_mat_init_A(const OSQPCscMatrix* mat,
                            csr**          A,
                            csr**          At,
@@ -50,6 +50,9 @@ void cuda_mat_update_A(const OSQPFloat* Ax,
                              OSQPInt*   d_A_to_At_ind);
 
 void cuda_mat_free(csr* mat);
+
+void csr_to_csc(csr** outcsc,
+                csr* incsr);
 
 OSQPInt cuda_csr_is_eq(const csr*      A,
                        const csr*      B,

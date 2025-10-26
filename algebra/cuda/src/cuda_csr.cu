@@ -45,10 +45,10 @@ extern void scatter(OSQPFloat *out, const OSQPFloat *in, const OSQPInt *ind, OSQ
  * In the case of a diagonal element we set the indices to a value  that is
  * larger than n to easily remove it later. This is done to keep the memory
  * patern one to one (MAP operation).
- * 
- * Additionally, it adds additional n diagonal elements to have a full 
+ *
+ * Additionally, it adds additional n diagonal elements to have a full
  * diagonal.
- * 
+ *
  * The output arrays row_ind_out and col_ind_out have to be of size 2*nnz+n.
  */
 __global__ void fill_full_matrix_kernel(OSQPInt*       row_ind_out,
@@ -99,7 +99,7 @@ __global__ void add_diagonal_kernel(OSQPInt*       row_ind,
 
   for(OSQPInt row = idx; row < n; row += grid_size) {
     if (has_non_zero_diag_element[row] == 0) {
-      row_ind[row] = row; 
+      row_ind[row] = row;
       col_ind[row] = row;
     }
     else {
@@ -111,21 +111,21 @@ __global__ void add_diagonal_kernel(OSQPInt*       row_ind,
 
 /*
  * Permutation in: (size n, range 2*nnz+n):
- * 
+ *
  * Gathers from the following array to create the full matrix :
- * 
+ *
  *       |P_lower->val|P_lower->val|zeros(n)|
  *
- *       
+ *
  * Permutation out: (size n, range new_range)
- * 
+ *
  * Gathers from the following array to create the full matrix :
- * 
+ *
  *          |P_lower->val|zeros(1)|
- *                             
+ *
  *          | x[i] mod new_range    if x[i] <  2 * new_range
- * x[i] ->  | new_range             if x[i] >= 2 * new_range   
- * 
+ * x[i] ->  | new_range             if x[i] >= 2 * new_range
+ *
  */
 __global__ void reduce_permutation_kernel(OSQPInt* permutation,
                                           OSQPInt  new_range,
@@ -320,10 +320,10 @@ static void init_SpMV_interface(csr *M) {
 
  /*
  *  Creates a CSR matrix with the specified dimension (m,n,nnz).
- *  
+ *
  *  If specified, it allocates proper amount of device memory
  *  allocate_on_device = 1: device memory for CSR
- *  allocate_on_device = 2: device memory for CSR (+ col_ind)  
+ *  allocate_on_device = 2: device memory for CSR (+ col_ind)
  */
 csr* csr_alloc(OSQPInt m,
                OSQPInt n,
@@ -367,9 +367,9 @@ csr* csr_init(OSQPInt          m,
     nnz = row_ptr[m];
 
   csr* dev_mat = csr_alloc(m, n, nnz, 1);
-  
+
   if (!dev_mat) return NULL;
-  
+
   if (m == 0) return dev_mat;
 
   /* Copy components into matrix */
@@ -456,10 +456,10 @@ void permute_vector(OSQPFloat*     values,
  *  Copy the values and pointers form target to the source matrix.
  *  The device memory of source has to be freed first to avoid a
  *  memory leak in case it holds allocated memory.
- *  
+ *
  *  The MatrixDescription has to be destroyed first since it is a
  *  pointer hidded by a typedef.
- *  
+ *
  *  The pointers of source matrix are set to NULL to avoid
  *  accidental freeing of the associated memory blocks.
  */
@@ -519,7 +519,7 @@ void csr_triu_to_full(csr*      P_triu,
     * where P is the desired full matrix and D is
     * a diagonal that contains dummy values
   */
-  
+
   checkCudaErrors(cudaMemcpy(&h_nnz_diag, d_nnz_diag, sizeof(OSQPInt), cudaMemcpyDeviceToHost));
 
   Full_nnz = (2 * (nnz_triu - h_nnz_diag)) + n;
@@ -577,6 +577,37 @@ void csr_transpose(csr*      A,
 }
 
 
+void csr_to_csc(csr** outcsc,
+                csr*  incsr) {
+
+  *outcsc = csr_alloc(incsr->n, incsr->m, incsr->nnz, 1 /* Don't allocate col_ind*/);
+
+  size_t bufferSize = 0;
+  void*  buffer     = OSQP_NULL;
+
+  // Figure out the buffer size
+  checkCudaErrors(cusparseCsr2cscEx2_bufferSize(
+      CUDA_handle->cusparseHandle,
+      incsr->m, incsr->n, incsr->nnz,                             // Dimensions
+      incsr->val, incsr->row_ptr, incsr->row_ind,                 // Input CSR
+      (*outcsc)->val, (*outcsc)->row_ptr, (*outcsc)->col_ind,     // Output CSC (Store the CSC col ptr in the CSR row ptr)
+      CUDA_FLOAT, CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO,
+      CUSPARSE_CSR2CSC_ALG1, &bufferSize));
+
+  checkCudaErrors(cudaMalloc((void**) &buffer, bufferSize));
+
+  // Actually do the conversion
+  checkCudaErrors(cusparseCsr2cscEx2(
+      CUDA_handle->cusparseHandle,
+      incsr->m, incsr->n, incsr->nnz,
+      incsr->val, incsr->row_ptr, incsr->row_ind,       // Input CSR
+      (*outcsc)->val, (*outcsc)->row_ptr, (*outcsc)->col_ind,    // Output CSC (Store the CSC col ptr in the CSR row ptr)
+      CUDA_FLOAT, CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO,
+      CUSPARSE_CSR2CSC_ALG1, buffer));
+
+  checkCudaErrors(cudaFree(buffer));
+}
+
 /*******************************************************************************
  *                           API Functions                                     *
  *******************************************************************************/
@@ -589,7 +620,7 @@ void cuda_mat_init_P(const OSQPCscMatrix* mat,
 
   OSQPInt n   = mat->n;
   OSQPInt nnz = mat->p[n];
-  
+
   /* Initialize upper triangular part of P */
   *P = csr_init(n, n, mat->p, mat->i, mat->x);
 
