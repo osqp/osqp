@@ -1,0 +1,1 @@
+import{n as v,t as u}from"./_toKey-16owuO_q.js";function i(r,o){o=v(o,r);for(var t=0,n=o.length;r!=null&&t<n;)r=r[u(o[t++])];return t&&t==n?r:void 0}var a=i;function l(r,o,t){var n=r==null?void 0:a(r,o);return n===void 0?t:n}var e=l;export{a as n,e as t};

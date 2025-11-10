@@ -1,0 +1,1 @@
+import{t as i}from"./toNumber-CTOPJrpu.js";var o=1/0,u=17976931348623157e292;function v(t){return t?(t=i(t),t===o||t===-o?(t<0?-1:1)*u:t===t?t:0):t===0?t:0}var e=v;function f(t){var n=e(t),a=n%1;return n===n?a?n-a:n:0}var s=f;export{e as n,s as t};

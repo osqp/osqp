@@ -1,0 +1,1 @@
+import{s as a}from"./chunk-DZLz74EQ.js";import{t as m}from"./react-BcIddLXZ.js";import{t as i}from"./compiler-runtime-Cr9loedd.js";var n=a(i(),1),s=a(m(),1);function f(){let t=(0,n.c)(2),[o,e]=(0,s.useState)(0),r;return t[0]===o?r=t[1]:(r=()=>{e(o+1)},t[0]=o,t[1]=r),r}export{f as t};

@@ -1,0 +1,1 @@
+import{c as s,d as n,n as i}from"./jotai-BTnrNcC1.js";import{t as r}from"./invariant-D5a0EE05.js";const e=n(null);function o(){let t=s(e);return r(t,"useRequestClient() requires setting requestClientAtom."),t}function u(){let t=i.get(e);return r(t,"getRequestClient() requires requestClientAtom to be set."),t}export{e as n,o as r,u as t};
