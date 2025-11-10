@@ -1,13 +1,6 @@
-include(FetchContent)
-
-message(STATUS "Fetching/configuring QDLDL solver")
-list(APPEND CMAKE_MESSAGE_INDENT "  ")
-
-FetchContent_Declare(
-  qdldl
-  GIT_REPOSITORY https://github.com/osqp/qdldl.git
-  GIT_TAG v0.1.8
-  )
+# Define where the QDLDL source code is located, and allow advanced users to provide their own copy
+set(QDLDL_SRC_LOCATION "${OSQP_ALGEBRA_ROOT}/../ext/qdldl" CACHE STRING "Location of QDLDL source code")
+mark_as_advanced(QDLDL_SRC_LOCATION)
 
 # Make QDLDL use the same types as OSQP
 set(QDLDL_FLOAT ${OSQP_USE_FLOAT} CACHE BOOL "QDLDL Float type")
@@ -17,8 +10,19 @@ set(QDLDL_LONG ${OSQP_USE_LONG} CACHE BOOL "QDLDL Integer type")
 set(QDLDL_BUILD_STATIC_LIB OFF CACHE BOOL "Build QDLDL static library")
 set(QDLDL_BUILD_SHARED_LIB OFF CACHE BOOL "Build QDLDL shared library")
 
-FetchContent_MakeAvailable(qdldl)
-FetchContent_GetProperties(qdldl)
+message(STATUS "Configuring QDLDL solver")
+list(APPEND CMAKE_MESSAGE_INDENT "  ")
+
+if(NOT EXISTS ${QDLDL_SRC_LOCATION}/README.md)
+    message(FATAL_ERROR
+            "QDLDL not found in \"${QDLDL_SRC_LOCATION}\".\n \n"
+            "Get the QDLDL source code using the following commands and then re-run CMake:\n"
+            "    git submodule init"
+            "    git submodule update"
+            )
+endif()
+
+add_subdirectory(${QDLDL_SRC_LOCATION} ${CMAKE_CURRENT_BINARY_DIR}/ext/qdldl EXCLUDE_FROM_ALL)
 
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
