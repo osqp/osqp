@@ -24,19 +24,30 @@
 
 
 /*********************************************
+ *   Internal definition of algebra context.
+ *********************************************/
+struct OSQPAlgebraContext_ {
+  int           device;
+  CUDA_Handle_t CUDA_Handles;
+};
+
+
+/*********************************************
 *   Internal definition of OSQPVector types
 *   and supporting definitions
 *********************************************/
 
 struct OSQPVectori_ {
-  OSQPInt* d_val;
-  OSQPInt  length;
+  const OSQPAlgebraContext* context;    /* Not owned by the vector - owned by the solver */
+  OSQPInt*                  d_val;
+  OSQPInt                   length;
 };
 
 struct OSQPVectorf_ {
-  OSQPFloat*           d_val;
-  OSQPInt              length;
-  cusparseDnVecDescr_t vec;
+  const OSQPAlgebraContext* context;    /* Not owned by the vector - owned by the solver */
+  OSQPFloat*                d_val;
+  OSQPInt                   length;
+  cusparseDnVecDescr_t      vec;
 };
 
 
@@ -49,13 +60,14 @@ struct OSQPVectorf_ {
 typedef struct csr_t csr;
 
 struct OSQPMatrix_ {
-  csr*       S;   /* P or A */
-  csr*       At;  /* NULL if symmetric */
-  OSQPInt*   d_A_to_At_ind;
-  OSQPFloat* d_P_triu_val;
-  OSQPInt*   d_P_triu_to_full_ind;
-  OSQPInt*   d_P_diag_ind;
-  OSQPInt    P_triu_nnz;
+  const OSQPAlgebraContext* context;    /* Not owned by the matrix - owned by the solver */
+  csr*                      S;          /* P or A */
+  csr*                      At;         /* NULL if symmetric */
+  OSQPInt*                  d_A_to_At_ind;
+  OSQPFloat*                d_P_triu_val;
+  OSQPInt*                  d_P_triu_to_full_ind;
+  OSQPInt*                  d_P_diag_ind;
+  OSQPInt                   P_triu_nnz;
 };
 
 

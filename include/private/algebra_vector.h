@@ -30,17 +30,19 @@ OSQPInt OSQPVectorf_is_eq(const OSQPVectorf* A,
                           OSQPFloat          tol);
 
 /* malloc/calloc for floats and ints (USES MALLOC/CALLOC) */
-OSQPVectorf* OSQPVectorf_malloc(OSQPInt length);
-OSQPVectorf* OSQPVectorf_calloc(OSQPInt length);
-OSQPVectori* OSQPVectori_malloc(OSQPInt length);
-OSQPVectori* OSQPVectori_calloc(OSQPInt length);
+OSQPVectorf* OSQPVectorf_malloc(const OSQPAlgebraContext* context, OSQPInt length);
+OSQPVectorf* OSQPVectorf_calloc(const OSQPAlgebraContext* context, OSQPInt length);
+OSQPVectori* OSQPVectori_malloc(const OSQPAlgebraContext* context, OSQPInt length);
+OSQPVectori* OSQPVectori_calloc(const OSQPAlgebraContext* context, OSQPInt length);
 
 /* Return a float vector using a raw array as input (Uses MALLOC) */
-OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
+OSQPVectorf* OSQPVectorf_new(const OSQPAlgebraContext* context,
+                             const OSQPFloat* a,
                              OSQPInt          length);
 
 /* Return an int vector using a raw array as input (Uses MALLOC) */
-OSQPVectori* OSQPVectori_new(const OSQPInt* a,
+OSQPVectori* OSQPVectori_new(const OSQPAlgebraContext* context,
+                             const OSQPInt* a,
                              OSQPInt        length);
 
 /* Return a copy of a float vector a as output (Uses MALLOC) */

@@ -3,6 +3,7 @@
 
 #include "osqp.h"       //includes user API types
 
+#include "lin_alg.h"
 #include "algebra_matrix.h"
 #include "algebra_vector.h"
 #include "glob_opts.h"
@@ -14,12 +15,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * Linear system solver structure (sublevel objects initialize it differently)
- */
-
-typedef struct linsys_solver LinSysSolver;
 
 /**
  * OSQP Timer for statistics
@@ -102,6 +97,8 @@ struct OSQPWorkspace_ {
 
   /// Linear System solver structure
   LinSysSolver* linsys_solver;
+
+  OSQPAlgebraContext* alg_context;
 
 # ifndef OSQP_EMBEDDED_MODE
   /// Polish structure
@@ -232,51 +229,6 @@ struct OSQPWorkspace_ {
 
 // NB: "typedef struct OSQPWorkspace_ OSQPWorkspace" is declared already
 // in the osqp API where the main OSQPSolver is defined.
-
-
-/**
- * Define linsys_solver prototype structure
- *
- * NB: The details are defined when the linear solver is initialized depending
- *      on the choice
- */
-struct linsys_solver {
-  enum osqp_linsys_solver_type type;             ///< linear system solver type functions
-
-  const char* (*name)(LinSysSolver* self);
-
-  OSQPInt (*solve)(LinSysSolver* self,
-                   OSQPVectorf*  b,
-                   OSQPInt       admm_iter);
-
-  void (*update_settings)(LinSysSolver*       self,
-                          const OSQPSettings* settings);
-
-  void (*warm_start)(LinSysSolver*      self,
-                     const OSQPVectorf* x);
-
-# ifndef OSQP_EMBEDDED_MODE
-  OSQPInt (*adjoint_derivative)(LinSysSolver* self);
-
-  void (*free)(LinSysSolver* self);         ///< free linear system solver (only in desktop version)
-# endif // ifndef OSQP_EMBEDDED_MODE
-
-# if OSQP_EMBEDDED_MODE != 1
-  OSQPInt (*update_matrices)(LinSysSolver*     self,
-                             const OSQPMatrix* P,            ///< update matrices P
-                             const OSQPInt*    Px_new_idx,
-                             OSQPInt           P_new_n,
-                             const OSQPMatrix* A,            //   and A in the solver
-                             const OSQPInt*    Ax_new_idx,
-                             OSQPInt           A_new_n);
-
-  OSQPInt (*update_rho_vec)(LinSysSolver*      self,
-                            const OSQPVectorf* rho_vec,
-                            OSQPFloat          rho_sc);  ///< Update rho_vec
-# endif // if OSQP_EMBEDDED_MODE != 1
-
-  OSQPInt nthreads; ///< number of threads active
-};
 
 #ifdef __cplusplus
 }

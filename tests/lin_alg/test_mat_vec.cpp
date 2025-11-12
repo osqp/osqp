@@ -69,81 +69,106 @@ TEST_CASE("Matrix-vector: multiplication", "[mat-vec][operation]") {
 }
 
 TEST_CASE("Matrix-vector: Empty matrix multiplication", "[mat-vec][operation]") {
-  lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
+    lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
 
-  // Import data
-  OSQPMatrix_ptr  Aempty{OSQPMatrix_new_from_csc(data->test_mat_no_entries, 0)};     //asymmetric
-  OSQPMatrix_ptr  Anorows{OSQPMatrix_new_from_csc(data->test_mat_no_rows, 0)};   //asymmetric
-  OSQPMatrix_ptr  Anocols{OSQPMatrix_new_from_csc(data->test_mat_no_cols, 0)};   //asymmetric
+    OSQPVectorf_ptr z{OSQPVectorf_new(data->test_vec_zeros, 2)};
+    OSQPVectorf_ptr ee{OSQPVectorf_new(data->test_vec_empty, 0)};
+    OSQPVectorf_ptr e2{OSQPVectorf_new(data->test_vec_mat_empty, 2)};
 
-  OSQPVectorf_ptr z{OSQPVectorf_new(data->test_vec_zeros, 2)};
-  OSQPVectorf_ptr ee{OSQPVectorf_new(data->test_vec_empty, 0)};
-  OSQPVectorf_ptr e2{OSQPVectorf_new(data->test_vec_mat_empty, 2)};
+    mu_assert("Empty vector creation failed", ee.get() != OSQP_NULL);
 
-  // Ensure all the matrices/vectors could be created properly
-  mu_assert(
-    "Linear algebra tests: error with empty matrix, empty matrix creation",
-    Aempty.get() != OSQP_NULL);
+    OSQPVectorf_ptr result{nullptr};
 
-  mu_assert(
-    "Linear algebra tests: error with empty matrix, matrix with no rows creation",
-    Anorows.get() != OSQP_NULL);
+    SECTION("Empty matrix (0x0)") {
+        OSQPMatrix_ptr  Aempty{OSQPMatrix_new_from_csc(data->test_mat_no_entries, 0)};     //asymmetric
 
-  mu_assert(
-    "Linear algebra tests: error with empty matrix, matrix with no columns creation",
-    Anocols.get() != OSQP_NULL);
+        mu_assert("Empty matrix creation failed", Aempty.get() != OSQP_NULL);
 
-  mu_assert(
-    "Linear algebra tests: error with empty matrix, empty vector creation",
-    ee.get() != OSQP_NULL);
+        // Matrix-vector multiplication of empty matrix with vector:  y = Ax
+        result.reset(OSQPVectorf_new(data->test_vec_zeros, 2));
 
-  OSQPVectorf_ptr result{nullptr};
+        OSQPMatrix_Axpy(Aempty.get(), e2.get(), result.get(), 1.0, 0.0);
+        mu_assert("Matrix-vector multiplication with empty matrix failed",
+            OSQPVectorf_norm_inf_diff(result.get(), z.get()) < TESTS_TOL);
 
-  // Matrix-vector multiplication of empty matrix with vector:  y = Ax
-  result.reset(OSQPVectorf_new(data->test_vec_zeros, 2));
+        // Matrix-transpose-vector multiplication of empty matrix with vector:  x = A'*y
+        result.reset(OSQPVectorf_new(data->test_vec_zeros, 2));
 
-  OSQPMatrix_Axpy(Aempty.get(), e2.get(), result.get(), 1.0, 0.0);
-  mu_assert(
-    "Linear algebra tests: error with empty matrix, matrix-vector multiplication",
-    OSQPVectorf_norm_inf_diff(result.get(), z.get()) < TESTS_TOL);
+        OSQPMatrix_Atxpy(Aempty.get(), e2.get(), result.get(), 1.0, 0.0);
+        mu_assert("Matrix-transpose-vector multiplication failed",
+            OSQPVectorf_norm_inf_diff(result.get(), z.get()) < TESTS_TOL);
+    }
 
-  // Matrix-transpose-vector multiplication of empty matrix with vector:  x = A'*y
-  result.reset(OSQPVectorf_new(data->test_vec_zeros, 2));
+    SECTION("No rows (0x2)") {
+        OSQPMatrix_ptr  Anorows{OSQPMatrix_new_from_csc(data->test_mat_no_rows, 0)};   //asymmetric
 
-  OSQPMatrix_Atxpy(Aempty.get(), e2.get(), result.get(), 1.0, 0.0);
-  mu_assert(
-    "Linear algebra tests: error with empty matrix, matrix-transpose-vector multiplication",
-    OSQPVectorf_norm_inf_diff(result.get(), z.get()) < TESTS_TOL);
+        mu_assert("Matrix with no rows creation failed", Anorows.get() != OSQP_NULL);
 
-  // Matrix-vector multiplication of matrix with no rows (2 columns) with vector:  y = Ax
-  result.reset(OSQPVectorf_malloc(0));
+        // Matrix-vector multiplication of matrix with no rows (2 columns) with vector:  y = Ax
+        result.reset(OSQPVectorf_malloc(0));
 
-  OSQPMatrix_Axpy(Anorows.get(), e2.get(), result.get(), 1.0, 0.0);
-  mu_assert(
-    "Linear algebra tests: error with no row matrix, matrix-vector multiplication",
-    OSQPVectorf_norm_inf_diff(result.get(), ee.get()) < TESTS_TOL);
+        OSQPMatrix_Axpy(Anorows.get(), e2.get(), result.get(), 1.0, 0.0);
+        mu_assert("No-row matrix-vector multiplication failed",
+            OSQPVectorf_norm_inf_diff(result.get(), ee.get()) < TESTS_TOL);
 
-  // Matrix-transpose-vector multiplication of matrix with no rows (2 columns) with vector:  x = A'*y
-  result.reset(OSQPVectorf_new(data->test_vec_zeros, 2));
+        // Matrix-transpose-vector multiplication of matrix with no rows (2 columns) with vector:  x = A'*y
+        result.reset(OSQPVectorf_new(data->test_vec_zeros, 2));
 
-  OSQPMatrix_Atxpy(Anorows.get(), ee.get(), result.get(), 1.0, 0.0);
-  mu_assert(
-    "Linear algebra tests: error with no row matrix, matrix-transpose-vector multiplication",
-    OSQPVectorf_norm_inf_diff(result.get(), z.get()) < TESTS_TOL);
+        OSQPMatrix_Atxpy(Anorows.get(), ee.get(), result.get(), 1.0, 0.0);
+        mu_assert("No-row matrix-transpose-vector multiplication failed",
+            OSQPVectorf_norm_inf_diff(result.get(), z.get()) < TESTS_TOL);
+    }
 
-  // Matrix-vector multiplication of matrix with no columns (2 rows) with vector:  y = Ax
-  result.reset(OSQPVectorf_new(data->test_vec_zeros, 2));
+    SECTION("No columns (2x0)") {
+        OSQPMatrix_ptr  Anocols{OSQPMatrix_new_from_csc(data->test_mat_no_cols, 0)};   //asymmetric
 
-  OSQPMatrix_Axpy(Anocols.get(), ee.get(), result.get(), 1.0, 0.0);
-  mu_assert(
-    "Linear algebra tests: error with no column matrix, matrix-vector multiplication",
-    OSQPVectorf_norm_inf_diff(result.get(), z.get()) < TESTS_TOL);
+        mu_assert("Matrix with no columns creation failed", Anocols.get() != OSQP_NULL);
 
-  // Matrix-transpose-vector multiplication of matrix with no columns (2 rows) with vector:  x = A'*y
-  result.reset(OSQPVectorf_malloc(0));
+        // Matrix-vector multiplication of matrix with no columns (2 rows) with vector:  y = Ax
+        result.reset(OSQPVectorf_new(data->test_vec_zeros, 2));
 
-  OSQPMatrix_Atxpy(Anocols.get(), e2.get(), result.get(), 1.0, 0.0);
-  mu_assert(
-    "Linear algebra tests: error with no column matrix, matrix-transpose-vector multiplication",
-    OSQPVectorf_norm_inf_diff(result.get(), ee.get()) < TESTS_TOL);
+        OSQPMatrix_Axpy(Anocols.get(), ee.get(), result.get(), 1.0, 0.0);
+        mu_assert("No column matrix-vector multiplication failed",
+            OSQPVectorf_norm_inf_diff(result.get(), z.get()) < TESTS_TOL);
+
+        // Matrix-transpose-vector multiplication of matrix with no columns (2 rows) with vector:  x = A'*y
+        result.reset(OSQPVectorf_malloc(0));
+
+        OSQPMatrix_Atxpy(Anocols.get(), e2.get(), result.get(), 1.0, 0.0);
+        mu_assert("No column matrix-transpose-vector multiplication failed",
+            OSQPVectorf_norm_inf_diff(result.get(), ee.get()) < TESTS_TOL);
+    }
+}
+
+// This test case might fail because Intel MKL changed the return code for the
+TEST_CASE("Matrix-vector: Empty matrix multiplication (no columns)", "[mat-vec][operation][!mayfail]") {
+    lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
+
+    OSQPVectorf_ptr z{OSQPVectorf_new(data->test_vec_zeros, 2)};
+    OSQPVectorf_ptr ee{OSQPVectorf_new(data->test_vec_empty, 0)};
+    OSQPVectorf_ptr e2{OSQPVectorf_new(data->test_vec_mat_empty, 2)};
+
+    mu_assert("Empty vector creation failed", ee.get() != OSQP_NULL);
+
+    OSQPVectorf_ptr result{nullptr};
+
+    SECTION("No columns (2x0)") {
+        OSQPMatrix_ptr  Anocols{OSQPMatrix_new_from_csc(data->test_mat_no_cols, 0)};   //asymmetric
+
+        mu_assert("Matrix with no columns creation failed", Anocols.get() != OSQP_NULL);
+
+        // Matrix-vector multiplication of matrix with no columns (2 rows) with vector:  y = Ax
+        result.reset(OSQPVectorf_new(data->test_vec_zeros, 2));
+
+        OSQPMatrix_Axpy(Anocols.get(), ee.get(), result.get(), 1.0, 0.0);
+        mu_assert("No column matrix-vector multiplication failed",
+            OSQPVectorf_norm_inf_diff(result.get(), z.get()) < TESTS_TOL);
+
+        // Matrix-transpose-vector multiplication of matrix with no columns (2 rows) with vector:  x = A'*y
+        result.reset(OSQPVectorf_malloc(0));
+
+        OSQPMatrix_Atxpy(Anocols.get(), e2.get(), result.get(), 1.0, 0.0);
+        mu_assert("No column matrix-transpose-vector multiplication failed",
+            OSQPVectorf_norm_inf_diff(result.get(), ee.get()) < TESTS_TOL);
+    }
 }

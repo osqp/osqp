@@ -1,5 +1,7 @@
 #include "osqp_api_constants.h"
 #include "osqp_api_types.h"
+#include "lin_alg.h"
+#include "algebra_impl.h"
 #include "qdldl_interface.h"
 #include "profilers.h"
 #include "util.h"
@@ -14,13 +16,18 @@ enum osqp_linsys_solver_type osqp_algebra_default_linsys(void) {
   return OSQP_DIRECT_SOLVER;
 }
 
-OSQPInt osqp_algebra_init_libs(OSQPInt device)
+OSQPInt osqp_algebra_init_ctx(OSQPAlgebraContext** alg_context,
+                              OSQPInt              device)
 {
+  alg_context = (OSQPAlgebraContext*) c_malloc(sizeof(OSQPAlgebraContext));
   OSQP_UnusedVar(device);
   return 0;
 }
 
-void osqp_algebra_free_libs(void) {return;}
+void osqp_algebra_free_ctx(OSQPAlgebraContext* alg_context) {
+  c_free(alg_context);
+  return;
+}
 
 OSQPInt osqp_algebra_name(char* name, OSQPInt nameLen) {
   OSQP_UnusedVar(nameLen);

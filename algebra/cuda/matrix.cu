@@ -36,11 +36,14 @@ OSQPInt OSQPMatrix_is_eq(const OSQPMatrix* A,
   return cuda_csr_is_eq(A->S, B->S, tol);
 }
 
-OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* M,
+OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPAlgebraContext* context,
+                                    const OSQPCscMatrix* M,
                                           OSQPInt        is_triu) {
 
   OSQPMatrix* out = (OSQPMatrix *) c_calloc(1, sizeof(OSQPMatrix));
   if (!out) return OSQP_NULL;
+
+  out->context = context;
 
   if (is_triu) {
     /* Initialize P */
@@ -165,6 +168,8 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix*  mat,
 
   out = (OSQPMatrix *) c_calloc(1, sizeof(OSQPMatrix));
   if (!out) return OSQP_NULL;
+
+  out->context = mat->context;
 
   cuda_submat_byrows(mat->S, rows->d_val, &out->S, &out->At);
 
