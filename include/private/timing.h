@@ -18,7 +18,7 @@ extern "C" {
  * Create a new timer.
  * @return the timer
  */
-OSQPTimer* OSQPTimer_new();
+OSQPTimer* OSQPTimer_new(void);
 
 /**
  * Free an existing timer.

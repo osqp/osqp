@@ -19,7 +19,7 @@ struct OSQPTimer_ {
 
 
 /* Create the timer */
-OSQPTimer* OSQPTimer_new() {
+OSQPTimer* OSQPTimer_new(void) {
     return c_malloc(sizeof(struct OSQPTimer_));
 }
 
