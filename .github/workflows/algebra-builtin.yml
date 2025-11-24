@@ -59,7 +59,7 @@ jobs:
         CTEST_OUTPUT_ON_FAILURE: 1
 
       steps:
-        - uses: actions/checkout@v5
+        - uses: actions/checkout@v6
           with:
             lfs: false
             submodules: recursive

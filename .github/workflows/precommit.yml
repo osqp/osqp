@@ -20,7 +20,7 @@ jobs:
           shell: bash -l {0}
 
       steps:
-        - uses: actions/checkout@v5
+        - uses: actions/checkout@v6
 
         - name: Set up conda
           uses: conda-incubator/setup-miniconda@v3
