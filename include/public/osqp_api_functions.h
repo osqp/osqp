@@ -152,7 +152,7 @@ OSQP_API void OSQPCscMatrix_set_data(OSQPCscMatrix* M,
  *
  * @return Pointer to new settings object, or null on error
  */
-OSQP_API OSQPSettings* OSQPSettings_new();
+OSQP_API OSQPSettings* OSQPSettings_new(void);
 
 /**
  * Free an OSQPSettings object.
@@ -179,7 +179,7 @@ OSQP_API void OSQPSettings_free(OSQPSettings* settings);
  *
  * @return Pointer to new codegen defines object, or null on error
  */
-OSQP_API OSQPCodegenDefines* OSQPCodegenDefines_new();
+OSQP_API OSQPCodegenDefines* OSQPCodegenDefines_new(void);
 
 /**
  * Free an OSQPCodegenDefines object.
