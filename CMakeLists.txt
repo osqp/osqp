@@ -5,6 +5,12 @@ include(GNUInstallDirs)
 include(CMakeDependentOption)
 include(CMakePackageConfigHelpers)
 
+if( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} ) # Starting with CMake 3.21, we can use PROJECT_IS_TOP_LEVEL instead.
+    set(OSQP_IS_TOP_LEVEL TRUE)
+else()
+    set(OSQP_IS_TOP_LEVEL FALSE)
+endif()
+
 # Detect the CMake build type and use that as the debug indicator
 if(DEFINED CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "Set to either \"Release\" or \"Debug\"")
@@ -40,15 +46,17 @@ if(NOT OSQP_VERSION STREQUAL "0.0.0")
   configure_file("${PROJECT_SOURCE_DIR}/configure/version.h.in" "${PROJECT_SOURCE_DIR}/include/private/version.h")
 endif()
 
-# Setup the output directories
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
-
-# Prevent generation of output Debug/ folder on MSVC See https://stackoverflow.com/questions/543203
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${EXECUTABLE_OUTPUT_PATH}")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${EXECUTABLE_OUTPUT_PATH}")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${LIBRARY_OUTPUT_PATH}")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${LIBRARY_OUTPUT_PATH}")
+if(OSQP_IS_TOP_LEVEL)
+    # Setup the output directories
+    set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
+    set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
+    
+    # Prevent generation of output Debug/ folder on MSVC See https://stackoverflow.com/questions/543203
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${EXECUTABLE_OUTPUT_PATH}")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${EXECUTABLE_OUTPUT_PATH}")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${LIBRARY_OUTPUT_PATH}")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${LIBRARY_OUTPUT_PATH}")
+endif()
 
 # Some non-standard CMake modules
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
