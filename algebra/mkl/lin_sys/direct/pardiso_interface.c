@@ -37,13 +37,15 @@ void free_linsys_solver_pardiso(pardiso_solver* s) {
   if (s) {
 
     // Free pardiso solver using internal function
-    s->phase = PARDISO_CLEANUP;
-    PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
-             &(s->nKKT), &(s->fdum), s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
-             s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
+    if (s->KKT_p && s->KKT_i) {
+      s->phase = PARDISO_CLEANUP;
+      PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+               &(s->nKKT), &(s->fdum), s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
+               s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 
-    if ( s->error != 0 ){
-      c_eprint("Error during MKL Pardiso cleanup: %d", (int)s->error);
+      if ( s->error != 0 ){
+        c_eprint("Error during MKL Pardiso cleanup: %d", (int)s->error);
+      }
     }
     // Check each attribute of the structure and free it if it exists
     if (s->KKT)         csc_spfree(s->KKT);
@@ -81,7 +83,9 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
 
   // Allocate private structure to store KKT factorization
   pardiso_solver *s = c_calloc(1, sizeof(pardiso_solver));
-  *sp = s;
+  *sp = OSQP_NULL;
+
+  if (!s) return OSQP_LINSYS_SOLVER_INIT_ERROR;
 
   // Size of KKT
   n = P->csc->n;
@@ -121,6 +125,11 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
   }
   // else it is NULL
 
+  if (!s->bp || !s->sol || (rho_vec && !s->rho_inv_vec)) {
+    free_linsys_solver_pardiso(s);
+    return OSQP_LINSYS_SOLVER_INIT_ERROR;
+  }
+
   // Form KKT matrix
   if (polishing){ // Called from polish()
     s->KKT = form_KKT(P->csc,A->csc,
@@ -134,6 +143,11 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
     s->PtoKKT   = c_malloc(P->csc->p[n] * sizeof(OSQPInt));
     s->AtoKKT   = c_malloc(A->csc->p[n] * sizeof(OSQPInt));
     s->rhotoKKT = c_malloc(m * sizeof(OSQPInt));
+
+    if (!s->PtoKKT || !s->AtoKKT || !s->rhotoKKT) {
+      free_linsys_solver_pardiso(s);
+      return OSQP_LINSYS_SOLVER_INIT_ERROR;
+    }
 
     // Use s->rho_inv_vec for storing param2 = rho_inv_vec
     if (rho_vec) {
@@ -154,7 +168,7 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
 
   // Check if matrix has been created
   if (!(s->KKT)) {
-	  c_eprint("Error in forming KKT matrix");
+    c_eprint("Error in forming KKT matrix");
     free_linsys_solver_pardiso(s);
     return OSQP_LINSYS_SOLVER_INIT_ERROR;
   } else {
@@ -162,6 +176,11 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
     nnzKKT = s->KKT->p[n_plus_m];
     s->KKT_i = c_malloc((nnzKKT) * sizeof(OSQPInt));
     s->KKT_p = c_malloc((n_plus_m + 1) * sizeof(OSQPInt));
+
+    if (!s->KKT_i || !s->KKT_p) {
+      free_linsys_solver_pardiso(s);
+      return OSQP_LINSYS_SOLVER_INIT_ERROR;
+    }
 
     for(i = 0; i < nnzKKT; i++){
       s->KKT_i[i] = s->KKT->i[i] + 1;
@@ -215,7 +234,6 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
   if ( s->error != 0 ){
     c_eprint("Error during symbolic factorization: %d", (int)s->error);
     free_linsys_solver_pardiso(s);
-    *sp = OSQP_NULL;
     return OSQP_LINSYS_SOLVER_INIT_ERROR;
   }
 
@@ -230,15 +248,16 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
   if ( s->error ){
     c_eprint("Error during numerical factorization: %d", (int)s->error);
     free_linsys_solver_pardiso(s);
-    *sp = OSQP_NULL;
     return OSQP_LINSYS_SOLVER_INIT_ERROR;
   }
   if ( s->iparm[21] < n ) {
     // Error: Number of positive eigenvalues of KKT should be the same as dimension of P
     c_eprint("KKT matrix has fewer positive eigenvalues than it should. The problem seems to be non-convex.");
+    free_linsys_solver_pardiso(s);
     return OSQP_NONCVX_ERROR;
   }
 
+  *sp = s;
   return 0;
 }
 

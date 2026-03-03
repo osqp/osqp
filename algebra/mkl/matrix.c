@@ -19,6 +19,7 @@ OSQPInt OSQPMatrix_is_eq(const OSQPMatrix* A,
 
 /* Special routine to allocate a OSQPCscMatrix using the MKL memory routines
    instead of the normal memory routines */
+static void mkl_csc_spfree(OSQPCscMatrix* M);
 static OSQPCscMatrix* mkl_csc_spalloc(OSQPInt m, OSQPInt n, OSQPInt nzmax, OSQPInt hasData) {
   OSQPCscMatrix* csc = c_calloc(1, sizeof(OSQPCscMatrix));
 
@@ -33,6 +34,11 @@ static OSQPCscMatrix* mkl_csc_spalloc(OSQPInt m, OSQPInt n, OSQPInt nzmax, OSQPI
   csc->p     = blas_malloc((n + 1) * sizeof(OSQPInt));
   csc->i     = hasData ? blas_malloc(nzmax * sizeof(OSQPInt)) : OSQP_NULL;
   csc->x     = hasData ? blas_malloc(nzmax * sizeof(OSQPFloat)) : OSQP_NULL;
+
+  if (!csc->p || (hasData && (!csc->i || !csc->x))) {
+    mkl_csc_spfree(csc);
+    return OSQP_NULL;
+  }
 
   return csc;
 }
@@ -152,6 +158,8 @@ OSQPCscMatrix* OSQPMatrix_get_csc(const OSQPMatrix* M) {
   /* Create the CSC using the returned data */
   nnz = p_end[numcols-1]+1;
   B = csc_spalloc(numcols, numrows, nnz, 1, 0);
+
+  if (!B) return OSQP_NULL;
 
   /* MKL doesn't give back the actual p we need, we need to take the last value from p_end and concatenate
      it onto the array returned in p_start */
@@ -328,7 +336,10 @@ static OSQPCscMatrix* mkl_submatrix_byrows(const OSQPCscMatrix* A,
 
   // Form R = A(rows,:), where nrows = sum(rows != 0)
   R = mkl_csc_spalloc(Rm, An, nzR, 1);
-  if (!R) return OSQP_NULL;
+  if (!R) {
+    c_free(rridx);
+    return OSQP_NULL;
+  }
 
   // no active constraints
   if (Rm == 0) {
