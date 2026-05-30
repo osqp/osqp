@@ -342,7 +342,10 @@ OSQPInt polish(OSQPSolver* solver) {
     return exitflag;
   } else if (work->pol->n_active == 0) {
     /* No active constraints, so skip polishing */
-    c_print("Polishing not needed - no active set detected at optimal point\n");
+#ifdef OSQP_ENABLE_PRINTING
+    if (settings->verbose)
+      c_print("Polishing not needed - no active set detected at optimal point\n");
+#endif /* ifdef OSQP_ENABLE_PRINTING */
     info->status_polish = OSQP_POLISH_NO_ACTIVE_SET_FOUND;
 
     /* Memory clean-up */
