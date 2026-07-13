@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: CC0-1.0 -->
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>osqp</name>
+
+  <version>1.0.0</version>
+
+  <description>The Operator Splitting QP Solver</description>
+
+  <maintainer email="Rauch.Christian@gmx.de">Christian Rauch</maintainer>
+
+  <license>Apache-2.0</license>
+
+  <url>https://osqp.org</url>
+
+  <author email="bartolomeo.stellato@gmail.com">Bartolomeo Stellato</author>
+
+  <buildtool_depend>cmake</buildtool_depend>
+  <buildtool_depend>git</buildtool_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>

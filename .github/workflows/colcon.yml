@@ -1,0 +1,42 @@
+name: colcon
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: "${{ matrix.image }}"
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+            - {image: "ubuntu:22.04"}
+            - {image: "ubuntu:24.04"}
+            - {image: "ubuntu:26.04"}
+
+    container:
+      image: ${{ matrix.image }}
+      env:
+        DEBIAN_FRONTEND: noninteractive
+        PIP_BREAK_SYSTEM_PACKAGES: 1
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install tooling
+        run: |
+          apt update
+          apt install -y python3-pip
+          pip install colcon-common-extensions rosdep
+
+      - name: Initialize rosdep
+        run: |
+          rosdep init || true
+          rosdep update
+
+      - name: Install package dependencies
+        run: |
+          rosdep install -y --from-paths . --ignore-src --rosdistro rolling
+
+      - name: Build with colcon
+        run: colcon build --event-handlers console_direct+
