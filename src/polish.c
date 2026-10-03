@@ -458,21 +458,18 @@ OSQPInt polish(OSQPSolver* solver) {
   // Compute primal and dual residuals at the polished solution
   update_info(solver, 0, 1);
 
-  // Check if polish was successful
+  /* Both residuals must improve, or a one-sided improvement is accepted
+   * only while the residual that was already below 1e-10 is still below
+   * 1e-10 after polishing. Checking only the pre-polish value lets a
+   * polished point with a huge dual residual replace a converged solution. */
   polish_successful = (work->pol->prim_res < info->prim_res &&
-                       work->pol->dual_res < info->dual_res) || // Residuals
-                                                                    // are
-                                                                    // reduced
+                       work->pol->dual_res < info->dual_res) ||
                       (work->pol->prim_res < info->prim_res &&
-                       info->dual_res < 1e-10) ||              // Dual
-                                                                    // residual
-                                                                    // already
-                                                                    // tiny
+                       info->dual_res < 1e-10 &&
+                       work->pol->dual_res < 1e-10) ||
                       (work->pol->dual_res < info->dual_res &&
-                       info->prim_res < 1e-10);                // Primal
-                                                                    // residual
-                                                                    // already
-                                                                    // tiny
+                       info->prim_res < 1e-10 &&
+                       work->pol->prim_res < 1e-10);
 
   if (polish_successful) {
     // Update solver information
