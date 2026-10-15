@@ -1,3 +1,5 @@
+#include <cfenv>
+#include <cmath>
 #include <catch2/catch.hpp>
 
 #include "osqp_api.h"    /* OSQP API wrapper (public + some private) */
@@ -990,4 +992,34 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Warm start", "[solve][qp][war
     // Check that the number of iterations equals 1
     mu_assert("Basic QP test warm start: Warm start error!", solver->info->iter == 1);
   }
+}
+
+TEST_CASE("Rho estimate with zero dual residual", "[solve],[qp],[rho]")
+{
+  // min x^2 / 2 subject to x = 0 has identically zero residuals.
+  OSQPInt indptr[] = {0, 1};
+  OSQPInt indices[] = {0};
+  OSQPFloat values[] = {1.0};
+  OSQPFloat q[] = {0.0};
+  OSQPFloat bounds[] = {0.0};
+  OSQPCscMatrix P, A;
+  OSQPCscMatrix_set_data(&P, 1, 1, 1, values, indices, indptr);
+  OSQPCscMatrix_set_data(&A, 1, 1, 1, values, indices, indptr);
+  OSQPSettings settings;
+  osqp_set_default_settings(&settings);
+  settings.adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_DISABLED;
+  settings.verbose = 0;
+  OSQPSolver* solver = nullptr;
+  REQUIRE(osqp_setup(&solver, &P, q, &A, bounds, bounds, 1, 1, &settings) == 0);
+
+  std::feclearexcept(FE_ALL_EXCEPT);
+  const OSQPInt result = osqp_solve(solver);
+  const int exceptions = std::fetestexcept(FE_DIVBYZERO | FE_INVALID);
+  CHECK(result == 0);
+  CHECK(solver->info->status_val == OSQP_SOLVED);
+  CHECK(exceptions == 0);
+  CHECK(std::isfinite(solver->info->rho_estimate));
+  CHECK(solver->info->rho_estimate >= static_cast<OSQPFloat>(OSQP_RHO_MIN));
+  CHECK(solver->info->rho_estimate <= static_cast<OSQPFloat>(OSQP_RHO_MAX));
+  osqp_cleanup(solver);
 }
