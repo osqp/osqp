@@ -40,7 +40,7 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
   dual_res     /= (dual_res_norm + OSQP_DIVISION_TOL);
 
   // Return rho estimate
-  rho_estimate = settings->rho * c_sqrt(prim_res / dual_res);
+  rho_estimate = settings->rho * c_sqrt(prim_res / (dual_res + OSQP_DIVISION_TOL));
   rho_estimate = c_min(c_max(rho_estimate, OSQP_RHO_MIN), OSQP_RHO_MAX);
 
   return rho_estimate;
