@@ -119,6 +119,12 @@ target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 ${osqplib_link_libs}
 
 add_test(NAME osqp_tester COMMAND osqp_tester)
 
+# Catch2's default stream capture does not capture C printf output. Run the
+# quiet case separately so CTest can detect an unwanted polishing message.
+add_test(NAME quiet_polishing COMMAND osqp_tester "[quiet]")
+set_tests_properties(quiet_polishing PROPERTIES
+  FAIL_REGULAR_EXPRESSION "Polishing not needed - no active set detected")
+
 # ----------------------------------------------
 # osqp_tester_custom_memory (only use with builtin algebra)
 # ----------------------------------------------
