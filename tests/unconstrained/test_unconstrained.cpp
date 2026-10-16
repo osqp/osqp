@@ -59,3 +59,21 @@ TEST_CASE_METHOD(unconstrained_test_fixture, "Unconstrained solve", "[unconstrai
   mu_assert("Unconstrained test solve: Error in polish status!",
             solver->info->status_polish == expectedPolishStatus);
 }
+
+TEST_CASE_METHOD(unconstrained_test_fixture, "Quiet unconstrained polishing",
+                 "[unconstrained],[polish],[quiet]")
+{
+  settings->verbose = 0;
+  settings->polishing = 1;
+  settings->linsys_solver = GENERATE(filter(&isLinsysSupported,
+      values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+
+  OSQPInt exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                                data->A, data->l, data->u,
+                                data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
+  REQUIRE(exitflag == 0);
+  REQUIRE(osqp_solve(solver.get()) == 0);
+  REQUIRE(solver->info->status_val == sols_data->status_test);
+  REQUIRE(solver->info->status_polish == OSQP_POLISH_NO_ACTIVE_SET_FOUND);
+}
