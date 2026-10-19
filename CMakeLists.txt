@@ -332,6 +332,15 @@ add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(algebra)
 
+# The shared library exports only the public API, i.e., the functions marked by
+# OSQP_API in osqp_api.c. The internal functions (csc_copy, vec_add_scaled,
+# QDLDL_factor, ...) have generic names that clash with those of other libraries
+# loaded in the same process.
+set_target_properties(OSQPLIB PROPERTIES C_VISIBILITY_PRESET hidden)
+if(TARGET qdldlobject)
+  set_target_properties(qdldlobject PROPERTIES C_VISIBILITY_PRESET hidden)
+endif()
+
 get_property(
   osqplib_includes
   TARGET OSQPLIB
@@ -444,6 +453,7 @@ if(OSQP_BUILD_SHARED_LIB)
   # a PUBLIC compile definition.
   target_compile_definitions(osqp PRIVATE BUILDING_OSQP)
   target_compile_definitions(osqp PUBLIC  OSQP_SHARED_LIB)
+  set_target_properties(osqp PROPERTIES C_VISIBILITY_PRESET hidden)
 
   # Modify the soname of the library to include the algebra if desired
   if(OSQP_LIB_SUFFIX)
