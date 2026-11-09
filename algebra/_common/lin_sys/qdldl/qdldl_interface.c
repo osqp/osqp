@@ -751,23 +751,23 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver**     s,
     QDLDL_float *Lx = OSQP_NULL;
     QDLDL_int   *Li = OSQP_NULL;
 
-    QDLDL_int   *Lp   = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An+1));
-    QDLDL_float *D    = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
-    QDLDL_float *Dinv = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+    QDLDL_int   *Lp   = (QDLDL_int*)c_malloc(sizeof(QDLDL_int)*(An+1));
+    QDLDL_float *D    = (QDLDL_float*)c_malloc(sizeof(QDLDL_float)*An);
+    QDLDL_float *Dinv = (QDLDL_float*)c_malloc(sizeof(QDLDL_float)*An);
 
     //permutation
-    QDLDL_int   *P    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An));
+    QDLDL_int   *P    = (QDLDL_int*)c_malloc(sizeof(QDLDL_int)*(An));
     QDLDL_int   *Pinv = OSQP_NULL;
 
     //data for elim tree calculation
-    QDLDL_int *etree = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
-    QDLDL_int *Lnz   = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
+    QDLDL_int *etree = (QDLDL_int*)c_malloc(sizeof(QDLDL_int)*An);
+    QDLDL_int *Lnz   = (QDLDL_int*)c_malloc(sizeof(QDLDL_int)*An);
     QDLDL_int  sumLnz;
 
     //working data for factorisation
-    QDLDL_int   *iwork = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(3*An));
-    QDLDL_bool  *bwork = (QDLDL_bool*)malloc(sizeof(QDLDL_bool)*An);
-    QDLDL_float *fwork = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+    QDLDL_int   *iwork = (QDLDL_int*)c_malloc(sizeof(QDLDL_int)*(3*An));
+    QDLDL_bool  *bwork = (QDLDL_bool*)c_malloc(sizeof(QDLDL_bool)*An);
+    QDLDL_float *fwork = (QDLDL_float*)c_malloc(sizeof(QDLDL_float)*An);
 
     //Data for results of A\b
     QDLDL_float *x = OSQP_NULL;
@@ -805,8 +805,8 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver**     s,
 
     sumLnz = QDLDL_etree(An, adj_permuted->p, adj_permuted->i, iwork, Lnz, etree);
 
-    Li    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*sumLnz);
-    Lx    = (QDLDL_float*)malloc(sizeof(QDLDL_float)*sumLnz);
+    Li    = (QDLDL_int*)c_malloc(sizeof(QDLDL_int)*sumLnz);
+    Lx    = (QDLDL_float*)c_malloc(sizeof(QDLDL_float)*sumLnz);
 
     if (!Li || !Lx) {
         retval = OSQP_MEM_ALLOC_ERROR;
@@ -815,8 +815,8 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver**     s,
 
     QDLDL_factor(An, adj_permuted->p, adj_permuted->i, adj_permuted->x, Lp, Li, Lx, D, Dinv, Lnz, etree, bwork, iwork, fwork);
 
-    x = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
-    x_work = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+    x = (QDLDL_float*)c_malloc(sizeof(QDLDL_float)*An);
+    x_work = (QDLDL_float*)c_malloc(sizeof(QDLDL_float)*An);
 
     if (!x || !x_work) {
         retval = OSQP_MEM_ALLOC_ERROR;
